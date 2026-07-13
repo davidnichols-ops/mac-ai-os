@@ -1,0 +1,24 @@
+# Example user override. Copy to configs/user.yaml and edit.
+# Any field left empty is auto-selected from detected hardware.
+
+planner:
+  provider: mlx
+  model: mlx-community/Qwen3-14B-4bit
+
+utility:
+  provider: mlx
+  model: mlx-community/gemma-3-4b-it-4bit
+
+embeddings:
+  # If your MLX embedding model lacks an embed() API, switch to ollama:
+  #   provider: ollama
+  #   model: nomic-embed-text
+  provider: mlx
+  model: mlx-community/bge-m3-4bit
+
+retrieval:
+  backend: chroma
+  top_k: 5
+
+ollama:
+  base_url: http://localhost:11434

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ruff_cache/
+.pytest_cache/
+dist/
+build/
+
+# uv
+uv.lock
+
+# Data / runtime artifacts
+data/embeddings/*
+data/indexes/*
+data/cache/*
+!data/**/.gitkeep
+logs/*.log
+models/*
+
+# Knowledge base — keep directory structure, ignore indexed content
+knowledge/*/*
+!knowledge/*/.gitkeep
+data/maos.db
+
+# OS
+.DS_Store

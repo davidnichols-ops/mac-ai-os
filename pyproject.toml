@@ -1,0 +1,56 @@
+[project]
+name = "mac-ai-os"
+version = "0.1.0"
+description = "Local-first AI operating system for macOS — an intelligence layer over the computer."
+readme = "README.md"
+requires-python = ">=3.12,<3.15"
+authors = [{ name = "Mac AI OS" }]
+license = { text = "MIT" }
+
+dependencies = [
+    "typer>=0.12.3",
+    "rich>=13.7",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "pyyaml>=6.0",
+    "structlog>=24.1",
+    "chromadb>=0.5.3",
+    "psutil>=5.9",
+    "pypdf>=4.0",
+    "ollama>=0.3.0",
+    # mlx-lm is Apple-Silicon only; on other platforms it won't resolve.
+    # We import it lazily so the project still imports off-Apple for tests.
+    "watchdog>=6.0.0",
+]
+
+[project.optional-dependencies]
+mlx = ["mlx-lm>=0.20.0"]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+mac-ai-os = "app.cli.app:run"
+maos = "app.cli.app:run"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008"]
