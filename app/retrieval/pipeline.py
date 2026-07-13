@@ -16,6 +16,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.db import Database
+from app.events.bus import EventBus
+from app.events.models import FILE_DELETED, FILE_INDEXED, FILE_SKIPPED, Event
 from app.log import get_logger
 from app.retrieval.base import Retriever
 from app.retrieval.indexers import build_indexers, dispatch
@@ -62,9 +64,11 @@ class IndexingPipeline:
         *,
         chunk_size: int = 800,
         chunk_overlap: int = 120,
+        bus: EventBus | None = None,
     ):
         self.retriever = retriever
         self.db = db
+        self.bus = bus
         self.indexers = build_indexers(
             chunk_size=chunk_size, chunk_overlap=chunk_overlap, db=db
         )
@@ -113,6 +117,8 @@ class IndexingPipeline:
         stored_hash = self.db.get_file_hash(str(path), source_label)
         if not force and stored_hash == content_hash:
             stats.skipped += 1
+            if self.bus:
+                self.bus.publish(Event(FILE_SKIPPED, {"path": str(path), "source": source_label}))
             return
 
         # Index the file (dispatch picks the right indexer per extension).
@@ -125,6 +131,8 @@ class IndexingPipeline:
 
         if not chunks:
             stats.skipped += 1
+            if self.bus:
+                self.bus.publish(Event(FILE_SKIPPED, {"path": str(path), "source": source_label}))
             return
 
         # Delete old chunks for this file, then insert new ones.
@@ -139,12 +147,18 @@ class IndexingPipeline:
         self.db.set_file_hash(str(path), source_label, content_hash, n)
         stats.indexed += 1
         stats.chunks_added += n
+        if self.bus:
+            self.bus.publish(Event(FILE_INDEXED, {
+                "path": str(path), "chunks": n, "source": source_label,
+            }))
 
     def remove_file(self, path: str, source_label: str) -> bool:
         """Remove a file from the vector store and hash table."""
         try:
             self.retriever.delete(path)
             self.db.remove_file_hash(path, source_label)
+            if self.bus:
+                self.bus.publish(Event(FILE_DELETED, {"path": path, "source": source_label}))
             log.info("pipeline.remove_file", path=path)
             return True
         except Exception as e:

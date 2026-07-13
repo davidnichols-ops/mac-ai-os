@@ -46,8 +46,13 @@ class FakeRetriever(Retriever):
         self._store[source] = chunks
         return len(chunks)
 
-    def search(self, query: str, *, top_k: int = 5) -> list[Result]:
+    def search(self, query: str, *, top_k: int = 5, where: dict | None = None) -> list[Result]:
         all_chunks = [c for chunks in self._store.values() for c in chunks]
+        if where:
+            all_chunks = [
+                c for c in all_chunks
+                if all(c["metadata"].get(k) == v for k, v in where.items())
+            ]
         return [
             Result(text=c["text"], score=1.0 - i * 0.1, source=c["metadata"].get("source", "?"), metadata=c["metadata"])
             for i, c in enumerate(all_chunks[:top_k])

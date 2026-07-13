@@ -11,6 +11,7 @@ from app.agents.filesystem import FilesystemAgent
 from app.agents.git import GitAgent
 from app.agents.repository import RepositoryAgent
 from app.agents.research import ResearchAgent
+from app.agents.session import SessionAgent
 from app.agents.system import SystemAgent
 from app.db import Database
 from app.models.base import Model
@@ -32,6 +33,7 @@ def default_agents(
         ResearchAgent.name: ResearchAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         SystemAgent.name: SystemAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         GitAgent.name: GitAgent(planner=planner, db=db, retriever=retriever),
+        SessionAgent.name: SessionAgent(planner=planner, db=db, retriever=retriever),
     }
 
 

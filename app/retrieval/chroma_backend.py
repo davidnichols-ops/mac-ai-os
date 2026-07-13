@@ -62,10 +62,13 @@ class ChromaRetriever(Retriever):
         log.info("chroma.indexed", source=source, count=len(chunks))
         return len(chunks)
 
-    def search(self, query: str, *, top_k: int | None = None) -> list[Result]:
+    def search(self, query: str, *, top_k: int | None = None, where: dict | None = None) -> list[Result]:
         k = top_k or self.top_k
         qvec = [float(x) for x in self.embedding_model.embed(query).vector]
-        res = self._collection.query(query_embeddings=[qvec], n_results=k)
+        query_kwargs: dict = {"query_embeddings": [qvec], "n_results": k}
+        if where:
+            query_kwargs["where"] = where
+        res = self._collection.query(**query_kwargs)
         docs = res.get("documents", [[]])[0]
         metas = res.get("metadatas", [[]])[0]
         dists = res.get("distances", [[]])[0]

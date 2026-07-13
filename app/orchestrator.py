@@ -25,6 +25,7 @@ from app.tools.registry import ToolRouter
 log = get_logger(__name__)
 
 _DEFAULT_ROUTE_HINTS: dict[str, list[str]] = {
+    "session": ["what was I working", "last session", "before I stopped", "what did I do", "what happened", "working on", "session summary", "recall", "what was going on"],
     "git": ["git", "commit", "commits", "branch", "diff", "blame", "pushed", "what changed", "since yesterday", "last commit", "recent commits", "most modified"],
     "repository": ["repo", "codebase", "source code", "function", "class", "how does", "where is"],
     "filesystem": ["file", "folder", "path", "read", "find", "directory"],

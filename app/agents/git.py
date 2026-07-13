@@ -182,11 +182,14 @@ class GitAgent(Agent):
                     )
             return AgentResult(ok=False, error="git agent needs a retriever and planner for explanatory questions")
 
-        results = self.retriever.search(goal, top_k=8)
-        # Filter to git_commit chunks if we have them.
-        git_results = [r for r in results if r.metadata.get("kind") == "git_commit"]
+        results = self.retriever.search(goal, top_k=8, where={"kind": "git_commit"})
+        git_results = results
         if not git_results:
-            git_results = results
+            # Fallback: unfiltered search.
+            results = self.retriever.search(goal, top_k=8)
+            git_results = [r for r in results if r.metadata.get("kind") == "git_commit"]
+            if not git_results:
+                git_results = results
         if not git_results:
             return AgentResult(ok=True, answer="No indexed git history matched the query.")
 

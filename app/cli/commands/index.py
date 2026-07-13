@@ -6,7 +6,6 @@ from pathlib import Path
 
 import typer
 
-from app.db import get_db
 from app.runtime import build_runtime
 from app.ui.console import print_panel
 
@@ -25,12 +24,12 @@ def index(
     rt = build_runtime()
     from app.retrieval.pipeline import IndexingPipeline
 
-    db = get_db(rt.settings.paths.data_dir + "/maos.db")
     pipeline = IndexingPipeline(
         rt.retriever,
-        db,
+        rt.db,
         chunk_size=rt.settings.retrieval.chunk_size,
         chunk_overlap=rt.settings.retrieval.chunk_overlap,
+        bus=rt.bus,
     )
     label = source_name or str(p)
     stats = pipeline.index_source(label, force=force)

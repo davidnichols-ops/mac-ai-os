@@ -33,7 +33,7 @@ class Retriever(ABC):
         """
 
     @abstractmethod
-    def search(self, query: str, *, top_k: int = 5) -> list[Result]:
+    def search(self, query: str, *, top_k: int = 5, where: dict | None = None) -> list[Result]:
         ...
 
     @abstractmethod
