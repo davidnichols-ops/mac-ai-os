@@ -101,7 +101,7 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         """Semantic search over indexed knowledge (vectors + graph)."""
         return resources.read_knowledge_resource(runtime, query=query)
 
-    # --- Tools -------------------------------------------------------------
+    # --- Tools (instrumented with MCP telemetry) ----------------------------
 
     @mcp.tool()
     def maos_get_context() -> str:
@@ -110,7 +110,7 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         This is the primary tool for understanding what the user is currently
         working on. Start here before asking specific questions.
         """
-        return tools.maos_get_context(runtime)
+        return tools._instrument(runtime, "maos_get_context", tools.maos_get_context)
 
     @mcp.tool()
     def maos_search_memory(query: str, top_k: int = 5) -> str:
@@ -119,7 +119,10 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         Returns ranked results with text, source path, and relevance score.
         Use this to find indexed documents, code, and commit history.
         """
-        return tools.maos_search_memory(runtime, query=query, top_k=top_k)
+        return tools._instrument(
+            runtime, "maos_search_memory",
+            tools.maos_search_memory, query=query, top_k=top_k,
+        )
 
     @mcp.tool()
     def maos_workspace_summary(workspace: str = "") -> str:
@@ -128,7 +131,10 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         Includes git branch, modified files, and pending tasks for the
         specified workspace. If no workspace is given, uses the active one.
         """
-        return tools.maos_workspace_summary(runtime, workspace=workspace)
+        return tools._instrument(
+            runtime, "maos_workspace_summary",
+            tools.maos_workspace_summary, workspace=workspace,
+        )
 
     @mcp.tool()
     def maos_create_task(title: str, workspace: str = "", priority: int = 0) -> str:
@@ -137,8 +143,9 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         The task is created through the MAOS ActionExecutor, which enforces
         permission checks and logs the action.
         """
-        return tools.maos_create_task(
-            runtime, title=title, workspace=workspace, priority=priority
+        return tools._instrument(
+            runtime, "maos_create_task",
+            tools.maos_create_task, title=title, workspace=workspace, priority=priority,
         )
 
     @mcp.tool()
@@ -147,7 +154,10 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
 
         Returns tasks through the MAOS ActionExecutor (read permission required).
         """
-        return tools.maos_list_tasks(runtime, workspace=workspace)
+        return tools._instrument(
+            runtime, "maos_list_tasks",
+            tools.maos_list_tasks, workspace=workspace,
+        )
 
     @mcp.tool()
     def maos_run_action(
@@ -167,8 +177,9 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         - workspace_summary: Get workspace state summary
         - list_tasks: List pending tasks
         """
-        return tools.maos_run_action(
-            runtime, action=action, target=target, parameters=parameters
+        return tools._instrument(
+            runtime, "maos_run_action",
+            tools.maos_run_action, action=action, target=target, parameters=parameters,
         )
 
     # Store token for HTTP transport middleware.

@@ -10,19 +10,61 @@ preserves:
 No tool may bypass ActionExecutor. Read-only tools (maos_get_context,
 maos_search_memory) call the Context API directly since they have no
 side effects.
+
+All tool calls are instrumented with MCP telemetry: each call is logged
+to the mcp_requests table and an MCP_TOOL_CALLED event is published.
 """
 
 from __future__ import annotations
 
 import json
+import time
 from typing import Any
 
 from app.actions.models import ActionRequest
+from app.events.models import MCP_TOOL_CALLED, Event
 from app.log import get_logger
 from app.runtime import Runtime
 from app.server.context import build_context_packet
 
 log = get_logger(__name__)
+
+
+def _instrument(
+    runtime: Runtime, name: str, fn: callable, *args: Any, **kwargs: Any
+) -> str:
+    """Wrap a tool call with telemetry logging and event publishing.
+
+    Records to mcp_requests table and publishes MCP_TOOL_CALLED event.
+    """
+    start = time.time()
+    success = True
+    error = ""
+    try:
+        result = fn(runtime, *args, **kwargs)
+        return result
+    except Exception as e:
+        success = False
+        error = str(e)
+        return json.dumps({"error": error})
+    finally:
+        latency_ms = int((time.time() - start) * 1000)
+        try:
+            runtime.db.log_mcp_request(
+                client_name="mcp",
+                kind="tool",
+                name=name,
+                success=success,
+                latency_ms=latency_ms,
+                error=error,
+            )
+            if runtime.bus:
+                runtime.bus.publish(Event(MCP_TOOL_CALLED, {
+                    "name": name, "success": success,
+                    "latency_ms": latency_ms,
+                }))
+        except Exception:
+            pass  # telemetry must never break the tool call
 
 
 def maos_get_context(runtime: Runtime) -> str:

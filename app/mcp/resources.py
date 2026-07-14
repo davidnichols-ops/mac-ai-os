@@ -2,15 +2,21 @@
 
 Each resource handler delegates to app/server/context.py or direct
 database queries. No business logic here — just protocol translation.
+
+All resource reads are instrumented with MCP telemetry: each read is
+logged to the mcp_requests table and an MCP_RESOURCE_READ event is
+published.
 """
 
 from __future__ import annotations
 
 import json
 import subprocess
+import time
 from typing import Any
 
 from app.db import Database
+from app.events.models import MCP_RESOURCE_READ, Event
 from app.log import get_logger
 from app.runtime import Runtime
 from app.server.context import build_context_packet
@@ -19,11 +25,51 @@ from app.workspace import detect_active_workspace
 log = get_logger(__name__)
 
 
+def _instrument_resource(
+    runtime: Runtime, uri: str, fn: callable, *args: Any, **kwargs: Any
+) -> str:
+    """Wrap a resource read with telemetry logging and event publishing."""
+    start = time.time()
+    success = True
+    error = ""
+    try:
+        result = fn(runtime, *args, **kwargs)
+        return result
+    except Exception as e:
+        success = False
+        error = str(e)
+        return json.dumps({"error": error})
+    finally:
+        latency_ms = int((time.time() - start) * 1000)
+        try:
+            runtime.db.log_mcp_request(
+                client_name="mcp",
+                kind="resource",
+                name=uri,
+                success=success,
+                latency_ms=latency_ms,
+                error=error,
+            )
+            if runtime.bus:
+                runtime.bus.publish(Event(MCP_RESOURCE_READ, {
+                    "uri": uri, "success": success,
+                    "latency_ms": latency_ms,
+                }))
+        except Exception:
+            pass
+
+
 def read_context_resource(runtime: Runtime) -> str:
     """maos://context/current — the universal context packet.
 
     Delegates to build_context_packet() in the Context API.
     """
+    return _instrument_resource(
+        runtime, "maos://context/current", _read_context_resource,
+    )
+
+
+def _read_context_resource(runtime: Runtime) -> str:
     packet = build_context_packet(
         runtime.db,
         runtime.blackboard,
@@ -34,6 +80,12 @@ def read_context_resource(runtime: Runtime) -> str:
 
 def read_workspace_resource(runtime: Runtime) -> str:
     """maos://workspace/current — active workspace with git status."""
+    return _instrument_resource(
+        runtime, "maos://workspace/current", _read_workspace_resource,
+    )
+
+
+def _read_workspace_resource(runtime: Runtime) -> str:
     ws = detect_active_workspace(runtime.db)
     if not ws:
         return json.dumps({"error": "no active workspace"})
@@ -55,6 +107,12 @@ def read_workspace_resource(runtime: Runtime) -> str:
 
 def read_session_resource(runtime: Runtime) -> str:
     """maos://session/latest — most recent session with details."""
+    return _instrument_resource(
+        runtime, "maos://session/latest", _read_session_resource,
+    )
+
+
+def _read_session_resource(runtime: Runtime) -> str:
     db = runtime.db
     latest = db.latest_session()
     if not latest:
@@ -104,6 +162,12 @@ def read_session_resource(runtime: Runtime) -> str:
 
 def read_tasks_resource(runtime: Runtime) -> str:
     """maos://tasks/open — pending tasks with dependencies and priority."""
+    return _instrument_resource(
+        runtime, "maos://tasks/open", _read_tasks_resource,
+    )
+
+
+def _read_tasks_resource(runtime: Runtime) -> str:
     db = runtime.db
     rows = db.pending_tasks()
     tasks = []
@@ -125,6 +189,12 @@ def read_knowledge_resource(runtime: Runtime, query: str = "") -> str:
 
     Combines vector store search with knowledge graph entity lookup.
     """
+    return _instrument_resource(
+        runtime, "maos://knowledge/search", _read_knowledge_resource, query=query,
+    )
+
+
+def _read_knowledge_resource(runtime: Runtime, query: str = "") -> str:
     results: dict[str, Any] = {"query": query}
 
     # Vector search.

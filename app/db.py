@@ -242,6 +242,35 @@ CREATE INDEX IF NOT EXISTS idx_action_log_time ON action_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_approval_status ON approval_queue(status);
 CREATE INDEX IF NOT EXISTS idx_user_model_key ON user_model(key);
 CREATE INDEX IF NOT EXISTS idx_workflow_runs_time ON workflow_runs(timestamp);
+
+CREATE TABLE IF NOT EXISTS mcp_requests (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp   TEXT NOT NULL,
+    client_name TEXT NOT NULL DEFAULT '',
+    kind        TEXT NOT NULL,
+    name        TEXT NOT NULL,
+    success     INTEGER NOT NULL DEFAULT 1,
+    latency_ms  INTEGER NOT NULL DEFAULT 0,
+    error       TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_mcp_requests_time ON mcp_requests(timestamp);
+CREATE INDEX IF NOT EXISTS idx_mcp_requests_kind ON mcp_requests(kind);
+
+CREATE TABLE IF NOT EXISTS context_evaluations (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp       TEXT NOT NULL,
+    workspace       REAL NOT NULL DEFAULT 0,
+    session         REAL NOT NULL DEFAULT 0,
+    tasks           REAL NOT NULL DEFAULT 0,
+    knowledge       REAL NOT NULL DEFAULT 0,
+    preferences     REAL NOT NULL DEFAULT 0,
+    activity        REAL NOT NULL DEFAULT 0,
+    overall         REAL NOT NULL DEFAULT 0,
+    details         TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_context_evals_time ON context_evaluations(timestamp);
 """
 
 
@@ -273,6 +302,15 @@ class Database:
             self.execute("ALTER TABLE tasks ADD COLUMN dependencies TEXT NOT NULL DEFAULT ''")
         # Create index after column exists.
         self.execute("CREATE INDEX IF NOT EXISTS idx_tasks_parent ON tasks(parent_id)")
+
+        # Phase 5.5: workspace profiling columns.
+        ws_cols = {row["name"] for row in self.query("PRAGMA table_info(workspaces)")}
+        if "profile" not in ws_cols:
+            self.execute("ALTER TABLE workspaces ADD COLUMN profile TEXT NOT NULL DEFAULT ''")
+        if "project_status" not in ws_cols:
+            self.execute("ALTER TABLE workspaces ADD COLUMN project_status TEXT NOT NULL DEFAULT ''")
+        if "profiled_at" not in ws_cols:
+            self.execute("ALTER TABLE workspaces ADD COLUMN profiled_at TEXT")
 
     @property
     def conn(self) -> sqlite3.Connection:
@@ -603,6 +641,19 @@ class Database:
     def workspace_by_path(self, path: str) -> sqlite3.Row | None:
         return self.query_one("SELECT * FROM workspaces WHERE path = ?", (path,))
 
+    def update_workspace_profile(
+        self, path: str, *, profile: str, project_status: str,
+    ) -> None:
+        """Update the LLM-generated profile for a workspace."""
+        self.execute(
+            "UPDATE workspaces SET profile = ?, project_status = ?, profiled_at = ? WHERE path = ?",
+            (profile, project_status, datetime.now(UTC).isoformat(), path),
+        )
+
+    def profiled_workspace_count(self) -> int:
+        row = self.query_one("SELECT COUNT(*) as n FROM workspaces WHERE profile != ''")
+        return row["n"] if row else 0
+
     # --- shell command helpers ------------------------------------------------
 
     def insert_shell_command(
@@ -919,6 +970,86 @@ class Database:
 
     def recent_workflow_runs(self, limit: int = 10) -> list[sqlite3.Row]:
         return self.query("SELECT * FROM workflow_runs ORDER BY timestamp DESC LIMIT ?", (limit,))
+
+    # --- MCP request helpers --------------------------------------------------
+
+    def log_mcp_request(
+        self,
+        *,
+        client_name: str = "",
+        kind: str,
+        name: str,
+        success: bool = True,
+        latency_ms: int = 0,
+        error: str = "",
+    ) -> int:
+        cur = self.execute(
+            """INSERT INTO mcp_requests
+                   (timestamp, client_name, kind, name, success, latency_ms, error)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (datetime.now(UTC).isoformat(), client_name, kind, name,
+             1 if success else 0, latency_ms, error),
+        )
+        return cur.lastrowid
+
+    def recent_mcp_requests(self, limit: int = 50) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM mcp_requests ORDER BY timestamp DESC LIMIT ?", (limit,)
+        )
+
+    def mcp_request_count(self) -> int:
+        row = self.query_one("SELECT COUNT(*) as n FROM mcp_requests")
+        return row["n"] if row else 0
+
+    def mcp_request_stats(self) -> dict[str, Any]:
+        """Aggregate stats for MCP requests."""
+        total = self.query_one("SELECT COUNT(*) as n FROM mcp_requests")
+        success = self.query_one("SELECT COUNT(*) as n FROM mcp_requests WHERE success = 1")
+        avg_lat = self.query_one("SELECT AVG(latency_ms) as v FROM mcp_requests WHERE success = 1")
+        by_kind = self.query(
+            "SELECT kind, COUNT(*) as count, AVG(latency_ms) as avg_lat "
+            "FROM mcp_requests GROUP BY kind"
+        )
+        return {
+            "total": total["n"] if total else 0,
+            "success": success["n"] if success else 0,
+            "avg_latency_ms": round(avg_lat["v"], 1) if avg_lat and avg_lat["v"] else 0,
+            "by_kind": {r["kind"]: {"count": r["count"], "avg_latency_ms": round(r["avg_lat"], 1)} for r in by_kind},
+        }
+
+    # --- context evaluation helpers -------------------------------------------
+
+    def save_context_evaluation(
+        self,
+        *,
+        workspace: float,
+        session: float,
+        tasks: float,
+        knowledge: float,
+        preferences: float,
+        activity: float,
+        overall: float,
+        details: str = "{}",
+    ) -> int:
+        cur = self.execute(
+            """INSERT INTO context_evaluations
+                   (timestamp, workspace, session, tasks, knowledge,
+                    preferences, activity, overall, details)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (datetime.now(UTC).isoformat(), workspace, session, tasks,
+             knowledge, preferences, activity, overall, details),
+        )
+        return cur.lastrowid
+
+    def recent_context_evaluations(self, limit: int = 10) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM context_evaluations ORDER BY timestamp DESC LIMIT ?", (limit,)
+        )
+
+    def latest_context_evaluation(self) -> sqlite3.Row | None:
+        return self.query_one(
+            "SELECT * FROM context_evaluations ORDER BY timestamp DESC LIMIT 1"
+        )
 
 
 # Module-level singleton accessor (lazy, not a global singleton pattern —

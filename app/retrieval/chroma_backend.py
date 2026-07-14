@@ -71,9 +71,9 @@ class ChromaRetriever(Retriever):
         if where:
             query_kwargs["where"] = where
         res = self._collection.query(**query_kwargs)
-        docs = res.get("documents", [[]])[0]
-        metas = res.get("metadatas", [[]])[0]
-        dists = res.get("distances", [[]])[0]
+        docs = (res.get("documents") or [[]])[0] if res else []
+        metas = (res.get("metadatas") or [[]])[0] if res else []
+        dists = (res.get("distances") or [[]])[0] if res else []
         results: list[Result] = []
         for doc, meta, dist in zip(docs, metas, dists, strict=False):
             score = 1.0 - float(dist)  # cosine distance -> similarity

@@ -45,6 +45,8 @@ uv run app                               # launch the CLI (== uv run maos)
 | Workspace scan | `uv run app workspace scan [path]` |
 | Workspace list | `uv run app workspace list` |
 | Active workspace | `uv run app workspace active` |
+| Profile all workspaces | `uv run app workspace profile [--force] [--no-llm]` |
+| Profile single workspace | `uv run app workspace profile <path>` |
 | Import shell history | `uv run app history import` |
 | Search history | `uv run app history search "pattern"` |
 | Recent commands | `uv run app history recent` |
@@ -78,6 +80,11 @@ uv run app                               # launch the CLI (== uv run maos)
 | Start Context API | `uv run app serve [--port 7777]` |
 | Start MCP server (stdio) | `uv run app mcp serve` |
 | Start MCP server (HTTP) | `uv run app mcp serve --transport http [--port 7778]` |
+| MCP status | `uv run app mcp status` |
+| MCP test | `uv run app mcp test` |
+| Bootstrap (first run) | `uv run app bootstrap [--scan-path ~/Projects]` |
+| Evaluate context quality | `uv run app context evaluate` |
+| Context eval history | `uv run app context history` |
 | Run the app directly | `uv run app` (entry: `app/__main__.py`) |
 
 ## Configuration
@@ -350,6 +357,66 @@ AI Client  →  MCP Adapter  →  Context API  →  MAOS Core
                                               (app/db.py)
 ```
 
+### Phase 5.4 — external agent validation layer (complete)
+
+Validates that MAOS improves external AI agent performance by providing
+persistent context. Focus on observability, integration, and developer
+experience — no new intelligence systems.
+
+- `app/evaluation.py` — `evaluate_context()`: scores context quality across
+  6 dimensions (workspace, session, tasks, knowledge, preferences, activity)
+  on a 0-100 scale. Weighted average produces overall score. Results stored
+  in `context_evaluations` table for trend tracking.
+- `app/cli/commands/context.py` — `maos context evaluate` and
+  `maos context history` commands. Shows scores, details, and trend arrows.
+- `app/cli/commands/mcp.py` — added `maos mcp status` (server state,
+  resources, tools, token, telemetry stats) and `maos mcp test` (connects
+  to running HTTP server, calls 3 tools, verifies responses).
+- `app/cli/commands/bootstrap.py` — `maos bootstrap`: first-run data
+  acquisition. Runs workspace scan → shell history import → telemetry
+  collection → git indexing → attention cycle. Takes empty DB to usable
+  context engine. Idempotent — safe to re-run.
+- MCP telemetry: `mcp_requests` table records every resource read and
+  tool call (client, kind, name, success, latency, error). Two new event
+  types: `MCP_RESOURCE_READ`, `MCP_TOOL_CALLED`. All MCP resources and
+  tools are instrumented via `_instrument()` wrappers.
+- `docs/getting-started.md` — end-user guide: installation, bootstrap,
+  starting MCP server, connecting AI clients, example questions,
+  troubleshooting.
+- `tests/test_phase54.py` — 19 tests covering evaluation, telemetry,
+  bootstrap, MCP status port check, token validation.
+
+### Phase 5.5 — workspace profiling (complete)
+
+Turns "28 directories with files" into "28 understood projects." For each
+workspace, the profiler gathers README content, recent git commits, current
+branch, uncommitted changes, TODO/FIXME comments, and open branches, then
+asks the utility LLM (3B) to produce a structured profile:
+
+  - SUMMARY: what the project is (1-2 sentences)
+  - STATUS: active / abandoned / complete / maintenance
+  - OPEN_WORK: discovered incomplete features
+  - STACK: tech stack summary
+
+- `app/workspace_profiler.py` — `profile_workspace()` profiles a single
+  workspace; `profile_all_workspaces()` iterates all registered workspaces.
+  Falls back to heuristic profiling (README + git recency) if LLM is
+  unavailable. Discovered open work items are automatically created as tasks
+  (with duplicate detection).
+- `app/cli/commands/workspace.py` — `maos workspace profile [path] [--force]
+  [--no-llm]` command. Profiles all or a single workspace. `workspace list`
+  now shows project_status column.
+- DB migration: `workspaces` table gains `profile`, `project_status`, and
+  `profiled_at` columns.
+- Context packet (`app/server/context.py`) now includes `workspace_profiles`:
+  a sorted list of all profiled workspaces (active first), each with name,
+  path, status, language, and truncated profile text.
+- Context evaluator (`app/evaluation.py`) credits profiled workspaces —
+  `with_profile` is now the biggest contributor to the workspace score (25%).
+- `tests/test_phase55.py` — 28 tests covering fallback profiling, LLM
+  response parsing, TODO extraction, git info gathering, task discovery,
+  context packet inclusion, evaluator scoring, and DB migration.
+
 ## Coding standards
 
 - Python 3.12+, strongly typed, `from __future__ import annotations`.
@@ -390,6 +457,10 @@ AI Client  →  MCP Adapter  →  Context API  →  MAOS Core
 - `tests/test_mcp.py` — MCP resources (context, workspace, session, tasks, knowledge), MCP tools
   (action executor routing, action logging, event publishing), token generation/validation,
   server creation with registered tools.
+- `tests/test_phase54.py` — context evaluation (empty DB, with data, persistence, history,
+  details), MCP telemetry (tool calls, resource reads, event publishing, failures, stats),
+  MCP status port check, bootstrap (workspace scan, shell history, telemetry, full run),
+  token validation.
 - Tests must pass with `uv run pytest` and no network.
 
 ## Known constraints on this host

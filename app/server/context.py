@@ -49,6 +49,9 @@ def build_context_packet(
     # --- Workspace ---
     workspace = _workspace_info(db)
 
+    # --- Workspace profiles (all understood projects) ---
+    workspace_profiles = _workspace_profiles(db)
+
     # --- Session ---
     session = _session_info(db)
 
@@ -90,6 +93,7 @@ def build_context_packet(
     return {
         "timestamp": now.isoformat(),
         "workspace": workspace,
+        "workspace_profiles": workspace_profiles,
         "session": session,
         "tasks": tasks,
         "recent_decisions": decisions,
@@ -124,6 +128,37 @@ def _workspace_info(db: Database) -> dict[str, Any]:
     except Exception as e:
         log.warning("context_packet.workspace_failed", error=str(e))
         return {"name": None, "path": None, "error": str(e)}
+
+
+def _workspace_profiles(db: Database) -> list[dict[str, Any]]:
+    """Profiles of all understood workspaces.
+
+    Returns a list of {name, path, status, profile} for every workspace
+    that has been profiled. Sorted by status (active first), then by
+    last_activity.
+    """
+    try:
+        rows = db.query(
+            "SELECT name, path, project_status, profile, language, last_activity "
+            "FROM workspaces WHERE profile != '' "
+            "ORDER BY CASE project_status "
+            "  WHEN 'active' THEN 0 WHEN 'maintenance' THEN 1 "
+            "  WHEN 'complete' THEN 2 WHEN 'abandoned' THEN 3 ELSE 4 END, "
+            "last_activity DESC"
+        )
+        return [
+            {
+                "name": r["name"],
+                "path": r["path"],
+                "status": r["project_status"],
+                "language": r["language"] or "",
+                "profile": r["profile"][:500],  # truncate for context budget
+            }
+            for r in rows
+        ]
+    except Exception as e:
+        log.warning("context_packet.profiles_failed", error=str(e))
+        return []
 
 
 def _session_info(db: Database) -> dict[str, Any]:

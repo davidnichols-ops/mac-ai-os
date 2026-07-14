@@ -210,7 +210,7 @@ class AttentionDaemon:
             if not a["executed"] and a["timestamp"] > since:
                 problems.append({
                     "problem": f"Action '{a['action_name']}' was denied",
-                    "evidence": a.get("error", ""),
+                    "evidence": a["error"] if a["error"] else "",
                     "timestamp": a["timestamp"],
                 })
 
@@ -235,7 +235,7 @@ class AttentionDaemon:
         # Suggest reviewing uncommitted changes.
         if workspace:
             snapshot = self.db.latest_snapshot(workspace=workspace)
-            if snapshot and snapshot.get("modified_files"):
+            if snapshot and snapshot["modified_files"]:
                 modified = snapshot["modified_files"]
                 count = len(modified.split("\n")) if modified else 0
                 if count > 0:
