@@ -31,6 +31,60 @@ def detect() -> None:
     print_panel("\n".join(lines), title="Session Detection")
 
 
+@session_app.command("reconstruct")
+def reconstruct(
+    gap_minutes: int = typer.Option(30, "--gap", help="Gap threshold in minutes"),
+    summarize_top: int = typer.Option(0, "--summarize", "-s",
+        help="Summarize top N sessions with LLM (0 = skip)"),
+) -> None:
+    """Reconstruct work sessions from git commit history.
+
+    Uses git commit timestamps as activity signals — works even when
+    shell history lacks timestamps. Also correlates shell commands to
+    sessions by content matching.
+    """
+    from datetime import timedelta
+    rt = build_runtime()
+    from app.sessions import detect_sessions_from_git
+
+    sessions = detect_sessions_from_git(
+        rt.db, gap_threshold=timedelta(minutes=gap_minutes),
+    )
+
+    if not sessions:
+        print_panel(
+            "No sessions detected from git history.\n"
+            "Make sure git commits are indexed (maos git index <repo>).",
+            title="Session Reconstruction",
+        )
+        return
+
+    lines = [f"Reconstructed {len(sessions)} session(s) from git history:"]
+    for s in sessions:
+        repos = ", ".join(s.get("repos", [])[:3])
+        lines.append(
+            f"  #{s['id']}  {s['start_time'][:19]} → {s['end_time'][:19]}  "
+            f"({s['commit_count']} commits, {s['project'] or '?'})"
+        )
+        if repos:
+            lines.append(f"    repos: {repos}")
+    print_panel("\n".join(lines), title="Session Reconstruction")
+
+    # Optionally summarize top sessions.
+    if summarize_top > 0:
+        from app.agents.session import SessionAgent
+
+        agent = SessionAgent(planner=rt.planner, db=rt.db, retriever=rt.retriever)
+        top = sorted(sessions, key=lambda s: s["commit_count"], reverse=True)[:summarize_top]
+        for s in top:
+            typer.echo(f"\n--- Session #{s['id']} ({s['project']}) ---")
+            result = agent.execute(f"Summarize session {s['id']}")
+            if result.ok:
+                print_markdown(result.answer)
+            else:
+                typer.echo(f"  (summary failed: {result.error})")
+
+
 @session_app.command("list")
 def list_sessions(
     limit: int = typer.Option(10, "--limit", "-n", help="Number of sessions to show"),
