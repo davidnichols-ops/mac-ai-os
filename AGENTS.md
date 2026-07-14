@@ -75,6 +75,9 @@ uv run app                               # launch the CLI (== uv run maos)
 | Clear blackboard | `uv run app blackboard clear` |
 | Learn summary | `uv run app learn summary` |
 | Record action outcome | `uv run app learn action <name> --success/--fail` |
+| Start Context API | `uv run app serve [--port 7777]` |
+| Start MCP server (stdio) | `uv run app mcp serve` |
+| Start MCP server (HTTP) | `uv run app mcp serve --transport http [--port 7778]` |
 | Run the app directly | `uv run app` (entry: `app/__main__.py`) |
 
 ## Configuration
@@ -301,6 +304,52 @@ Observe → Remember → Understand → Plan → Act → Verify → Learn
                                                     inherits context
 ```
 
+### Phase 5 — intelligence fabric (in progress)
+
+MAOS pivots from a standalone AI assistant to a personal context engine
+that external AI agents can consume. The CLI stays, but the primary
+interface becomes the Context API and MCP server.
+
+- `app/server/` — Context API: local HTTP daemon (`maos serve`) on
+  localhost:7777. Exposes 16 REST endpoints including `GET /context`
+  (the universal context packet), `GET /memory/search`, `GET /tasks`,
+  `POST /actions/request`. Uses stdlib `http.server` — zero new deps.
+  The server holds a Runtime reference, so every request has access to
+  the full system.
+- `app/mcp/` — MCP Context Layer: thin adapter over the Context API
+  and ActionExecutor. Exposes 5 resources and 6 tools through the
+  Model Context Protocol (official `mcp` Python SDK, FastMCP API).
+  Supports stdio transport (default, for Claude Code / Codex) and
+  streamable-http transport. All action tools route through
+  ActionExecutor — no bypass of permissions, logging, or events.
+- `app/mcp/server.py` — security: localhost capability token generated
+  on first run, stored at `~/.maos/token` (0600). HTTP transport
+  requires `Authorization: Bearer <token>`. stdio skips token check
+  (local-only by definition). Server binds to 127.0.0.1 by default.
+- `app/mcp/resources.py` — 5 MCP resources: `maos://context/current`,
+  `maos://workspace/current`, `maos://session/latest`,
+  `maos://tasks/open`, `maos://knowledge/search{query}`. All delegate
+  to `app/server/context.py` or direct DB queries. No business logic.
+- `app/mcp/tools.py` — 6 MCP tools: `maos_get_context`,
+  `maos_search_memory`, `maos_workspace_summary`, `maos_create_task`,
+  `maos_list_tasks`, `maos_run_action`. Read-only tools call the
+  Context API directly. Action tools go through ActionExecutor with
+  `context={"db": runtime.db}` — preserving permissions, reversibility,
+  action_log, and EventBus publishing.
+- `docs/mcp.md` — MCP documentation: resources, tools, connecting
+  external AI clients, security model.
+
+Architecture rule: the MCP layer contains NO business logic. It is a
+protocol translator. All intelligence remains in existing MAOS
+components.
+
+```
+AI Client  →  MCP Adapter  →  Context API  →  MAOS Core
+              (app/mcp/)      (app/server/)   (app/actions/)
+                                              (app/retrieval/)
+                                              (app/db.py)
+```
+
 ## Coding standards
 
 - Python 3.12+, strongly typed, `from __future__ import annotations`.
@@ -337,6 +386,10 @@ Observe → Remember → Understand → Plan → Act → Verify → Learn
 - `tests/test_workflows.py` — workflow engine, step execution, verification, failure handling, morning routine.
 - `tests/test_task_graph.py` — task parent/child, dependencies, blocking, approval queue, user model.
 - `tests/test_blackboard.py` — blackboard state, persistence, thread safety, attention cycle, learner.
+- `tests/test_server.py` — Context API HTTP server: context packet, health, 404, action request.
+- `tests/test_mcp.py` — MCP resources (context, workspace, session, tasks, knowledge), MCP tools
+  (action executor routing, action logging, event publishing), token generation/validation,
+  server creation with registered tools.
 - Tests must pass with `uv run pytest` and no network.
 
 ## Known constraints on this host

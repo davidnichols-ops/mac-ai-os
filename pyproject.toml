@@ -21,6 +21,7 @@ dependencies = [
     # mlx-lm is Apple-Silicon only; on other platforms it won't resolve.
     # We import it lazily so the project still imports off-Apple for tests.
     "watchdog>=6.0.0",
+    "mcp>=1.27,<2",
 ]
 
 [project.optional-dependencies]
@@ -41,6 +42,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"configs" = "configs"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

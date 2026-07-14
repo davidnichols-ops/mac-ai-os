@@ -98,7 +98,11 @@ class IndexingPipeline:
         folder_idx = next((i for i in self.indexers if isinstance(i, FolderIndexer)), None)
         walker = folder_idx._walk if folder_idx else _default_walk
         for path in walker(root):
-            self._index_file(path, source_label=source_label, stats=stats, force=force)
+            try:
+                self._index_file(path, source_label=source_label, stats=stats, force=force)
+            except Exception as e:
+                log.warning("pipeline.index_file.error", path=str(path), error=str(e))
+                stats.errors += 1
 
     def _index_file(
         self,

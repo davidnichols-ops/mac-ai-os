@@ -8,7 +8,6 @@ without duplicating boilerplate. No globals: `build_runtime()` returns a
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 
 from app.actions import (
     ActionExecutor,
@@ -74,7 +73,9 @@ def build_runtime(
     embedding_model = build_embedding_model(settings)
     retriever = build_retriever(settings, embedding_model)
 
-    db_path = str(Path(settings.paths.data_dir) / "maos.db")
+    data_dir = settings.resolved_data_dir()
+    data_dir.mkdir(parents=True, exist_ok=True)
+    db_path = str(data_dir / "maos.db")
     db = Database(db_path)
 
     # Event bus — persists all events to the events table.

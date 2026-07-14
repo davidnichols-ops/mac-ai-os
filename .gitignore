@@ -23,6 +23,11 @@ models/*
 knowledge/*/*
 !knowledge/*/.gitkeep
 data/maos.db
+data/maos.db-shm
+data/maos.db-wal
+
+# Agent context history (session artifacts)
+agent context history/
 
 # OS
 .DS_Store

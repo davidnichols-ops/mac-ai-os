@@ -18,7 +18,7 @@ log = get_logger(__name__)
 
 
 def _stable_id(source: str, chunk_index: int, text: str) -> str:
-    h = hashlib.sha1(f"{source}:{chunk_index}:{text[:64]}".encode()).hexdigest()
+    h = hashlib.sha1(f"{source}:{chunk_index}:{text}".encode()).hexdigest()
     return f"chunk-{h}"
 
 
@@ -49,7 +49,9 @@ class ChromaRetriever(Retriever):
         if not chunks:
             return 0
         embeddings = [[float(x) for x in self.embedding_model.embed(c["text"]).vector] for c in chunks]
-        ids = [_stable_id(source, c["metadata"].get("chunk_index", i), c["text"])
+        # Use enumerate index for ID — guaranteed unique within a single upsert.
+        # The full text hash ensures stability across re-indexing.
+        ids = [_stable_id(source, i, c["text"])
                for i, c in enumerate(chunks)]
         documents = [c["text"] for c in chunks]
         metadatas = []

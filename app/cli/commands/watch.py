@@ -24,7 +24,7 @@ def watch(
     from app.retrieval.pipeline import IndexingPipeline
     from app.retrieval.watcher import ContinuousIndexer
 
-    db = get_db(rt.settings.paths.data_dir + "/maos.db")
+    db = get_db(str(rt.settings.resolved_data_dir() / "maos.db"))
     pipeline = IndexingPipeline(
         rt.retriever,
         db,
