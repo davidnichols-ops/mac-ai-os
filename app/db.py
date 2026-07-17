@@ -982,12 +982,14 @@ class Database:
         success: bool = True,
         latency_ms: int = 0,
         error: str = "",
+        timestamp_override: datetime | None = None,
     ) -> int:
+        ts = timestamp_override if timestamp_override else datetime.now(UTC)
         cur = self.execute(
             """INSERT INTO mcp_requests
                    (timestamp, client_name, kind, name, success, latency_ms, error)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (datetime.now(UTC).isoformat(), client_name, kind, name,
+            (ts.isoformat(), client_name, kind, name,
              1 if success else 0, latency_ms, error),
         )
         return cur.lastrowid

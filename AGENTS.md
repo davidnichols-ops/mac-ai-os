@@ -34,6 +34,10 @@ uv run app                               # launch the CLI (== uv run maos)
 | Telemetry history | `uv run app telemetry history --hours 1` |
 | Activity timeline | `uv run app timeline --hours 1` |
 | Event types | `uv run app event-types` |
+| Web search | `uv run app search "query" [--num N] [--json]` |
+| Browse web page | `uv run app browse <url> [--json]` |
+| Read PDF | `uv run app read-pdf <path> [--json]` |
+| OCR image | `uv run app ocr <path> [--lang eng] [--json]` |
 | Graph stats | `uv run app graph stats` |
 | Graph search | `uv run app graph search <name>` |
 | Graph extract (LLM) | `uv run app graph extract "<topic>"` |
@@ -82,6 +86,19 @@ uv run app                               # launch the CLI (== uv run maos)
 | Start MCP server (HTTP) | `uv run app mcp serve --transport http [--port 7778]` |
 | MCP status | `uv run app mcp status` |
 | MCP test | `uv run app mcp test` |
+| **Onboarding briefing** | `uv run app onboard` |
+| Onboarding (JSON) | `uv run app onboard --json` |
+| List lessons | `uv run app onboard lessons` |
+| Record a lesson | `uv run app onboard record <slug> "<text>"` |
+| Send email to david | `uv run app onboard email "<subject>" "<body>"` |
+| Escalate (needs attention) | `uv run app onboard escalate "<subject>" "<body>"` |
+| **Scan for vibes** | `uv run app guards scan "<text>"` |
+| Run all guards | `uv run app guards check "<text>" --pr --bug-fix` |
+| Scan from stdin (pipe) | `echo "<text>" \| uv run app guards stdin` |
+| **Tool diagnostics** | `uv run app diagnostics` |
+| Diagnostics (JSON) | `uv run app diagnostics --json` |
+| **Time awareness** | `uv run app time` |
+| Time (JSON) | `uv run app time --json` |
 | Bootstrap (first run) | `uv run app bootstrap [--scan-path ~/Projects]` |
 | Evaluate context quality | `uv run app context evaluate` |
 | Context eval history | `uv run app context history` |
@@ -324,7 +341,7 @@ interface becomes the Context API and MCP server.
   The server holds a Runtime reference, so every request has access to
   the full system.
 - `app/mcp/` — MCP Context Layer: thin adapter over the Context API
-  and ActionExecutor. Exposes 5 resources and 6 tools through the
+  and ActionExecutor. Exposes 5 resources and 14 tools through the
   Model Context Protocol (official `mcp` Python SDK, FastMCP API).
   Supports stdio transport (default, for Claude Code / Codex) and
   streamable-http transport. All action tools route through
@@ -337,12 +354,44 @@ interface becomes the Context API and MCP server.
   `maos://workspace/current`, `maos://session/latest`,
   `maos://tasks/open`, `maos://knowledge/search{query}`. All delegate
   to `app/server/context.py` or direct DB queries. No business logic.
-- `app/mcp/tools.py` — 6 MCP tools: `maos_get_context`,
+- `app/mcp/tools.py` — 14 MCP tools: `maos_get_context`,
   `maos_search_memory`, `maos_workspace_summary`, `maos_create_task`,
-  `maos_list_tasks`, `maos_run_action`. Read-only tools call the
-  Context API directly. Action tools go through ActionExecutor with
+  `maos_list_tasks`, `maos_run_action`, 3 onboarding tools
+  (`maos_onboard`, `maos_record_lesson`, `maos_list_lessons`),
+  2 email tools (`maos_send_email`, `maos_escalate`), 2 guard
+  tools (`maos_scan_vibes`, `maos_check_guards`), and 1 diagnostic
+  tool (`maos_diagnostics`). Read-only tools call the Context API
+  directly. Action tools go through ActionExecutor with
   `context={"db": runtime.db}` — preserving permissions, reversibility,
   action_log, and EventBus publishing.
+- `app/onboarding.py` — Session onboarding system. Assembles a briefing
+  for new AI sessions from: user preferences (user_model), hard-won
+  lessons (lesson.* keys in user_model), recent session, active
+  workspace, open tasks, and known failure patterns. Lessons are
+  recorded via `maos_record_lesson` / `maos onboard record` and
+  surfaced in every future briefing. This is the cold-start antidote —
+  it prevents new sessions from repeating past mistakes.
+- `app/gmail.py` — Email sending via Gmail OAuth. Uses credentials
+  from `~/.gmail-mcp/` (account-b = david.nichols.ops@gmail.com).
+  Refreshes tokens automatically. Two functions: `send_email` (generic)
+  and `escalate` (the anti-vibe-overload channel — sends a [MAOS]
+  prefixed email when something needs human attention). No external
+  deps, just stdlib urllib + base64 + email.
+- `app/guards.py` — Hard filters against vibe overload. Four guards:
+  `VibeLanguageGuard` (scans text for unsupported success claims like
+  "everything is working", "verified" without evidence, "all tests pass"
+  without output, "looks good", sub-agent agreement as proof),
+  `PrPreflightGuard` (hard checks before PR creation — requires test
+  output, build output, and manual verification for bug fixes),
+  `LessonComplianceGuard` (checks if an action violates recorded lessons),
+  `SubagentProofGuard` (blocks sub-agent agreement as sole evidence).
+  Each guard returns PASS/WARN/BLOCK. Intentionally aggressive — false
+  positives are acceptable, false negatives are not.
+- `app/diagnostics.py` — Self-diagnostic for all MAOS MCP tools. Actually
+  calls each read-only tool and verifies it returns valid JSON. Side-effect
+  tools (email, task creation) are checked for handler existence but not
+  called. Returns per-tool status: working, degraded, broken, skipped.
+  Use `maos_diagnostics` / `maos diagnostics` to verify system health.
 - `docs/mcp.md` — MCP documentation: resources, tools, connecting
   external AI clients, security model.
 
@@ -416,6 +465,27 @@ asks the utility LLM (3B) to produce a structured profile:
 - `tests/test_phase55.py` — 28 tests covering fallback profiling, LLM
   response parsing, TODO extraction, git info gathering, task discovery,
   context packet inclusion, evaluator scoring, and DB migration.
+
+### Phase 5.6 — perception layer (AAFP integration)
+
+MAOS agents can now see the internet. The perception layer shells out to the
+AAFP CLI (`aafp search/browse/read-pdf/ocr`) for web search, page browsing,
+PDF text extraction, and image OCR. The AAFP binary must be on PATH (or at
+`~/Projects/aafp/target/release/aafp`). Build it with:
+`cd ~/Projects/aafp && cargo build --release --bin aafp`
+
+- `app/perception.py` — `Perception` class wraps the AAFP CLI commands.
+  Returns structured dataclasses (`SearchResult`, `BrowseResult`, `PdfResult`,
+  `OcrResult`). All commands use `--json` output for reliable parsing.
+- `app/agents/research.py` — `ResearchAgent` now does web search (via
+  perception) + local RAG (via retriever) + LLM synthesis. Falls back to
+  local-only RAG if perception is unavailable. Cites both web and local sources.
+- `app/cli/commands/perception.py` — CLI commands: `maos search`, `maos browse`,
+  `maos read-pdf`, `maos ocr`. Each supports `--json` for raw output.
+- `app/runtime.py` — `Runtime` dataclass now includes `perception: Perception`.
+  Wired into `default_agents()` for the ResearchAgent.
+- `app/agents/base.py` — `Agent` ABC now accepts `perception: Perception | None`
+  via constructor injection.
 
 ## Coding standards
 

@@ -32,16 +32,21 @@ from app.cli.commands.approval import approval_app
 from app.cli.commands.blackboard import blackboard_app
 from app.cli.commands.bootstrap import bootstrap
 from app.cli.commands.context import context_app
+from app.cli.commands.diagnostics import diagnostics_app
 from app.cli.commands.git import git_app
 from app.cli.commands.graph import graph_app
+from app.cli.commands.guards import guards_app
 from app.cli.commands.history import history_app
 from app.cli.commands.learn import learn_app
 from app.cli.commands.mcp import mcp_app
+from app.cli.commands.onboarding import onboarding_app
+from app.cli.commands.perception import browse, ocr, read_pdf, search
 from app.cli.commands.preferences import preferences_app
 from app.cli.commands.session import session_app
 from app.cli.commands.snapshot import snapshot_app
 from app.cli.commands.task import task_app
 from app.cli.commands.telemetry import telemetry_app
+from app.cli.commands.time import time_app
 from app.cli.commands.timeline import event_types, timeline
 from app.cli.commands.workflow import workflow_app
 from app.cli.commands.workspace import workspace_app
@@ -64,6 +69,10 @@ app.command()(serve.serve)
 app.command()(bootstrap)
 app.command(name="timeline")(timeline)
 app.command(name="event-types")(event_types)
+app.command(name="search")(search)
+app.command(name="browse")(browse)
+app.command(name="read-pdf")(read_pdf)
+app.command(name="ocr")(ocr)
 app.add_typer(git_app, name="git")
 app.add_typer(telemetry_app, name="telemetry")
 app.add_typer(graph_app, name="graph")
@@ -80,6 +89,10 @@ app.add_typer(blackboard_app, name="blackboard")
 app.add_typer(learn_app, name="learn")
 app.add_typer(mcp_app, name="mcp")
 app.add_typer(context_app, name="context")
+app.add_typer(onboarding_app, name="onboard")
+app.add_typer(guards_app, name="guards")
+app.add_typer(diagnostics_app, name="diagnostics")
+app.add_typer(time_app, name="time")
 
 
 def run() -> None:
