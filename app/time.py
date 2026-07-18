@@ -308,6 +308,95 @@ def session_stats(db: Database, gap: timedelta = SESSION_GAP) -> dict[str, Any]:
     }
 
 
+def reading_profile(db: Database, gap: timedelta = SESSION_GAP) -> dict[str, Any]:
+    """Profile the agent's reading behavior in the current session.
+
+    Reading is the #1 repeated action for AI agents. This function
+    tracks how many files have been read, how many unique files,
+    reading velocity (files per minute), and whether the agent is
+    re-reading the same files (a sign of going in circles).
+
+    Returns:
+        Dict with:
+        - files_read: total file reads in this session
+        - unique_files: distinct files read
+        - re_reads: number of reads that were re-reads of already-read files
+        - re_read_ratio: fraction of reads that were re-reads (0-1)
+        - reads_per_minute: reading velocity
+        - most_read_files: top 3 files by read count
+        - total_lines_read: sum of lines across all reads
+        - assessment: human-readable behavioral assessment
+    """
+    session = detect_session_start(db, gap)
+    if not session["session_start"]:
+        return {
+            "files_read": 0,
+            "unique_files": 0,
+            "re_reads": 0,
+            "re_read_ratio": 0,
+            "reads_per_minute": 0,
+            "most_read_files": [],
+            "total_lines_read": 0,
+            "assessment": "no reads recorded yet",
+        }
+
+    rows = db.file_reads_since(session["session_start"])
+    if not rows:
+        return {
+            "files_read": 0,
+            "unique_files": 0,
+            "re_reads": 0,
+            "re_read_ratio": 0,
+            "reads_per_minute": 0,
+            "most_read_files": [],
+            "total_lines_read": 0,
+            "assessment": "no files read in this session yet",
+        }
+
+    paths = [r["path"] for r in rows]
+    unique = set(paths)
+    re_reads = len(paths) - len(unique)
+    re_read_ratio = re_reads / len(paths) if paths else 0
+    total_lines = sum(r["lines"] for r in rows)
+
+    # File frequency
+    freq: dict[str, int] = {}
+    for p in paths:
+        freq[p] = freq.get(p, 0) + 1
+    most_read = sorted(freq.items(), key=lambda x: -x[1])[:3]
+
+    # Reading velocity
+    active_minutes = session["elapsed"].total_seconds() / 60
+    reads_per_minute = len(rows) / active_minutes if active_minutes > 0 else 0
+
+    # Behavioral assessment
+    assessment_parts = []
+    if re_read_ratio > 0.5:
+        assessment_parts.append(f"re-reading {re_read_ratio:.0%} of files — may be going in circles")
+    elif re_read_ratio > 0.3:
+        assessment_parts.append(f"moderate re-reading ({re_read_ratio:.0%}) — checking back on files")
+    else:
+        assessment_parts.append("mostly reading new files — good forward progress")
+
+    if reads_per_minute > 3:
+        assessment_parts.append(f"high read velocity ({reads_per_minute:.1f}/min) — may be skimming too fast")
+    elif reads_per_minute < 0.5 and len(rows) > 5:
+        assessment_parts.append(f"low read velocity ({reads_per_minute:.1f}/min) — reading carefully")
+    else:
+        assessment_parts.append(f"reading at {reads_per_minute:.1f} files/min")
+
+    return {
+        "files_read": len(rows),
+        "unique_files": len(unique),
+        "re_reads": re_reads,
+        "re_read_ratio": round(re_read_ratio, 2),
+        "reads_per_minute": round(reads_per_minute, 2),
+        "most_read_files": [{"path": p, "reads": c} for p, c in most_read],
+        "total_lines_read": total_lines,
+        "assessment": "; ".join(assessment_parts),
+    }
+
+
 def build_time_packet(db: Database) -> dict[str, Any]:
     """Build a complete time awareness packet for an AI agent.
 
@@ -363,6 +452,13 @@ def build_time_packet(db: Database) -> dict[str, Any]:
     if stats["calls_per_minute"] > 0:
         relative_hints.append(f"Average {stats['calls_per_minute']} tool calls per minute of active time")
 
+    # Reading profile
+    reading = reading_profile(db)
+    if reading["files_read"] > 0:
+        relative_hints.append(
+            f"Read {reading['files_read']} files ({reading['unique_files']} unique) — {reading['assessment']}"
+        )
+
     return {
         "current_time": current.isoformat(),
         "current_time_human": human,
@@ -387,6 +483,7 @@ def build_time_packet(db: Database) -> dict[str, Any]:
             "tools_used": stats["tools_used"],
             "tool_frequency": stats["tool_frequency"],
         },
+        "reading_profile": reading,
         "relative_hints": relative_hints,
     }
 
@@ -420,6 +517,20 @@ def format_time_packet(packet: dict[str, Any]) -> str:
             lines.append(f"    ... and {len(stats['tools_used']) - 10} more")
     else:
         lines.append("  No stats available.")
+    lines.append("")
+    lines.append("Reading:")
+    reading = packet.get("reading_profile", {})
+    if reading.get("files_read", 0) > 0:
+        lines.append(f"  Files read: {reading['files_read']} ({reading['unique_files']} unique, {reading['re_reads']} re-reads)")
+        lines.append(f"  Lines read: {reading['total_lines_read']}")
+        lines.append(f"  Velocity: {reading['reads_per_minute']} files/min")
+        lines.append(f"  Re-read ratio: {reading['re_read_ratio']:.0%}")
+        if reading.get("most_read_files"):
+            for f in reading["most_read_files"][:3]:
+                lines.append(f"    {f['reads']}x {f['path']}")
+        lines.append(f"  Assessment: {reading['assessment']}")
+    else:
+        lines.append("  No files read in this session.")
     lines.append("")
     lines.append("Hints:")
     for hint in packet["relative_hints"]:

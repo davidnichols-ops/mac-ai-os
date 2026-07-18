@@ -11,6 +11,7 @@ from app.time import (
     format_duration,
     format_duration_compact,
     format_time_packet,
+    reading_profile,
     relative_time,
     session_stats,
 )
@@ -182,6 +183,7 @@ def test_build_time_packet(tmp_path):
     assert "unix_timestamp" in packet
     assert "session" in packet
     assert "session_stats" in packet
+    assert "reading_profile" in packet
     assert "relative_hints" in packet
     assert packet["session"]["tool_call_count"] == 1
     assert packet["session"]["is_active"] is True
@@ -193,6 +195,7 @@ def test_build_time_packet_empty(tmp_path):
     assert packet["session"]["tool_call_count"] == 0
     assert packet["session"]["is_active"] is False
     assert len(packet["relative_hints"]) > 0
+    assert packet["reading_profile"]["files_read"] == 0
 
 
 # --- format_time_packet ---
@@ -204,6 +207,7 @@ def test_format_time_packet(tmp_path):
     assert "Current time:" in text
     assert "Session:" in text
     assert "Stats:" in text
+    assert "Reading:" in text
     assert "Hints:" in text
 
 
@@ -212,3 +216,108 @@ def test_format_time_packet_empty(tmp_path):
     packet = build_time_packet(db)
     text = format_time_packet(packet)
     assert "No MCP calls recorded" in text
+
+
+# --- reading_profile ---
+
+def test_reading_profile_empty(tmp_path):
+    db = _make_db(tmp_path)
+    profile = reading_profile(db)
+    assert profile["files_read"] == 0
+    assert profile["unique_files"] == 0
+    assert profile["re_reads"] == 0
+    assert profile["re_read_ratio"] == 0
+    assert "no reads" in profile["assessment"]
+
+
+def test_reading_profile_no_reads_in_session(tmp_path):
+    """MCP calls exist but no file reads."""
+    db = _make_db(tmp_path, calls=[(2, "maos_get_context")])
+    profile = reading_profile(db)
+    assert profile["files_read"] == 0
+    assert "no files read" in profile["assessment"]
+
+
+def test_reading_profile_single_read(tmp_path):
+    db = _make_db(tmp_path, calls=[(3, "maos_read_file")])
+    db.log_file_read(path="/foo/bar.py", lines=50)
+    profile = reading_profile(db)
+    assert profile["files_read"] == 1
+    assert profile["unique_files"] == 1
+    assert profile["re_reads"] == 0
+    assert profile["re_read_ratio"] == 0
+    assert profile["total_lines_read"] == 50
+
+
+def test_reading_profile_multiple_unique(tmp_path):
+    db = _make_db(tmp_path, calls=[(5, "maos_read_file")])
+    db.log_file_read(path="/foo/a.py", lines=10)
+    db.log_file_read(path="/foo/b.py", lines=20)
+    db.log_file_read(path="/foo/c.py", lines=30)
+    profile = reading_profile(db)
+    assert profile["files_read"] == 3
+    assert profile["unique_files"] == 3
+    assert profile["re_reads"] == 0
+    assert profile["re_read_ratio"] == 0
+    assert profile["total_lines_read"] == 60
+    assert "new files" in profile["assessment"]
+
+
+def test_reading_profile_re_reads(tmp_path):
+    """Re-reading the same files — should detect going in circles."""
+    db = _make_db(tmp_path, calls=[(5, "maos_read_file")])
+    db.log_file_read(path="/foo/a.py", lines=10)
+    db.log_file_read(path="/foo/b.py", lines=20)
+    db.log_file_read(path="/foo/a.py", lines=10)  # re-read
+    db.log_file_read(path="/foo/a.py", lines=10)  # re-read
+    db.log_file_read(path="/foo/b.py", lines=20)  # re-read
+    profile = reading_profile(db)
+    assert profile["files_read"] == 5
+    assert profile["unique_files"] == 2
+    assert profile["re_reads"] == 3
+    assert profile["re_read_ratio"] == 0.6
+    assert "going in circles" in profile["assessment"]
+
+
+def test_reading_profile_most_read_files(tmp_path):
+    db = _make_db(tmp_path, calls=[(5, "maos_read_file")])
+    db.log_file_read(path="/foo/a.py", lines=10)
+    db.log_file_read(path="/foo/a.py", lines=10)
+    db.log_file_read(path="/foo/a.py", lines=10)
+    db.log_file_read(path="/foo/b.py", lines=20)
+    profile = reading_profile(db)
+    assert len(profile["most_read_files"]) == 2
+    assert profile["most_read_files"][0]["path"] == "/foo/a.py"
+    assert profile["most_read_files"][0]["reads"] == 3
+
+
+def test_reading_profile_in_build_time_packet(tmp_path):
+    """build_time_packet includes reading_profile."""
+    db = _make_db(tmp_path, calls=[(2, "maos_read_file")])
+    db.log_file_read(path="/foo/a.py", lines=100)
+    packet = build_time_packet(db)
+    assert "reading_profile" in packet
+    assert packet["reading_profile"]["files_read"] == 1
+    assert packet["reading_profile"]["total_lines_read"] == 100
+
+
+# --- file_reads DB helpers ---
+
+def test_log_file_read(tmp_path):
+    db = _make_db(tmp_path)
+    rowid = db.log_file_read(path="/foo/bar.py", lines=42)
+    assert rowid > 0
+    assert db.file_read_count() == 1
+    assert db.unique_files_read() == 1
+
+
+def test_file_reads_since(tmp_path):
+    db = _make_db(tmp_path)
+    now = datetime.now(UTC)
+    old_ts = now - timedelta(hours=2)
+    db.log_file_read(path="/old.py", lines=10, timestamp_override=old_ts)
+    db.log_file_read(path="/new.py", lines=20, timestamp_override=now)
+    since = (now - timedelta(minutes=5)).isoformat()
+    rows = db.file_reads_since(since)
+    assert len(rows) == 1
+    assert rows[0]["path"] == "/new.py"

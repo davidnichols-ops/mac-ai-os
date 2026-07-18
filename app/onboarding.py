@@ -164,6 +164,11 @@ def format_onboarding_briefing(packet: dict[str, Any]) -> str:
             lines.append(f"  First tool: {sess.get('first_tool', '?')}")
         else:
             lines.append("  (no previous tool calls — this is the first call in a new session)")
+        reading = time_info.get("reading_profile", {})
+        if reading.get("files_read", 0) > 0:
+            lines.append(f"  Files read: {reading['files_read']} ({reading['unique_files']} unique, {reading['re_read_ratio']:.0%} re-reads)")
+            lines.append(f"  Reading: {reading['assessment']}")
+        lines.append("  NOTE: Use maos_read_file instead of built-in read to track reading behavior.")
         hints = time_info.get("relative_hints", [])
         if hints:
             lines.append("  Hints:")

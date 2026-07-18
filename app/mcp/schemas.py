@@ -419,6 +419,32 @@ TIME_TOOL = MCPToolSpec(
     },
 )
 
+READ_FILE_TOOL = MCPToolSpec(
+    name="maos_read_file",
+    description=(
+        "Read a file with time awareness and reading behavior tracking. "
+        "Returns file content PLUS a _time_awareness section showing "
+        "session elapsed, tool call count, files read, re-read ratio, "
+        "and a behavioral assessment. If the re-read ratio is >50%, a "
+        "_warning is added. Reading is the #1 repeated action for AI "
+        "agents — by routing reads through this tool, every read "
+        "becomes a time check and behavioral checkpoint. Use this "
+        "instead of the built-in read tool to stay aware of how long "
+        "you've been working and whether you're going in circles."
+    ),
+    parameters={
+        "path": {
+            "type": "string",
+            "description": "Absolute or relative path to the file to read.",
+        },
+        "max_lines": {
+            "type": "integer",
+            "description": "Maximum lines to read (default 2000).",
+            "default": 2000,
+        },
+    },
+)
+
 ALL_TOOLS: list[MCPToolSpec] = [
     GET_CONTEXT_TOOL,
     SEARCH_MEMORY_TOOL,
@@ -435,4 +461,5 @@ ALL_TOOLS: list[MCPToolSpec] = [
     CHECK_GUARDS_TOOL,
     DIAGNOSTICS_TOOL,
     TIME_TOOL,
+    READ_FILE_TOOL,
 ]

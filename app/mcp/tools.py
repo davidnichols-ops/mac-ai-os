@@ -513,6 +513,7 @@ def maos_time(runtime: Runtime, format: str = "text") -> str:
     - Session start time (when the first tool call in this session happened)
     - Tool call count and frequency (calls per minute)
     - Idle time (how long since the last tool call)
+    - Reading profile (files read, re-read ratio, reading velocity)
     - Relative time hints ("3 minutes since last tool call")
 
     A "session" is defined as a contiguous sequence of MCP tool calls with
@@ -528,3 +529,92 @@ def maos_time(runtime: Runtime, format: str = "text") -> str:
     if format == "json":
         return json.dumps(packet, default=str, indent=2)
     return format_time_packet(packet)
+
+
+def maos_read_file(runtime: Runtime, path: str, max_lines: int = 2000) -> str:
+    """Read a file with time awareness and reading behavior tracking.
+
+    This is the time-aware version of file reading. It returns the file
+    content PLUS a time awareness footer showing how long the session has
+    been running, how many files have been read, and whether the agent is
+    re-reading the same files (a sign of going in circles).
+
+    Reading is the #1 repeated action for AI agents. By routing reads
+    through this tool, every read becomes a time check and a behavioral
+    checkpoint. The agent sees:
+
+      [⏱ 45m · 23 calls · 12 files read (8 unique, 33% re-reads) · active 2m]
+
+    If the re-read ratio is high (>50%), the agent is likely going in
+    circles and should step back and reconsider its approach.
+
+    Args:
+        path: Absolute or relative path to the file to read.
+        max_lines: Maximum lines to read (default 2000, same as built-in read).
+    """
+    from pathlib import Path
+
+    from app.time import detect_session_start, reading_profile
+
+    # Resolve path
+    p = Path(path).expanduser()
+    if not p.is_absolute():
+        p = Path.cwd() / p
+
+    try:
+        if not p.exists():
+            return json.dumps({"error": f"file not found: {path}"})
+        if not p.is_file():
+            return json.dumps({"error": f"not a file: {path}"})
+
+        # Read the file
+        content = p.read_text(errors="replace")
+        lines = content.split("\n")
+        line_count = len(lines)
+
+        # Truncate if needed
+        if max_lines and line_count > max_lines:
+            content = "\n".join(lines[:max_lines])
+            content += f"\n... ({line_count - max_lines} more lines, use max_lines to see more)"
+
+        # Log the read for behavior tracking
+        runtime.db.log_file_read(path=str(p), lines=min(line_count, max_lines))
+
+        # Build time + reading awareness
+        session = detect_session_start(runtime.db)
+        reading = reading_profile(runtime.db)
+
+        elapsed = session["elapsed_compact"]
+        calls = session["tool_call_count"]
+        files_read = reading["files_read"]
+        unique = reading["unique_files"]
+        re_read_pct = int(reading["re_read_ratio"] * 100)
+
+        # Build the response with content + time awareness
+        result = {
+            "path": str(p),
+            "lines": line_count,
+            "content": content,
+            "_time_awareness": {
+                "elapsed": elapsed,
+                "tool_calls": calls,
+                "idle": session.get("idle_compact", "0s"),
+                "active": session["is_active"],
+                "files_read": files_read,
+                "unique_files": unique,
+                "re_read_ratio": reading["re_read_ratio"],
+                "reads_per_minute": reading["reads_per_minute"],
+                "assessment": reading["assessment"],
+            },
+        }
+
+        # Add a warning if re-reading too much
+        if reading["re_read_ratio"] > 0.5 and files_read > 5:
+            result["_warning"] = (
+                f"Re-reading {re_read_pct}% of files — you may be going in circles. "
+                f"Consider stepping back and reconsidering your approach."
+            )
+
+        return json.dumps(result, default=str, indent=2)
+    except Exception as e:
+        return json.dumps({"error": str(e), "path": str(p)})

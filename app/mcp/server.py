@@ -360,6 +360,7 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         - Session start time (when the first tool call in this session happened)
         - Tool call count and frequency (calls per minute)
         - Idle time (how long since the last tool call)
+        - Reading profile (files read, re-read ratio, reading velocity)
         - Relative time hints ("3 minutes since last tool call")
 
         A "session" is a contiguous sequence of MCP tool calls with no gap
@@ -371,6 +372,29 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         return tools._instrument(
             runtime, "maos_time",
             tools.maos_time, format=format,
+        )
+
+    @mcp.tool()
+    def maos_read_file(path: str, max_lines: int = 2000) -> str:
+        """Read a file with time awareness and reading behavior tracking.
+
+        This is the time-aware version of file reading. It returns file
+        content PLUS a _time_awareness section showing session elapsed,
+        tool call count, files read, re-read ratio, and a behavioral
+        assessment. If the re-read ratio is >50%, a _warning is added.
+
+        Reading is the #1 repeated action for AI agents. By routing reads
+        through this tool, every read becomes a time check and behavioral
+        checkpoint. Use this instead of the built-in read tool when you
+        want to stay aware of how long you've been working.
+
+        Args:
+            path: Absolute or relative path to the file.
+            max_lines: Maximum lines to read (default 2000).
+        """
+        return tools._instrument(
+            runtime, "maos_read_file",
+            tools.maos_read_file, path=path, max_lines=max_lines,
         )
 
     # Store token for HTTP transport middleware.

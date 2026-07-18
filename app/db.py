@@ -271,6 +271,17 @@ CREATE TABLE IF NOT EXISTS context_evaluations (
 );
 
 CREATE INDEX IF NOT EXISTS idx_context_evals_time ON context_evaluations(timestamp);
+
+CREATE TABLE IF NOT EXISTS file_reads (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp   TEXT NOT NULL,
+    path        TEXT NOT NULL,
+    lines       INTEGER NOT NULL DEFAULT 0,
+    session_id  INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_file_reads_time ON file_reads(timestamp);
+CREATE INDEX IF NOT EXISTS idx_file_reads_path ON file_reads(path);
 """
 
 
@@ -1018,6 +1029,32 @@ class Database:
             "avg_latency_ms": round(avg_lat["v"], 1) if avg_lat and avg_lat["v"] else 0,
             "by_kind": {r["kind"]: {"count": r["count"], "avg_latency_ms": round(r["avg_lat"], 1)} for r in by_kind},
         }
+
+    # --- file read helpers ----------------------------------------------------
+
+    def log_file_read(self, *, path: str, lines: int = 0, timestamp_override: datetime | None = None) -> int:
+        """Log a file read for behavior tracking."""
+        ts = timestamp_override if timestamp_override else datetime.now(UTC)
+        cur = self.execute(
+            "INSERT INTO file_reads (timestamp, path, lines) VALUES (?, ?, ?)",
+            (ts.isoformat(), path, lines),
+        )
+        return cur.lastrowid
+
+    def file_reads_since(self, since_iso: str) -> list[sqlite3.Row]:
+        """Get file reads since a timestamp."""
+        return self.query(
+            "SELECT * FROM file_reads WHERE timestamp >= ? ORDER BY timestamp ASC",
+            (since_iso,),
+        )
+
+    def file_read_count(self) -> int:
+        row = self.query_one("SELECT COUNT(*) as n FROM file_reads")
+        return row["n"] if row else 0
+
+    def unique_files_read(self) -> int:
+        row = self.query_one("SELECT COUNT(DISTINCT path) as n FROM file_reads")
+        return row["n"] if row else 0
 
     # --- context evaluation helpers -------------------------------------------
 
