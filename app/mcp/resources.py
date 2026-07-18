@@ -232,6 +232,23 @@ def _read_knowledge_resource(runtime: Runtime, query: str = "") -> str:
     return json.dumps(results, default=str, indent=2)
 
 
+def read_time_resource(runtime: Runtime) -> str:
+    """maos://time/current — time awareness for the current AI session.
+
+    Returns current wall-clock time, session elapsed time, tool call
+    count, idle time, and relative time hints.
+    """
+    return _instrument_resource(
+        runtime, "maos://time/current", _read_time_resource,
+    )
+
+
+def _read_time_resource(runtime: Runtime) -> str:
+    from app.time import build_time_packet
+    packet = build_time_packet(runtime.db)
+    return json.dumps(packet, default=str, indent=2)
+
+
 # --- helpers ---------------------------------------------------------------
 
 

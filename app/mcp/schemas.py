@@ -79,12 +79,23 @@ KNOWLEDGE_RESOURCE = MCPResourceSpec(
     ),
 )
 
+TIME_RESOURCE = MCPResourceSpec(
+    uri="maos://time/current",
+    name="current_time",
+    description=(
+        "Time awareness for the current AI session: current wall-clock "
+        "time, session elapsed time, tool call count, idle time, and "
+        "relative time hints."
+    ),
+)
+
 ALL_RESOURCES: list[MCPResourceSpec] = [
     CONTEXT_RESOURCE,
     WORKSPACE_RESOURCE,
     SESSION_RESOURCE,
     TASKS_RESOURCE,
     KNOWLEDGE_RESOURCE,
+    TIME_RESOURCE,
 ]
 
 

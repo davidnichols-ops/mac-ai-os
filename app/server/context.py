@@ -90,6 +90,9 @@ def build_context_packet(
     # --- Recent events summary ---
     events_summary = _events_summary(db, since)
 
+    # --- Time awareness ---
+    time_awareness = _time_info(db)
+
     return {
         "timestamp": now.isoformat(),
         "workspace": workspace,
@@ -110,6 +113,7 @@ def build_context_packet(
             "last_updated": bb["last_updated"],
         },
         "recent_activity": events_summary,
+        "time_awareness": time_awareness,
     }
 
 
@@ -297,3 +301,17 @@ def _events_summary(db: Database, since: str) -> dict[str, Any]:
         }
     except Exception:
         return {"total": 0, "by_type": {}}
+
+
+def _time_info(db: Database) -> dict[str, Any]:
+    """Time awareness for the current AI session.
+
+    Injected into every context packet so agents always know how long
+    they've been working — even without calling maos_time explicitly.
+    """
+    try:
+        from app.time import build_time_packet
+        return build_time_packet(db)
+    except Exception as e:
+        log.warning("context_packet.time_failed", error=str(e))
+        return {"available": False, "error": str(e)}

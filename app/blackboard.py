@@ -106,6 +106,18 @@ class Blackboard:
             self.confidence = confidence
             self._touch()
 
+    def update_time_awareness(self, time_info: dict[str, Any]) -> None:
+        """Update the time awareness state on the blackboard.
+
+        This is called periodically (e.g. by the attention daemon or
+        before each context packet assembly) to keep the blackboard's
+        time info fresh. The time info is stored in current_context
+        under the "time_awareness" key.
+        """
+        with self._lock:
+            self.current_context["time_awareness"] = time_info
+            self._touch()
+
     def clear(self) -> None:
         with self._lock:
             self.current_goal = ""
@@ -143,6 +155,16 @@ class Blackboard:
         if s["current_workspace"]:
             lines.append(f"Workspace: {s['current_workspace']}")
         lines.append(f"Confidence: {s['confidence']:.2f}")
+
+        # Time awareness (if available in current_context).
+        time_info = s.get("current_context", {}).get("time_awareness", {})
+        if time_info and isinstance(time_info, dict):
+            sess = time_info.get("session", {})
+            if sess.get("elapsed"):
+                elapsed = sess["elapsed"]
+                calls = sess.get("tool_call_count", 0)
+                active = "active" if sess.get("is_active") else "idle"
+                lines.append(f"Time: {time_info.get('current_time_human', '?')} | Session: {elapsed} ({calls} calls, {active})")
 
         if s["open_problems"]:
             lines.append(f"\nOpen problems ({len(s['open_problems'])}):")

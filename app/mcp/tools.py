@@ -52,12 +52,19 @@ def _instrument(
     """Wrap a tool call with telemetry logging and event publishing.
 
     Records to mcp_requests table and publishes MCP_TOOL_CALLED event.
+    Also appends an ambient time footer to every tool response so the
+    agent always knows how long it's been working — even deep in a
+    coding rabbit hole.
     """
     start = time.time()
     success = True
     error = ""
     try:
         result = fn(runtime, *args, **kwargs)
+        # Append ambient time footer to every tool response.
+        # This is the key integration: the agent can't avoid seeing
+        # how long it's been working because it's in every response.
+        result = _append_time_footer(runtime, name, result)
         return result
     except Exception as e:
         success = False
@@ -81,6 +88,54 @@ def _instrument(
                 }))
         except Exception:
             pass  # telemetry must never break the tool call
+
+
+def _append_time_footer(runtime: Runtime, tool_name: str, result: str) -> str:
+    """Append a compact time awareness footer to a tool response.
+
+    Format: [⏱ 28m · 17 calls · idle 2m · Fri 5:31 PM CDT]
+
+    This is injected into EVERY tool response so the agent always has
+    ambient time awareness without needing to explicitly call maos_time.
+    The footer is kept short to avoid bloating the response.
+
+    For JSON responses, the time info is added as a top-level
+    "_time_awareness" key. For text responses, it's appended as a
+    bracketed footer line.
+
+    Skip for maos_time itself (it already returns time info).
+    """
+    if tool_name == "maos_time":
+        return result
+
+    try:
+        from app.time import detect_session_start
+
+        session = detect_session_start(runtime.db)
+        elapsed = session["elapsed_compact"]
+        calls = session["tool_call_count"]
+        idle = session.get("idle_compact", "0s")
+
+        # Try to parse as JSON and inject as a top-level key.
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, dict):
+                parsed["_time_awareness"] = {
+                    "elapsed": elapsed,
+                    "tool_calls": calls,
+                    "idle": idle,
+                    "active": session["is_active"],
+                }
+                return json.dumps(parsed, default=str, indent=2)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+        # For non-JSON responses, append a text footer.
+        status = "active" if session["is_active"] else "idle"
+        footer = f"\n[⏱ {elapsed} · {calls} calls · {status} {idle}]"
+        return result + footer
+    except Exception:
+        return result
 
 
 def maos_get_context(runtime: Runtime) -> str:

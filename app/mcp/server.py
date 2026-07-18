@@ -101,6 +101,11 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         """Semantic search over indexed knowledge (vectors + graph)."""
         return resources.read_knowledge_resource(runtime, query=query)
 
+    @mcp.resource("maos://time/current")
+    def current_time() -> str:
+        """Time awareness: current time, session elapsed, tool call stats, idle time."""
+        return resources.read_time_resource(runtime)
+
     # --- Tools (instrumented with MCP telemetry) ----------------------------
 
     @mcp.tool()
