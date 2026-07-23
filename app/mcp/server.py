@@ -330,6 +330,95 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
             has_empirical_evidence=has_empirical_evidence,
         )
 
+    # --- Evidence-producing guard tools (PR governance) ---
+
+    @mcp.tool()
+    def maos_verify_command(
+        command: str,
+        cwd: str = "",
+        timeout: int = 300,
+    ) -> str:
+        """Execute a verification command and capture evidence.
+
+        Evidence-PRODUCING verification. The system runs the command, not the
+        agent. The agent cannot fake the exit code, stdout, or commit hash.
+        Use this instead of self-attested booleans like has_test_output=True.
+
+        SECURITY: Only verification commands are allowed (test runners, linters,
+        type checkers, build commands). Allowed prefixes: uv run pytest, uv run
+        ruff, uv run mypy, pytest, ruff, mypy, npm test, npm run lint, cargo
+        test, cargo clippy, go test, make test, git status, etc.
+
+        Capture test evidence: maos_verify_command(command="uv run pytest")
+        Capture lint evidence: maos_verify_command(command="uv run ruff check app tests")
+
+        Returns JSON with: exit_code, stdout, stderr, duration_ms, timestamp,
+        working_dir, git_commit, git_dirty.
+        """
+        return tools._instrument(
+            runtime, "maos_verify_command",
+            tools.maos_verify_command,
+            command=command, cwd=cwd, timeout=timeout,
+        )
+
+    @mcp.tool()
+    def maos_inspect_diff(
+        repo_dir: str = "",
+        base: str = "HEAD",
+        stated_scope: str = "",
+    ) -> str:
+        """Inspect the git diff for risk patterns.
+
+        BLOCK for secrets/credentials. WARN for debug statements, dependency
+        changes, binary files, scope violations, large diffs. REQUIRES_REVIEW
+        for MCP tool/schema changes and security-sensitive paths.
+
+        Run this before opening a PR to catch risky changes.
+        """
+        return tools._instrument(
+            runtime, "maos_inspect_diff",
+            tools.maos_inspect_diff,
+            repo_dir=repo_dir, base=base, stated_scope=stated_scope,
+        )
+
+    @mcp.tool()
+    def maos_pr_readiness(
+        repo_dir: str = "",
+        pr_description: str = "",
+        is_bug_fix: bool = False,
+        test_evidence_json: str = "",
+        lint_evidence_json: str = "",
+        build_evidence_json: str = "",
+        manual_evidence_json: str = "",
+        diff_base: str = "HEAD",
+        skip_diff: bool = False,
+    ) -> str:
+        """Assess PR readiness via state machine: DRAFT -> UNDERSTOOD -> VERIFIED -> PR_READY.
+
+        The comprehensive readiness check. Requires evidence objects (from
+        maos_verify_command), a structured PR description, and inspects the
+        diff. If state is NOT PR_READY, do NOT open the PR.
+
+        PR description must have sections: Summary, Why, What Changed, Scope.
+        Bug fixes also need: Root Cause, Regression Test, Before, After.
+
+        Pass evidence JSON strings from maos_verify_command to test_evidence_json,
+        lint_evidence_json, etc.
+        """
+        return tools._instrument(
+            runtime, "maos_pr_readiness",
+            tools.maos_pr_readiness,
+            repo_dir=repo_dir,
+            pr_description=pr_description,
+            is_bug_fix=is_bug_fix,
+            test_evidence_json=test_evidence_json,
+            lint_evidence_json=lint_evidence_json,
+            build_evidence_json=build_evidence_json,
+            manual_evidence_json=manual_evidence_json,
+            diff_base=diff_base,
+            skip_diff=skip_diff,
+        )
+
     # --- Diagnostic tools ---
 
     @mcp.tool()

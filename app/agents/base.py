@@ -19,6 +19,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from app.models.base import Model
+from app.perception import Perception
 from app.retrieval.base import Retriever
 from app.tools.registry import ToolRouter
 
@@ -43,11 +44,13 @@ class Agent(ABC):
         utility: Model | None = None,
         retriever: Retriever | None = None,
         tools: ToolRouter | None = None,
+        perception: Perception | None = None,
     ):
         self.planner = planner
         self.utility = utility
         self.retriever = retriever
         self.tools = tools
+        self.perception = perception
 
     @abstractmethod
     def plan(self, goal: str) -> list[str]:

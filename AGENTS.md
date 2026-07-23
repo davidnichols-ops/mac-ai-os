@@ -95,6 +95,10 @@ uv run app                               # launch the CLI (== uv run maos)
 | **Scan for vibes** | `uv run app guards scan "<text>"` |
 | Run all guards | `uv run app guards check "<text>" --pr --bug-fix` |
 | Scan from stdin (pipe) | `echo "<text>" \| uv run app guards stdin` |
+| **Produce test evidence** | `uv run app guards verify "uv run pytest" --save test.json` |
+| **Produce lint evidence** | `uv run app guards verify "uv run ruff check app tests" --save lint.json` |
+| **Inspect git diff** | `uv run app guards diff --json` |
+| **PR readiness check** | `uv run app guards readiness --test-evidence test.json --lint-evidence lint.json --pr-description pr.md` |
 | **Tool diagnostics** | `uv run app diagnostics` |
 | Diagnostics (JSON) | `uv run app diagnostics --json` |
 | **Time awareness** | `uv run app time` |
@@ -377,16 +381,34 @@ interface becomes the Context API and MCP server.
   and `escalate` (the anti-vibe-overload channel — sends a [MAOS]
   prefixed email when something needs human attention). No external
   deps, just stdlib urllib + base64 + email.
-- `app/guards.py` — Hard filters against vibe overload. Four guards:
-  `VibeLanguageGuard` (scans text for unsupported success claims like
-  "everything is working", "verified" without evidence, "all tests pass"
-  without output, "looks good", sub-agent agreement as proof),
-  `PrPreflightGuard` (hard checks before PR creation — requires test
-  output, build output, and manual verification for bug fixes),
-  `LessonComplianceGuard` (checks if an action violates recorded lessons),
-  `SubagentProofGuard` (blocks sub-agent agreement as sole evidence).
-  Each guard returns PASS/WARN/BLOCK. Intentionally aggressive — false
-  positives are acceptable, false negatives are not.
+- `app/guards.py` — PR governance system (evidence-producing, not
+  evidence-consuming). The core principle: a boolean should represent the
+  RESULT of a verification process, not REPLACE it. An agent can always
+  claim `--has-tests=True`; it cannot fake a captured command execution
+  tied to a commit, timestamp, and exit code.
+  - **Legacy guards** (still present, for text scanning only):
+    `VibeLanguageGuard`, `PrPreflightGuard`, `LessonComplianceGuard`,
+    `SubagentProofGuard`. Each returns PASS/WARN/BLOCK. Use `guards scan`
+    for vibe detection on arbitrary text. Do NOT use `guards check --pr`
+    for PR readiness — it accepts self-attested booleans.
+  - **Evidence-producing modules** (the real PR governance system):
+    - `app/guards_evidence.py` — `CommandEvidence` captures exit code,
+      stdout, stderr, duration, timestamp, working dir, git commit, dirty
+      flag. `ManualVerificationEvidence` captures before/after states.
+      `ReviewEvidence` captures human review decisions.
+    - `app/guards_diff.py` — inspects `git diff` for: secrets/credentials
+      (BLOCK), debug statements (WARN), MCP tool/schema changes
+      (REQUIRE_REVIEW), security-sensitive paths (REQUIRE_REVIEW),
+      dependency changes (WARN), binary files (WARN), scope violations
+      (WARN), large diffs (WARN).
+    - `app/guards_readiness.py` — PR readiness state machine:
+      DRAFT → UNDERSTOOD → VERIFIED → PR_READY. Requires evidence objects,
+      structured PR description, and diff inspection. If state is not
+      PR_READY, do NOT open the PR.
+  - **CLI**: `guards verify`, `guards diff`, `guards readiness` are the
+    evidence-producing commands. `guards scan` and `guards check` are
+    legacy text-scanning only.
+  - Full architecture: `docs/pr-governance.md`.
 - `app/diagnostics.py` — Self-diagnostic for all MAOS MCP tools. Actually
   calls each read-only tool and verifies it returns valid JSON. Side-effect
   tools (email, task creation) are checked for handler existence but not

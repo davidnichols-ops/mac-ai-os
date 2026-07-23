@@ -445,6 +445,127 @@ READ_FILE_TOOL = MCPToolSpec(
     },
 )
 
+VERIFY_COMMAND_TOOL = MCPToolSpec(
+    name="maos_verify_command",
+    description=(
+        "Execute a verification command and capture evidence (exit code, "
+        "stdout, stderr, git commit, timestamp). Evidence-PRODUCING "
+        "verification — the system runs the command, not the agent. The "
+        "agent cannot fake the exit code, stdout, or commit hash. Use this "
+        "instead of self-attested booleans like has_test_output=True. "
+        "SECURITY: Only verification commands are allowed (test runners, "
+        "linters, type checkers, build commands). Allowed prefixes: uv run "
+        "pytest, uv run ruff, uv run mypy, pytest, ruff, mypy, npm test, "
+        "npm run lint, cargo test, cargo clippy, go test, make test, git "
+        "status. Capture test evidence with command='uv run pytest', lint "
+        "evidence with command='uv run ruff check app tests'. Pass the "
+        "returned JSON to maos_pr_readiness."
+    ),
+    parameters={
+        "command": {
+            "type": "string",
+            "description": "The verification command to execute (must be in the allowlist).",
+        },
+        "cwd": {
+            "type": "string",
+            "description": "Working directory (defaults to current directory).",
+            "default": "",
+        },
+        "timeout": {
+            "type": "integer",
+            "description": "Maximum execution time in seconds.",
+            "default": 300,
+        },
+    },
+)
+
+INSPECT_DIFF_TOOL = MCPToolSpec(
+    name="maos_inspect_diff",
+    description=(
+        "Inspect the git diff for risk patterns. BLOCK for secrets/credentials. "
+        "WARN for debug statements, dependency changes, binary files, scope "
+        "violations, large diffs. REQUIRES_REVIEW for MCP tool/schema changes "
+        "and security-sensitive paths. Run this before opening a PR."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (defaults to cwd).",
+            "default": "",
+        },
+        "base": {
+            "type": "string",
+            "description": "Base ref to diff against.",
+            "default": "HEAD",
+        },
+        "stated_scope": {
+            "type": "string",
+            "description": "The stated scope of the PR (for unrelated-file detection).",
+            "default": "",
+        },
+    },
+)
+
+PR_READINESS_TOOL = MCPToolSpec(
+    name="maos_pr_readiness",
+    description=(
+        "Assess PR readiness via state machine: DRAFT -> UNDERSTOOD -> "
+        "VERIFIED -> PR_READY. The comprehensive readiness check. Requires "
+        "evidence objects (from maos_verify_command), a structured PR "
+        "description, and inspects the diff. If state is NOT PR_READY, do "
+        "NOT open the PR. PR description must have: Summary, Why, What "
+        "Changed, Scope. Bug fixes also need: Root Cause, Regression Test, "
+        "Before, After."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (defaults to cwd).",
+            "default": "",
+        },
+        "pr_description": {
+            "type": "string",
+            "description": "The PR description text (markdown with required sections).",
+            "default": "",
+        },
+        "is_bug_fix": {
+            "type": "boolean",
+            "description": "Whether this is a bug fix (requires manual verification).",
+            "default": False,
+        },
+        "test_evidence_json": {
+            "type": "string",
+            "description": "JSON evidence from maos_verify_command (tests).",
+            "default": "",
+        },
+        "lint_evidence_json": {
+            "type": "string",
+            "description": "JSON evidence from maos_verify_command (lint).",
+            "default": "",
+        },
+        "build_evidence_json": {
+            "type": "string",
+            "description": "JSON evidence from maos_verify_command (build).",
+            "default": "",
+        },
+        "manual_evidence_json": {
+            "type": "string",
+            "description": "JSON manual verification evidence.",
+            "default": "",
+        },
+        "diff_base": {
+            "type": "string",
+            "description": "Base ref for diff inspection.",
+            "default": "HEAD",
+        },
+        "skip_diff": {
+            "type": "boolean",
+            "description": "Skip diff inspection.",
+            "default": False,
+        },
+    },
+)
+
 ALL_TOOLS: list[MCPToolSpec] = [
     GET_CONTEXT_TOOL,
     SEARCH_MEMORY_TOOL,
@@ -459,6 +580,9 @@ ALL_TOOLS: list[MCPToolSpec] = [
     ESCALATE_TOOL,
     SCAN_VIBES_TOOL,
     CHECK_GUARDS_TOOL,
+    VERIFY_COMMAND_TOOL,
+    INSPECT_DIFF_TOOL,
+    PR_READINESS_TOOL,
     DIAGNOSTICS_TOOL,
     TIME_TOOL,
     READ_FILE_TOOL,

@@ -191,7 +191,77 @@ CREATE TABLE IF NOT EXISTS workflow_runs (
     steps_done  INTEGER NOT NULL DEFAULT 0,
     result      TEXT,
     error       TEXT,
-    duration_ms INTEGER
+    duration_ms INTEGER,
+    workflow_id TEXT NOT NULL DEFAULT '',
+    version     INTEGER NOT NULL DEFAULT 1,
+    heartbeat_at TEXT,
+    parent_run_id INTEGER,
+    paused_at   TEXT,
+    cancelled_at TEXT,
+    finished_at TEXT
+);
+
+CREATE TABLE IF NOT EXISTS workflow_definitions (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    version     INTEGER NOT NULL DEFAULT 1,
+    definition  TEXT NOT NULL DEFAULT '{}',
+    created_at  TEXT NOT NULL,
+    UNIQUE (name, version)
+);
+
+CREATE TABLE IF NOT EXISTS workflow_step_runs (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id      INTEGER NOT NULL,
+    step_id     TEXT NOT NULL DEFAULT '',
+    step_name   TEXT NOT NULL,
+    step_index  INTEGER NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'pending',
+    attempt     INTEGER NOT NULL DEFAULT 1,
+    data        TEXT NOT NULL DEFAULT '{}',
+    verification TEXT,
+    error       TEXT NOT NULL DEFAULT '',
+    duration_ms INTEGER,
+    started_at  TEXT,
+    finished_at TEXT,
+    FOREIGN KEY (run_id) REFERENCES workflow_runs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS workflow_checkpoints (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id      INTEGER NOT NULL,
+    step_index  INTEGER NOT NULL,
+    context     TEXT NOT NULL DEFAULT '{}',
+    created_at  TEXT NOT NULL,
+    FOREIGN KEY (run_id) REFERENCES workflow_runs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS workflow_side_effects (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id      INTEGER NOT NULL,
+    step_id     TEXT NOT NULL DEFAULT '',
+    step_name   TEXT NOT NULL,
+    effect_type TEXT NOT NULL,
+    idempotency_key TEXT NOT NULL,
+    executed_at TEXT NOT NULL,
+    details     TEXT NOT NULL DEFAULT '{}',
+    FOREIGN KEY (run_id) REFERENCES workflow_runs(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS workflow_dead_letter_queue (
+    id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id                INTEGER NOT NULL,
+    workflow_name         TEXT NOT NULL,
+    failure_reason        TEXT NOT NULL DEFAULT '',
+    compensation_records  TEXT NOT NULL DEFAULT '[]',
+    context_snapshot      TEXT NOT NULL DEFAULT '{}',
+    enqueued_at           TEXT NOT NULL,
+    status                TEXT NOT NULL DEFAULT 'pending',
+    notes                 TEXT NOT NULL DEFAULT '',
+    inspected_at          TEXT,
+    new_run_id            INTEGER,
+    reprocessed_at        TEXT,
+    FOREIGN KEY (run_id) REFERENCES workflow_runs(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS workspace_snapshots (
@@ -242,6 +312,17 @@ CREATE INDEX IF NOT EXISTS idx_action_log_time ON action_log(timestamp);
 CREATE INDEX IF NOT EXISTS idx_approval_status ON approval_queue(status);
 CREATE INDEX IF NOT EXISTS idx_user_model_key ON user_model(key);
 CREATE INDEX IF NOT EXISTS idx_workflow_runs_time ON workflow_runs(timestamp);
+CREATE INDEX IF NOT EXISTS idx_workflow_runs_status ON workflow_runs(status);
+-- idx_workflow_runs_workflow_id is created in _run_migrations() after the
+-- workflow_id column is added to existing tables. Creating it here fails on
+-- databases with an older workflow_runs schema (no workflow_id column yet).
+CREATE INDEX IF NOT EXISTS idx_workflow_step_runs_run_id ON workflow_step_runs(run_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_step_runs_step_id ON workflow_step_runs(step_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_definitions_name ON workflow_definitions(name);
+CREATE INDEX IF NOT EXISTS idx_workflow_checkpoints_run_id ON workflow_checkpoints(run_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_side_effects_run_id ON workflow_side_effects(run_id);
+CREATE INDEX IF NOT EXISTS idx_workflow_side_effects_idem_key ON workflow_side_effects(idempotency_key);
+CREATE INDEX IF NOT EXISTS idx_workflow_dlq_status ON workflow_dead_letter_queue(status);
 
 CREATE TABLE IF NOT EXISTS mcp_requests (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -322,6 +403,25 @@ class Database:
             self.execute("ALTER TABLE workspaces ADD COLUMN project_status TEXT NOT NULL DEFAULT ''")
         if "profiled_at" not in ws_cols:
             self.execute("ALTER TABLE workspaces ADD COLUMN profiled_at TEXT")
+
+        # Phase 1 (workflow evolution): workflow_runs new columns.
+        wr_cols = {row["name"] for row in self.query("PRAGMA table_info(workflow_runs)")}
+        if "workflow_id" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN workflow_id TEXT NOT NULL DEFAULT ''")
+        if "version" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN version INTEGER NOT NULL DEFAULT 1")
+        if "heartbeat_at" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN heartbeat_at TEXT")
+        if "parent_run_id" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN parent_run_id INTEGER")
+        if "paused_at" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN paused_at TEXT")
+        if "cancelled_at" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN cancelled_at TEXT")
+        if "finished_at" not in wr_cols:
+            self.execute("ALTER TABLE workflow_runs ADD COLUMN finished_at TEXT")
+        self.execute("CREATE INDEX IF NOT EXISTS idx_workflow_runs_status ON workflow_runs(status)")
+        self.execute("CREATE INDEX IF NOT EXISTS idx_workflow_runs_workflow_id ON workflow_runs(workflow_id)")
 
     @property
     def conn(self) -> sqlite3.Connection:
@@ -957,30 +1057,228 @@ class Database:
 
     # --- workflow run helpers -------------------------------------------------
 
-    def start_workflow_run(self, workflow: str, steps_total: int) -> int:
+    def start_workflow_run(
+        self, workflow: str, steps_total: int,
+        *, workflow_id: str = "", version: int = 1, parent_run_id: int | None = None,
+    ) -> int:
         cur = self.execute(
-            """INSERT INTO workflow_runs (timestamp, workflow, status, steps_total, steps_done)
-               VALUES (?, ?, 'running', ?, 0)""",
-            (datetime.now(UTC).isoformat(), workflow, steps_total),
+            """INSERT INTO workflow_runs
+               (timestamp, workflow, status, steps_total, steps_done,
+                workflow_id, version, parent_run_id, heartbeat_at)
+               VALUES (?, ?, 'running', ?, 0, ?, ?, ?, ?)""",
+            (datetime.now(UTC).isoformat(), workflow, steps_total,
+             workflow_id, version, parent_run_id, datetime.now(UTC).isoformat()),
         )
         return cur.lastrowid
 
     def update_workflow_run(self, run_id: int, steps_done: int, status: str = "running") -> None:
         self.execute(
-            "UPDATE workflow_runs SET steps_done = ?, status = ? WHERE id = ?",
-            (steps_done, status, run_id),
+            "UPDATE workflow_runs SET steps_done = ?, status = ?, heartbeat_at = ? WHERE id = ?",
+            (steps_done, status, datetime.now(UTC).isoformat(), run_id),
+        )
+
+    def heartbeat_workflow_run(self, run_id: int) -> None:
+        """Update the heartbeat timestamp for a running workflow."""
+        self.execute(
+            "UPDATE workflow_runs SET heartbeat_at = ? WHERE id = ?",
+            (datetime.now(UTC).isoformat(), run_id),
+        )
+
+    def transition_workflow_run(self, run_id: int, status: str, **kwargs: Any) -> None:
+        """Transition a workflow run to a new status, recording timestamps.
+
+        kwargs can include: result, error, duration_ms, paused_at, cancelled_at
+        """
+        now = datetime.now(UTC).isoformat()
+        sets = ["status = ?"]
+        vals: list[Any] = [status]
+        if "result" in kwargs:
+            sets.append("result = ?")
+            vals.append(str(kwargs["result"])[:500])
+        if "error" in kwargs:
+            sets.append("error = ?")
+            vals.append(str(kwargs["error"])[:500])
+        if "duration_ms" in kwargs:
+            sets.append("duration_ms = ?")
+            vals.append(kwargs["duration_ms"])
+        if status in ("completed", "failed", "cancelled", "timed_out", "crashed", "compensated"):
+            sets.append("finished_at = ?")
+            vals.append(now)
+        if status == "paused":
+            sets.append("paused_at = ?")
+            vals.append(now)
+        if status == "cancelled":
+            sets.append("cancelled_at = ?")
+            vals.append(now)
+        vals.append(run_id)
+        self.execute(
+            f"UPDATE workflow_runs SET {', '.join(sets)} WHERE id = ?",
+            vals,
         )
 
     def finish_workflow_run(
         self, run_id: int, status: str, result: str = "", error: str = "", duration_ms: int = 0,
     ) -> None:
-        self.execute(
-            "UPDATE workflow_runs SET status = ?, result = ?, error = ?, duration_ms = ? WHERE id = ?",
-            (status, result[:500], error[:500], duration_ms, run_id),
+        self.transition_workflow_run(
+            run_id, status, result=result, error=error, duration_ms=duration_ms,
         )
+
+    def get_workflow_run(self, run_id: int) -> sqlite3.Row | None:
+        return self.query_one("SELECT * FROM workflow_runs WHERE id = ?", (run_id,))
 
     def recent_workflow_runs(self, limit: int = 10) -> list[sqlite3.Row]:
         return self.query("SELECT * FROM workflow_runs ORDER BY timestamp DESC LIMIT ?", (limit,))
+
+    def workflow_runs_by_status(self, status: str) -> list[sqlite3.Row]:
+        return self.query("SELECT * FROM workflow_runs WHERE status = ? ORDER BY timestamp", (status,))
+
+    def stale_workflow_runs(self, max_heartbeat_age_seconds: float = 300) -> list[sqlite3.Row]:
+        """Find runs with status='running' whose heartbeat is older than the threshold."""
+        cutoff = (datetime.now(UTC).timestamp()) - max_heartbeat_age_seconds
+        rows = self.workflow_runs_by_status("running")
+        stale = []
+        for row in rows:
+            hb = row["heartbeat_at"]
+            if not hb:
+                # No heartbeat at all — definitely stale.
+                stale.append(row)
+                continue
+            try:
+                hb_dt = datetime.fromisoformat(hb.replace("Z", "+00:00"))
+                if hb_dt.timestamp() < cutoff:
+                    stale.append(row)
+            except (ValueError, TypeError):
+                stale.append(row)
+        return stale
+
+    def mark_stale_runs_as_crashed(self, max_heartbeat_age_seconds: float = 300) -> list[int]:
+        """Detect and mark stale 'running' workflows as 'crashed'. Returns run IDs."""
+        stale = self.stale_workflow_runs(max_heartbeat_age_seconds)
+        run_ids = []
+        for row in stale:
+            self.transition_workflow_run(row["id"], "crashed", error="heartbeat timeout — process likely crashed")
+            run_ids.append(row["id"])
+        return run_ids
+
+    # --- workflow definition helpers ------------------------------------------
+
+    def save_workflow_definition(
+        self, workflow_id: str, name: str, version: int, definition: str,
+    ) -> None:
+        self.execute(
+            """INSERT OR REPLACE INTO workflow_definitions
+               (id, name, version, definition, created_at)
+               VALUES (?, ?, ?, ?, ?)""",
+            (workflow_id, name, version, definition, datetime.now(UTC).isoformat()),
+        )
+
+    def get_workflow_definition(self, name: str, version: int | None = None) -> sqlite3.Row | None:
+        if version is not None:
+            return self.query_one(
+                "SELECT * FROM workflow_definitions WHERE name = ? AND version = ?",
+                (name, version),
+            )
+        return self.query_one(
+            "SELECT * FROM workflow_definitions WHERE name = ? ORDER BY version DESC LIMIT 1",
+            (name,),
+        )
+
+    def list_workflow_definitions(self) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM workflow_definitions ORDER BY name, version",
+        )
+
+    # --- workflow step run helpers --------------------------------------------
+
+    def start_workflow_step_run(
+        self, run_id: int, step_id: str, step_name: str, step_index: int, attempt: int = 1,
+    ) -> int:
+        cur = self.execute(
+            """INSERT INTO workflow_step_runs
+               (run_id, step_id, step_name, step_index, status, attempt, started_at)
+               VALUES (?, ?, ?, ?, 'running', ?, ?)""",
+            (run_id, step_id, step_name, step_index, attempt, datetime.now(UTC).isoformat()),
+        )
+        return cur.lastrowid
+
+    def finish_workflow_step_run(
+        self, step_run_id: int, status: str, data: str = "", verification: str = "",
+        error: str = "", duration_ms: int = 0,
+    ) -> None:
+        self.execute(
+            """UPDATE workflow_step_runs
+               SET status = ?, data = ?, verification = ?, error = ?, duration_ms = ?, finished_at = ?
+               WHERE id = ?""",
+            (status, data[:2000], verification, error[:500], duration_ms,
+             datetime.now(UTC).isoformat(), step_run_id),
+        )
+
+    def step_runs_for_workflow(self, run_id: int) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM workflow_step_runs WHERE run_id = ? ORDER BY step_index",
+            (run_id,),
+        )
+
+    def completed_step_runs_for_workflow(self, run_id: int) -> list[sqlite3.Row]:
+        """Get only successfully completed step runs (for resume)."""
+        return self.query(
+            "SELECT * FROM workflow_step_runs WHERE run_id = ? AND status = 'completed' ORDER BY step_index",
+            (run_id,),
+        )
+
+    # --- workflow checkpoint helpers -------------------------------------------
+
+    def save_checkpoint(self, run_id: int, step_index: int, context: str) -> int:
+        """Save a workflow context checkpoint after completing a step."""
+        cur = self.execute(
+            """INSERT INTO workflow_checkpoints (run_id, step_index, context, created_at)
+               VALUES (?, ?, ?, ?)""",
+            (run_id, step_index, context, datetime.now(UTC).isoformat()),
+        )
+        return cur.lastrowid
+
+    def latest_checkpoint(self, run_id: int) -> sqlite3.Row | None:
+        """Get the most recent checkpoint for a workflow run."""
+        return self.query_one(
+            "SELECT * FROM workflow_checkpoints WHERE run_id = ? ORDER BY step_index DESC LIMIT 1",
+            (run_id,),
+        )
+
+    def checkpoints_for_workflow(self, run_id: int) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM workflow_checkpoints WHERE run_id = ? ORDER BY step_index",
+            (run_id,),
+        )
+
+    # --- workflow side effect helpers ------------------------------------------
+
+    def record_side_effect(
+        self, run_id: int, step_id: str, step_name: str,
+        effect_type: str, idempotency_key: str, details: str = "{}",
+    ) -> int:
+        """Record that a side effect was executed during a workflow run."""
+        cur = self.execute(
+            """INSERT INTO workflow_side_effects
+               (run_id, step_id, step_name, effect_type, idempotency_key, executed_at, details)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (run_id, step_id, step_name, effect_type, idempotency_key,
+             datetime.now(UTC).isoformat(), details),
+        )
+        return cur.lastrowid
+
+    def side_effects_for_workflow(self, run_id: int) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM workflow_side_effects WHERE run_id = ? ORDER BY id",
+            (run_id,),
+        )
+
+    def side_effect_exists(self, idempotency_key: str) -> bool:
+        """Check if a side effect with this idempotency key has already been executed."""
+        row = self.query_one(
+            "SELECT COUNT(*) as cnt FROM workflow_side_effects WHERE idempotency_key = ?",
+            (idempotency_key,),
+        )
+        return row is not None and row["cnt"] > 0
 
     # --- MCP request helpers --------------------------------------------------
 

@@ -15,6 +15,7 @@ from app.agents.session import SessionAgent
 from app.agents.system import SystemAgent
 from app.db import Database
 from app.models.base import Model
+from app.perception import Perception
 from app.retrieval.base import Retriever
 from app.tools.registry import ToolRouter
 
@@ -26,11 +27,12 @@ def default_agents(
     retriever: Retriever | None = None,
     tools: ToolRouter | None = None,
     db: Database | None = None,
+    perception: Perception | None = None,
 ) -> dict[str, Agent]:
     return {
         RepositoryAgent.name: RepositoryAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         FilesystemAgent.name: FilesystemAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
-        ResearchAgent.name: ResearchAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
+        ResearchAgent.name: ResearchAgent(planner=planner, utility=utility, retriever=retriever, tools=tools, perception=perception),
         SystemAgent.name: SystemAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         GitAgent.name: GitAgent(planner=planner, db=db, retriever=retriever),
         SessionAgent.name: SessionAgent(planner=planner, db=db, retriever=retriever),

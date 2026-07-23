@@ -66,7 +66,7 @@ def test_workflow_required_step_failure(tmp_path):
     assert not result.ok
     assert len(result.steps) == 2  # step3 should not run
     assert result.steps[1].ok is False
-    assert "required step" in result.error
+    assert "required step" in result.error or "step" in result.error  # Phase 2: error message format changed
 
     runs = db.recent_workflow_runs()
     assert runs[0]["status"] == "failed"

@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import structlog
+
 from app.actions import (
     ActionExecutor,
     ActionRegistry,
@@ -28,12 +30,15 @@ from app.models.base import EmbeddingModel, Model
 from app.models.manager import ModelManager
 from app.models.registry import build_embedding_model, build_model
 from app.orchestrator import AgentOrchestrator
+from app.perception import Perception
 from app.retrieval.base import Retriever
 from app.retrieval.registry import build_retriever
 from app.router import IntentRouter
 from app.tools.builtin import builtin_tools
 from app.tools.registry import ToolRouter
 from app.workflows.engine import WorkflowEngine
+
+log = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -57,6 +62,7 @@ class Runtime:
     blackboard: Blackboard
     attention: AttentionDaemon
     learner: Learner
+    perception: Perception
 
 
 def build_runtime(
@@ -87,8 +93,13 @@ def build_runtime(
     tools = ToolRouter(builtin_tools(), granted_permissions={
         "shell.exec", "file.read", "file.write", "git.exec",
     })
+
+    # Perception — web search, browse, PDF, OCR via AAFP CLI.
+    perception = Perception()
+
     agents = default_agents(
-        planner=planner, utility=utility, retriever=retriever, tools=tools, db=db
+        planner=planner, utility=utility, retriever=retriever, tools=tools, db=db,
+        perception=perception,
     )
     orchestrator = AgentOrchestrator(planner=planner, agents=agents, tools=tools)
 
@@ -114,8 +125,11 @@ def build_runtime(
     model_manager.register("planner", planner, estimated_memory_gb=9.0)
     model_manager.register("utility", utility, estimated_memory_gb=2.0)
 
-    # Workflow engine.
+    # Workflow engine — with crash recovery on startup.
     workflow_engine = WorkflowEngine(db, bus=bus)
+    crashed = workflow_engine.recover_crashed_runs()
+    if crashed:
+        log.warning("runtime.workflow.crash_recovery", crashed_runs=crashed)
 
     # Blackboard — shared working memory.
     blackboard = Blackboard()
@@ -147,4 +161,5 @@ def build_runtime(
         blackboard=blackboard,
         attention=attention,
         learner=learner,
+        perception=perception,
     )

@@ -482,6 +482,197 @@ def maos_check_guards(
     }, indent=2)
 
 
+def maos_verify_command(
+    runtime: Runtime,
+    command: str,
+    cwd: str = "",
+    timeout: int = 300,
+) -> str:
+    """Execute a verification command and capture evidence.
+
+    This is the evidence-PRODUCING verification tool. The system runs the
+    command, not the agent. The agent cannot fake the exit code, stdout, or
+    the commit hash at execution time. Use this instead of self-attested
+    booleans like `has_test_output=True`.
+
+    SECURITY: Only verification commands are allowed (test runners, linters,
+    type checkers, build commands). The command must start with one of the
+    allowed prefixes. Arbitrary shell commands are rejected.
+
+    Allowed command prefixes:
+        uv run pytest, uv run ruff, uv run mypy, uv run pyright,
+        uv run pytest--, pytest, ruff, mypy, pyright,
+        npm test, npm run lint, npm run typecheck, npm run build,
+        cargo test, cargo clippy, cargo build, cargo check,
+        go test, go vet, go build,
+        make test, make lint, make check, make build,
+        git status, git diff --stat
+
+    Args:
+        command: The verification command to execute (must be in the allowlist).
+        cwd: Working directory (defaults to current directory).
+        timeout: Maximum execution time in seconds.
+    """
+    from app.guards_evidence import capture_command, evidence_to_json
+    if not command:
+        return json.dumps({"error": "command is required"})
+
+    # Security: restrict to verification commands only.
+    # This prevents the tool from being abused to run arbitrary shell commands
+    # (rm -rf, curl exfiltration, etc.) while still allowing the core use case
+    # of capturing test/lint/build evidence.
+    ALLOWED_PREFIXES = (
+        "uv run pytest",
+        "uv run ruff",
+        "uv run mypy",
+        "uv run pyright",
+        "uv run pytest--",  # pytest with flags
+        "pytest",
+        "ruff",
+        "mypy",
+        "pyright",
+        "npm test",
+        "npm run lint",
+        "npm run typecheck",
+        "npm run build",
+        "npm run check",
+        "cargo test",
+        "cargo clippy",
+        "cargo build",
+        "cargo check",
+        "go test",
+        "go vet",
+        "go build",
+        "make test",
+        "make lint",
+        "make check",
+        "make build",
+        "git status",
+        "git diff --stat",
+    )
+    normalized = command.strip()
+    if not any(normalized.startswith(p) for p in ALLOWED_PREFIXES):
+        return json.dumps({
+            "error": "command not in verification allowlist",
+            "command": command,
+            "hint": "Only test/lint/typecheck/build commands are allowed. "
+                    "Use the CLI (guards verify) for unrestricted command execution.",
+            "allowed_prefixes": list(ALLOWED_PREFIXES),
+        }, indent=2)
+
+    evidence = capture_command(command, cwd=cwd or None, timeout=timeout)
+    return evidence_to_json(evidence)
+
+
+def maos_inspect_diff(
+    runtime: Runtime,
+    repo_dir: str = "",
+    base: str = "HEAD",
+    stated_scope: str = "",
+) -> str:
+    """Inspect the git diff for risk patterns (secrets, debug, MCP changes, etc.).
+
+    BLOCK for secrets/credentials. WARN for debug statements, dependency
+    changes, binary files, scope violations, large diffs. REQUIRES_REVIEW
+    for MCP tool/schema changes and security-sensitive paths.
+
+    Args:
+        repo_dir: Path to the git repository (defaults to cwd).
+        base: Base ref to diff against (default "HEAD").
+        stated_scope: The stated scope of the PR (for unrelated-file detection).
+    """
+    import os
+
+    from app.guards_diff import inspect_diff
+    repo = repo_dir or os.getcwd()
+    result = inspect_diff(repo, base, stated_scope=stated_scope)
+    return json.dumps(result.to_dict(), indent=2)
+
+
+def maos_pr_readiness(
+    runtime: Runtime,
+    repo_dir: str = "",
+    pr_description: str = "",
+    is_bug_fix: bool = False,
+    test_evidence_json: str = "",
+    lint_evidence_json: str = "",
+    build_evidence_json: str = "",
+    manual_evidence_json: str = "",
+    diff_base: str = "HEAD",
+    skip_diff: bool = False,
+) -> str:
+    """Assess PR readiness via the state machine: DRAFT -> UNDERSTOOD -> VERIFIED -> PR_READY.
+
+    This is the comprehensive readiness check. It requires evidence objects
+    (produced by maos_verify_command), a structured PR description, and
+    inspects the diff. If the state is not PR_READY, do NOT open the PR.
+
+    The PR description must contain sections: Summary, Why, What Changed,
+    Scope. For bug fixes also: Root Cause, Regression Test, Before, After.
+
+    Args:
+        repo_dir: Path to the git repository (defaults to cwd).
+        pr_description: The PR description text (markdown with required sections).
+        is_bug_fix: Whether this is a bug fix (requires manual verification).
+        test_evidence_json: JSON evidence from maos_verify_command (tests).
+        lint_evidence_json: JSON evidence from maos_verify_command (lint).
+        build_evidence_json: JSON evidence from maos_verify_command (build).
+        manual_evidence_json: JSON manual verification evidence.
+        diff_base: Base ref for diff inspection.
+        skip_diff: Skip diff inspection.
+    """
+    import os
+
+    from app.guards_evidence import (
+        CommandEvidence,
+        ManualVerificationEvidence,
+        load_evidence,
+    )
+    from app.guards_readiness import PRContent, assess_readiness
+
+    repo = repo_dir or os.getcwd()
+
+    # Load evidence objects from JSON
+    test_ev = None
+    lint_ev = None
+    build_ev = None
+    manual_ev = None
+    if test_evidence_json:
+        ev = load_evidence(test_evidence_json)
+        if isinstance(ev, CommandEvidence):
+            test_ev = ev
+    if lint_evidence_json:
+        ev = load_evidence(lint_evidence_json)
+        if isinstance(ev, CommandEvidence):
+            lint_ev = ev
+    if build_evidence_json:
+        ev = load_evidence(build_evidence_json)
+        if isinstance(ev, CommandEvidence):
+            build_ev = ev
+    if manual_evidence_json:
+        ev = load_evidence(manual_evidence_json)
+        if isinstance(ev, ManualVerificationEvidence):
+            manual_ev = ev
+
+    # Parse PR content
+    content = None
+    if pr_description:
+        content = PRContent.from_markdown(pr_description)
+
+    report = assess_readiness(
+        repo_dir=repo,
+        content=content,
+        is_bug_fix=is_bug_fix,
+        test_evidence=test_ev,
+        build_evidence=build_ev,
+        lint_evidence=lint_ev,
+        manual_evidence=manual_ev,
+        diff_base=diff_base,
+        skip_diff=skip_diff,
+    )
+    return json.dumps(report.to_dict(), default=str, indent=2)
+
+
 # --- Diagnostic tools -------------------------------------------------------
 
 

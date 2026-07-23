@@ -27,13 +27,16 @@ from app.models.types import Message
 
 log = get_logger(__name__)
 
-_EXTRACT_SYSTEM = """You are a knowledge graph extractor. Given a text passage, extract entities and relationships as JSON.
+_EXTRACT_SYSTEM = """/no_think
+You are a knowledge graph extractor. Given a text passage, extract entities and relationships as JSON.
+
+Do NOT generate any reasoning, thinking, or explanation. Output the JSON object immediately.
 
 Entity types: concept, technology, person, project, framework, paper, tool, language, organization, file, function.
 
 Relationship examples: uses, implements, depends_on, relates_to, authored_by, part_of, affects, alternative_to, extends.
 
-Return ONLY valid JSON, no prose:
+Return ONLY valid JSON, no prose, no thinking:
 {
   "entities": [{"name": "EntityName", "type": "concept", "description": "one line"}],
   "relationships": [{"source": "EntityName", "relation": "uses", "target": "OtherEntity"}]
@@ -88,11 +91,11 @@ class KnowledgeGraph:
         return total
 
     def _parse_json_response(self, text: str) -> dict[str, Any] | None:
-        """Extract JSON from an LLM response that may have surrounding text or code blocks."""
+        """Extract JSON from an LLM response that may have surrounding text, code blocks, or reasoning traces."""
+        # Strip reasoning traces from models like Nemotron that emit <think>...</think>.
+        cleaned = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL).strip()
         # Strip markdown code fences if present.
-        cleaned = text.strip()
         if cleaned.startswith("```"):
-            # Remove the opening fence (```json or ```).
             cleaned = re.sub(r'^```(?:json)?\s*\n?', '', cleaned)
             cleaned = re.sub(r'\s*```\s*$', '', cleaned)
         # Try parsing the whole thing first (most reliable if the model cooperates).
@@ -108,6 +111,20 @@ class KnowledgeGraph:
                 return json.loads(cleaned[start : end + 1])
             except json.JSONDecodeError:
                 pass
+        # Reasoning models (e.g. Nemotron) may emit prose before the JSON.
+        # Try each "{" as a potential start, looking for valid JSON with our keys.
+        for i, ch in enumerate(cleaned):
+            if ch != "{":
+                continue
+            for j in range(len(cleaned), i, -1):
+                if cleaned[j - 1] != "}":
+                    continue
+                try:
+                    candidate = json.loads(cleaned[i:j])
+                    if isinstance(candidate, dict) and ("entities" in candidate or "relationships" in candidate):
+                        return candidate
+                except json.JSONDecodeError:
+                    continue
         log.warning("graph.parse_failed", text_preview=text[:200])
         return None
 

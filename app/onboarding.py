@@ -150,6 +150,25 @@ def format_onboarding_briefing(packet: dict[str, Any]) -> str:
     else:
         lines.append("  (none recorded)")
 
+    # --- PR governance (unavoidable rules) ---
+    lines.append("")
+    lines.append("=== PR GOVERNANCE — UNAVOIDABLE ===")
+    lines.append("  Before opening a PR or declaring a fix done, you MUST run the")
+    lines.append("  evidence-producing guards. Self-attested booleans are NOT accepted.")
+    lines.append("")
+    lines.append("  1. Produce evidence (system runs commands, captures output):")
+    lines.append('       uv run app guards verify "uv run pytest" --save test.json')
+    lines.append('       uv run app guards verify "uv run ruff check app tests" --save lint.json')
+    lines.append("  2. Write a structured PR description (Summary/Why/What Changed/Scope;")
+    lines.append("     bug fixes also need Root Cause/Regression Test/Before/After).")
+    lines.append("  3. Assess readiness (state machine: DRAFT -> UNDERSTOOD -> VERIFIED -> PR_READY):")
+    lines.append("       uv run app guards readiness --test-evidence test.json \\")
+    lines.append("         --lint-evidence lint.json --pr-description pr.md [--bug-fix]")
+    lines.append("  4. If state is NOT PR_READY, do NOT open the PR. Fix blockers, re-run.")
+    lines.append("")
+    lines.append("  DO NOT use: `guards check --pr --has-tests` (self-attested, fakeable).")
+    lines.append("  Full architecture: ~/mac-ai-os/docs/pr-governance.md")
+
     # --- Time awareness ---
     time_info = packet.get("time_awareness", {})
     lines.append("")

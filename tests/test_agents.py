@@ -28,7 +28,7 @@ def test_research_agent_cites_sources(fake_retriever):
     agent = ResearchAgent(planner=FakeModel(), retriever=fake_retriever)
     result = agent.execute("what is Metal?")
     assert result.ok
-    assert "metal.md" in result.data["sources"]
+    assert "metal.md" in result.data["local_sources"]
 
 
 def test_system_agent_snapshot():
