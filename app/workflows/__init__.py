@@ -1,13 +1,55 @@
 """Workflows package — autonomous multi-step workflows."""
 
+from app.workflows.adapters import (
+    FrameworkEvaluation,
+    LangGraphAdapter,
+    PydanticAIAdapter,
+    TemporalAdapter,
+    WorkflowAdapter,
+    format_evaluation_report,
+    get_framework_evaluations,
+    get_recommended_framework,
+)
+from app.workflows.api import (
+    maos_workflow_cancel,
+    maos_workflow_dlq_inspect,
+    maos_workflow_dlq_list,
+    maos_workflow_dlq_mark_inspected,
+    maos_workflow_inspect,
+    maos_workflow_list_definitions,
+    maos_workflow_list_runs,
+    maos_workflow_recover_crashed,
+    maos_workflow_resume,
+    maos_workflow_show,
+    maos_workflow_status,
+)
+from app.workflows.cognitive import (
+    CognitiveLoop,
+    CognitiveResult,
+    CognitiveState,
+    Observation,
+    create_cognitive_workflow,
+)
 from app.workflows.engine import (
+    WORKFLOW_CANCELLED,
     WORKFLOW_COMPLETED,
+    WORKFLOW_CRASHED,
+    WORKFLOW_PAUSED,
+    WORKFLOW_RESUMED,
     WORKFLOW_STARTED,
     WORKFLOW_STEP_COMPLETED,
     WORKFLOW_STEP_FAILED,
     WorkflowEngine,
 )
+from app.workflows.failure import (
+    CompensationRecord,
+    CompensationStrategy,
+    DeadLetterQueue,
+    FailurePolicy,
+    SagaCoordinator,
+)
 from app.workflows.models import (
+    FailureBehavior,
     StepResult,
     VerificationResult,
     Workflow,
@@ -15,6 +57,31 @@ from app.workflows.models import (
     WorkflowStep,
 )
 from app.workflows.morning import format_morning_report, morning_workflow
+from app.workflows.proposals import (
+    ActionProposal,
+    AuthorizationPipeline,
+    AuthorizationResult,
+    TrustcardIntegrationPoint,
+)
+from app.workflows.review import (
+    KnownLimitation,
+    format_review_report,
+    get_known_limitations,
+    get_limitations_by_severity,
+    get_trust_boundary_analysis,
+)
+from app.workflows.runtime import (
+    WorkflowRegistry,
+    WorkflowRuntime,
+)
+from app.workflows.states import (
+    InvalidTransitionError,
+    WorkflowStatus,
+    can_transition,
+    is_active,
+    is_terminal,
+    validate_transition,
+)
 
 __all__ = [
     "Workflow",
@@ -22,11 +89,64 @@ __all__ = [
     "WorkflowResult",
     "StepResult",
     "VerificationResult",
+    "FailureBehavior",
+    "ActionProposal",
+    "AuthorizationPipeline",
+    "AuthorizationResult",
+    "TrustcardIntegrationPoint",
+    "CognitiveLoop",
+    "CognitiveState",
+    "CognitiveResult",
+    "Observation",
+    "create_cognitive_workflow",
+    "CompensationStrategy",
+    "FailurePolicy",
+    "CompensationRecord",
+    "SagaCoordinator",
+    "DeadLetterQueue",
+    "WorkflowRegistry",
+    "WorkflowRuntime",
+    "WorkflowAdapter",
+    "FrameworkEvaluation",
+    "LangGraphAdapter",
+    "PydanticAIAdapter",
+    "TemporalAdapter",
+    "get_framework_evaluations",
+    "get_recommended_framework",
+    "format_evaluation_report",
     "WorkflowEngine",
+    "WorkflowStatus",
+    "InvalidTransitionError",
+    "validate_transition",
+    "can_transition",
+    "is_terminal",
+    "is_active",
     "morning_workflow",
     "format_morning_report",
     "WORKFLOW_STARTED",
     "WORKFLOW_STEP_COMPLETED",
     "WORKFLOW_STEP_FAILED",
     "WORKFLOW_COMPLETED",
+    "WORKFLOW_CANCELLED",
+    "WORKFLOW_CRASHED",
+    "WORKFLOW_PAUSED",
+    "WORKFLOW_RESUMED",
+    # Workflow API
+    "maos_workflow_cancel",
+    "maos_workflow_dlq_inspect",
+    "maos_workflow_dlq_list",
+    "maos_workflow_dlq_mark_inspected",
+    "maos_workflow_inspect",
+    "maos_workflow_list_definitions",
+    "maos_workflow_list_runs",
+    "maos_workflow_recover_crashed",
+    "maos_workflow_resume",
+    "maos_workflow_show",
+    "maos_workflow_status",
+    # Review
+    "KnownLimitation",
+    "format_review_report",
+    "get_known_limitations",
+    "get_limitations_by_severity",
+    "get_trust_boundary_analysis",
 ]
