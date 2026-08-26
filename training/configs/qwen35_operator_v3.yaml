@@ -1,0 +1,113 @@
+# Qwen3.5-9B Operator v3 — Detailed Training Config
+# Used by the Together AI fine-tuning API or local training scripts.
+
+# Model
+model:
+  base: "Qwen/Qwen3.5-9B"
+  family: "qwen3.5"
+  size_b: 9
+  architecture: "decoder_only"
+  vocab_size: 151936
+  hidden_size: 3584
+  num_layers: 36
+  num_attention_heads: 28
+  num_kv_heads: 4
+  max_position_embeddings: 32768
+
+# LoRA configuration
+lora:
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+# Training arguments
+training_args:
+  output_dir: "./output"
+  num_train_epochs: 3
+  per_device_train_batch_size: 4
+  per_device_eval_batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 0.0002
+  warmup_ratio: 0.03
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  lr_scheduler_type: "cosine"
+  logging_steps: 10
+  save_steps: 100
+  eval_steps: 50
+  save_total_limit: 3
+  bf16: true
+  report_to: "none"
+  max_seq_length: 4096
+
+# Data configuration
+data:
+  train_file: "training/output/sft.jsonl"
+  eval_file: "training/output/sft_eval.jsonl"
+  preference_file: "training/output/preference.jsonl"
+  policy_file: "training/output/compute_policy.jsonl"
+
+  # Data mixing ratios (must sum to 1.0)
+  mixing:
+    sft_general: 0.40
+    sft_recovery: 0.20
+    sft_tools: 0.20
+    sft_planning: 0.10
+    compute_policy: 0.10
+
+  # Filtering
+  min_quality_score: 0.5
+  winners_only: true
+  include_thinking: false
+  max_tokens_per_sample: 4096
+
+# Together AI specific
+together_ai:
+  model_name: "qwen3.5-9b-adaptive-operator-v3"
+  backend: "together"
+  compute: "h100"
+  # Cost: ~$0.48/M tokens, $4 minimum per job
+  # Estimated cost for 30K samples @ 2K tokens: ~$29
+  estimated_cost_usd: 29
+  estimated_time_hours: 2
+
+# MLX conversion (post-training)
+mlx_conversion:
+  quantization: "4bit"
+  output_dir: "models/adaptive-operator-v3/mlx/"
+  final_name: "Qwen3.5-9B-Adaptive-Operator-v3-MLX-4bit"
+  # Use mlx_lm.convert or mlx_vlm.convert depending on architecture
+  converter: "mlx_vlm"  # v2 uses VLM architecture
+
+# Evaluation
+evaluation:
+  harness_dir: "eval/operator_v3/"
+  categories:
+    - tool_competence
+    - recovery
+    - planning
+    - compute_allocation
+  min_pass_rate:
+    tool_competence: 0.80
+    recovery: 0.60
+    planning: 0.70
+    compute_allocation: 0.75
+
+# Safety
+safety:
+  # Do not train on unsafe trajectories
+  exclude_unsafe: true
+  # Do not train on trajectories with safety violations
+  exclude_safety_violations: true
+  # Max risk level allowed in training data
+  max_risk_level: "MEDIUM"

@@ -56,3 +56,60 @@ def record_action(
     if stats:
         typer.echo(f"Recorded: {action} success={success}")
         typer.echo(f"  Rate: {stats['successes']}/{stats['total']} ({stats['rate']:.0%})")
+
+
+@learn_app.command("candidate")
+def candidate(
+    name: str = typer.Argument(..., help="Lesson name (lowercase-hyphenated)"),
+    description: str = typer.Argument(..., help="One-sentence description (<=60 chars)"),
+    body: str = typer.Argument(..., help="Lesson body (markdown)"),
+    category: str = typer.Option("workflow", "--category", "-c",
+        help="tooling | workflow | environment | api | architecture"),
+    tags: str = typer.Option("", "--tags", "-t", help="Comma-separated tags"),
+    confidence: float = typer.Option(0.5, "--confidence", help="Confidence 0-1"),
+    source: str = typer.Option("observed", "--source", help="observed | incident | manual"),
+    reminder: str = typer.Option("", "--reminder", help="One-line reminder"),
+    record: bool = typer.Option(False, "--record", help="Record directly to user_model"),
+) -> None:
+    """Build and validate a structured lesson candidate.
+
+    Applies the Hermes-derived authoring standards (description <=60 chars,
+    frontmatter, source hygiene). By default this only validates and prints
+    the candidate; pass --record to write it through the approved
+    record_lesson pathway.
+    """
+    from app.learn import LessonCandidate, validate_lesson
+
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+    cand = LessonCandidate(
+        name=name,
+        description=description,
+        body=body,
+        category=category,
+        tags=tag_list,
+        source=source,
+        confidence=confidence,
+        reminder=reminder,
+        keywords=tag_list,
+    )
+    validate_lesson(cand)
+
+    lines = [f"Name:        {cand.name}",
+             f"Description: {cand.description} ({len(cand.description)} chars)",
+             f"Category:    {cand.category}",
+             f"Tags:        {', '.join(cand.tags) or '-'}",
+             f"Confidence:  {cand.confidence}",
+             f"Source:      {cand.source}",
+             "", "---", "", cand.body.strip()]
+    if cand.warnings:
+        lines += ["", "Warnings:"] + [f"  ! {w}" for w in cand.warnings]
+    print_panel("\n".join(lines), title="Lesson Candidate")
+
+    if record:
+        rt = build_runtime()
+        from app.onboarding import record_lesson
+
+        stored = record_lesson(rt.db, **cand.to_record_kwargs())
+        typer.echo(f"Recorded lesson '{stored['slug']}' (conf={stored['confidence']})")
+    elif cand.warnings:
+        typer.echo("\nFix the warnings above, or pass --record to record anyway.")

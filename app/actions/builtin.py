@@ -10,6 +10,7 @@ These are intentionally boring. They build the foundation:
 
 from __future__ import annotations
 
+import json
 import subprocess
 from typing import Any
 
@@ -167,7 +168,7 @@ def _workspace_summary_action(request: ActionRequest, ctx: dict[str, Any]) -> Ac
         parts.append("Git: not available")
 
     # Pending tasks for this workspace.
-    tasks = db.pending_tasks(workspace=path)
+    tasks = db.pending_tasks(workspace=path, limit=5)
     if tasks:
         parts.append(f"Pending tasks ({len(tasks)}):")
         for t in tasks[:5]:
@@ -181,6 +182,43 @@ def _workspace_summary_action(request: ActionRequest, ctx: dict[str, Any]) -> Ac
     )
 
 
+def _capture_personal_memory_action(request: ActionRequest, ctx: dict[str, Any]) -> ActionResult:
+    """Capture a personal memory through the durable MAOS memory service."""
+    memory = ctx.get("memory")
+    if memory is None:
+        return ActionResult(ok=False, action="capture_personal_memory", target=request.target,
+                            error="memory service unavailable")
+    result = memory.capture(
+        str(request.parameters.get("content", request.target)),
+        title=str(request.parameters.get("title", "")),
+        tags=tuple(request.parameters.get("tags", ())),
+        source=str(request.parameters.get("source", "manual")),
+        source_ref=str(request.parameters.get("source_ref", "")),
+        author_id=str(request.parameters.get("author_id", "")),
+        archive=bool(request.parameters.get("archive", True)),
+    )
+    if not result.ok:
+        return ActionResult(ok=False, action="capture_personal_memory", target=request.target,
+                            error=result.error)
+    archive = result.archive
+    payload = {
+        "memory_id": result.memory_id,
+        "content_hash": result.content_hash,
+        "indexed": result.indexed,
+        "duplicate": result.duplicate,
+        "archive_status": archive.status if archive else "disabled",
+        "archive_path": archive.archive_path if archive else "",
+        "archive_verified": archive.verified if archive else False,
+        "archive_detail": archive.detail if archive else "",
+    }
+    return ActionResult(
+        ok=True,
+        action="capture_personal_memory",
+        target=result.memory_id,
+        result=json.dumps(payload, sort_keys=True),
+    )
+
+
 def _list_tasks_action(request: ActionRequest, ctx: dict[str, Any]) -> ActionResult:
     """List pending tasks."""
     db: Database | None = ctx.get("db")
@@ -189,7 +227,7 @@ def _list_tasks_action(request: ActionRequest, ctx: dict[str, Any]) -> ActionRes
                             error="no database in context")
 
     workspace = request.parameters.get("workspace", "")
-    tasks = db.pending_tasks(workspace=workspace or None)
+    tasks = db.pending_tasks(workspace=workspace or None, limit=50)
     if not tasks:
         return ActionResult(
             ok=True, action="list_tasks", target=workspace or "all",
@@ -208,6 +246,17 @@ def _list_tasks_action(request: ActionRequest, ctx: dict[str, Any]) -> ActionRes
 def builtin_actions() -> list[tuple[Action, callable]]:
     """Return all built-in actions with their handlers."""
     return [
+        (Action(
+            name="capture_personal_memory",
+            description="Capture, index, and optionally archive a user-authored personal memory",
+            permissions=["memory.write"],
+            reversible=True,
+            parameters={
+                "content": "string", "title": "string", "tags": "list[string]",
+                "source": "string", "source_ref": "string", "author_id": "string",
+                "archive": "bool",
+            },
+        ), _capture_personal_memory_action),
         (Action(
             name="open_workspace",
             description="Open a project directory in Finder",

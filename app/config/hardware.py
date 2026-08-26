@@ -31,12 +31,10 @@ class HardwareProfile:
     def recommended_planner(self) -> str:
         """Pick a planner model that fits comfortably in RAM."""
         if not self.can_run_mlx:
-            return "qwen3:14b"  # ollama fallback
-        if self.memory_gb >= 32:
-            return "mlx-community/Qwen3-14B-4bit"
-        if self.memory_gb >= 16:
-            return "mlx-community/Qwen3-14B-4bit"
-        return "mlx-community/Qwen3-8B-4bit"
+            return "qwen3.5:4b"  # ollama fallback
+        # Qwen3.5-4B-OptiQ-4bit — mixed-precision sensitivity-aware quant.
+        # 2.8GB on disk, Capability Score 68.76, sweet spot for laptops.
+        return "mlx-community/Qwen3.5-4B-OptiQ-4bit"
 
     def recommended_utility(self) -> str:
         if self.can_run_mlx:

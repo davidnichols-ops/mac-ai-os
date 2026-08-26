@@ -38,6 +38,8 @@ class Blackboard:
     """Shared working memory. Thread-safe via a lock."""
 
     current_goal: str = ""
+    goal_source: str = ""
+    goal_updated_at: str = ""
     current_workspace: str = ""
     current_context: dict[str, Any] = field(default_factory=dict)
     open_problems: list[dict[str, Any]] = field(default_factory=list)
@@ -48,9 +50,11 @@ class Blackboard:
     last_updated: str = ""
     _lock: threading.Lock = field(default_factory=threading.Lock, repr=False)
 
-    def set_goal(self, goal: str) -> None:
+    def set_goal(self, goal: str, *, source: str = "manual") -> None:
         with self._lock:
             self.current_goal = goal
+            self.goal_source = source
+            self.goal_updated_at = datetime.now(UTC).isoformat()
             self._touch()
 
     def set_workspace(self, workspace: str) -> None:
@@ -121,6 +125,8 @@ class Blackboard:
     def clear(self) -> None:
         with self._lock:
             self.current_goal = ""
+            self.goal_source = ""
+            self.goal_updated_at = ""
             self.current_workspace = ""
             self.current_context = {}
             self.open_problems = []
@@ -135,6 +141,8 @@ class Blackboard:
         with self._lock:
             return {
                 "current_goal": self.current_goal,
+                "goal_source": self.goal_source,
+                "goal_updated_at": self.goal_updated_at,
                 "current_workspace": self.current_workspace,
                 "current_context": dict(self.current_context),
                 "open_problems": list(self.open_problems),
@@ -151,7 +159,8 @@ class Blackboard:
         lines: list[str] = []
 
         if s["current_goal"]:
-            lines.append(f"Goal: {s['current_goal']}")
+            source = f" (source: {s['goal_source']})" if s["goal_source"] else ""
+            lines.append(f"Goal: {s['current_goal']}{source}")
         if s["current_workspace"]:
             lines.append(f"Workspace: {s['current_workspace']}")
         lines.append(f"Confidence: {s['confidence']:.2f}")
@@ -209,6 +218,12 @@ class Blackboard:
             state = json.loads(entry["value"])
             with self._lock:
                 self.current_goal = state.get("current_goal", "")
+                self.goal_source = state.get("goal_source") or (
+                    "legacy" if self.current_goal else ""
+                )
+                self.goal_updated_at = state.get(
+                    "goal_updated_at", state.get("last_updated", "")
+                )
                 self.current_workspace = state.get("current_workspace", "")
                 self.current_context = state.get("current_context", {})
                 self.open_problems = state.get("open_problems", [])

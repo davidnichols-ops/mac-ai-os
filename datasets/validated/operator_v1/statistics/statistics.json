@@ -1,0 +1,41 @@
+{
+  "total_lines_read": 4725,
+  "parsed_samples": 2651,
+  "malformed_lines": 0,
+  "schema_rejected": 0,
+  "secret_rejected": 0,
+  "duplicates_removed": 2074,
+  "validation_samples": 133,
+  "task_id_leakage": [],
+  "per_split_counts": {
+    "train": 2297,
+    "test": 354
+  },
+  "category_distribution": {
+    "tools": 700,
+    "proxy_war": 593,
+    "compute": 483,
+    "architecture": 382,
+    "engineering": 224,
+    "failure": 152,
+    "debugging": 56,
+    "research": 49,
+    "verify": 8,
+    "testing": 2,
+    "benchmark": 2
+  },
+  "compute_label_distribution": {
+    "THINK": 1474,
+    "FAST": 711,
+    "VERIFY": 263,
+    "RECOVER": 190,
+    "ESCALATE": 13
+  },
+  "tokens": {
+    "min": 175,
+    "max": 1381,
+    "mean": 403.92,
+    "median": 381,
+    "stdev": 185.29
+  }
+}

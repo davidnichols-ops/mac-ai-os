@@ -1,0 +1,88 @@
+# Experiment B — Recovery Focus Training Mixture (Production Dataset)
+#
+# Purpose: Improve autonomous debugging and error recovery.
+# Over-weights recovery examples to teach the model how to adapt
+# when tools fail, arguments are wrong, or hypotheses are incorrect.
+#
+# Run this AFTER the balanced mixture if recovery metrics are weak.
+
+experiment:
+  name: "operator_v3_recovery_focus"
+  description: "Recovery-focused mixture for autonomous debugging (production dataset)"
+  priority: 2
+
+base_model:
+  name: "Qwen/Qwen3.5-9B"
+  provider: "together_ai"
+  context_length: 32768
+
+method:
+  type: "lora"
+  rank: 64
+  alpha: 128
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+# Dataset mixture — recovery-heavy
+mixture:
+  recovery:
+    weight: 0.40
+    source: "datasets/incoming/adaptive_operator_dataset_v1/recovery/train.jsonl"
+    format: "sft"
+    max_samples: 189
+
+  sft:
+    weight: 0.30
+    source: "datasets/incoming/adaptive_operator_dataset_v1/sft/train.jsonl"
+    format: "sft"
+    max_samples: 700
+
+  tools:
+    weight: 0.15
+    source: "datasets/incoming/adaptive_operator_dataset_v1/tools/train.jsonl"
+    format: "sft"
+    max_samples: 300
+
+  compute_policy:
+    weight: 0.10
+    source: "datasets/incoming/adaptive_operator_dataset_v1/compute_policy/train.jsonl"
+    format: "sft"
+    max_samples: 200
+    filter:
+      compute_label: "RECOVER"  # focus on RECOVER mode
+
+  architecture:
+    weight: 0.05
+    source: "datasets/incoming/adaptive_operator_dataset_v1/architecture/train.jsonl"
+    format: "sft"
+    max_samples: 100
+
+training:
+  epochs: 4  # more epochs for recovery patterns
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.5e-4  # slightly higher for recovery patterns
+  warmup_ratio: 0.05
+  lr_scheduler: "cosine"
+  max_seq_length: 4096
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  early_stopping_patience: 4
+
+evaluation:
+  eval_steps: 50
+  eval_dataset: "datasets/incoming/adaptive_operator_dataset_v1/evaluation/test.jsonl"
+  harness_dir: "eval/operator_v3/"
+  categories: [recovery, tool_competence]
+  min_pass_rate:
+    recovery: 0.75
+    tool_competence: 0.70
+
+output:
+  adapter_dir: "models/adaptive-operator-v3/checkpoints/recovery_focus/"
+  merged_model_dir: "models/adaptive-operator-v3/merged/recovery_focus/"
+  mlx_model_dir: "models/adaptive-operator-v3/mlx/recovery_focus/"
+  mlx_quantization: "4bit"
+  final_name: "Qwen3.5-9B-Adaptive-Operator-v3-RecoveryFocus-MLX-4bit"
+
+seed: 42

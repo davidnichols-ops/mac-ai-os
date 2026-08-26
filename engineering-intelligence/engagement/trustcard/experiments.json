@@ -1,0 +1,39 @@
+[
+  {
+    "id": "TC-E1",
+    "hypothesis_id": "TC-H1",
+    "command": "node --input-type=module -e 'buildManifest(...); compare expiresAt to 90*24h'",
+    "observation": "expiresAt was 3600 seconds beyond the test's strict 90-day +/- 60-second bound.",
+    "evidence": [
+      "evidence/TC-E1-expiry.txt"
+    ],
+    "status": "reproduced_test_failure",
+    "impact_assessment": "Low direct security impact. Expiry uses calendar-day arithmetic; a strict duration assertion can fail around DST. Review whether policy requires elapsed-hours or calendar-day semantics.",
+    "confirmed_vulnerability": false
+  },
+  {
+    "id": "TC-E2",
+    "hypothesis_id": "TC-H2",
+    "command": "npm test; node --test test/adversarial.test.js test/audit-probes.test.js test/auth.test.js test/evidence-adapters.test.js test/proxy.test.js test/security-model.test.js",
+    "observation": "Full suite: 513 passed, 1 failed. Targeted selection: 92 passed, 1 failed. Security, auth, drift, replay, receipt, and proxy tests passed; expiry-bound test failed.",
+    "evidence": [
+      "evidence/TC-E2-npm-test.tap",
+      "evidence/TC-E2-targeted.tap"
+    ],
+    "status": "partially_supported",
+    "impact_assessment": "No unauthorized access was demonstrated. Coverage is strong for the exercised local fixtures but incomplete for all JSON-RPC methods and environment inheritance.",
+    "confirmed_vulnerability": false
+  },
+  {
+    "id": "TC-E3",
+    "hypothesis_id": "TC-H4",
+    "command": "npm run lint",
+    "observation": "The package has no lint script; no lint evidence was produced.",
+    "evidence": [
+      "evidence/TC-E3-lint.txt"
+    ],
+    "status": "missing_validation",
+    "impact_assessment": "Static quality and security checks are not represented by the documented npm command surface.",
+    "confirmed_vulnerability": false
+  }
+]

@@ -12,6 +12,7 @@ Providers are registered in `registry.py` and selected by `provider` in config.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 from app.models.types import EmbeddingResponse, Message, ModelResponse
 
@@ -27,8 +28,18 @@ class Model(ABC):
         """Single-turn generation."""
 
     @abstractmethod
-    def chat(self, messages: list[Message], **kwargs) -> ModelResponse:
-        """Multi-turn chat."""
+    def chat(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        **kwargs,
+    ) -> ModelResponse:
+        """Multi-turn chat with optional tool definitions.
+
+        When tools are provided, the model may emit tool calls in its
+        response. The provider parses these into ModelResponse.tool_calls.
+        """
 
     def embed(self, text: str) -> EmbeddingResponse:
         raise NotImplementedError(f"{self.provider}/{self.name} does not implement embed()")

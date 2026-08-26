@@ -27,6 +27,7 @@ Each lesson has:
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -92,15 +93,39 @@ def format_onboarding_briefing(packet: dict[str, Any]) -> str:
     if user.get("github"):
         lines.append(f"GitHub: {user['github']}")
 
-    # --- Lessons (the critical part) ---
+    # --- Lessons (grouped by category) ---
     lessons = packet.get("lessons", [])
     lines.append("")
     lines.append(f"=== LESSONS ({len(lessons)}) ===")
     if not lessons:
         lines.append("(no lessons recorded yet)")
     else:
+        # Group by category, uncategorized last.
+        categories: dict[str, list[dict]] = {}
         for lesson in lessons:
-            lines.append(f"  [{lesson['confidence']:.0%}] {lesson['slug']}: {lesson['text']}")
+            cat = lesson.get("category", "") or "general"
+            categories.setdefault(cat, []).append(lesson)
+
+        # Defined category order.
+        cat_order = ["tooling", "workflow", "environment", "api", "architecture", "general"]
+        cat_labels = {
+            "tooling": "Tooling & Infrastructure",
+            "workflow": "Workflow & Process",
+            "environment": "Machine & Environment",
+            "api": "External Services & APIs",
+            "architecture": "Architecture & Design",
+            "general": "General",
+        }
+        for cat in cat_order:
+            cat_lessons = categories.get(cat)
+            if not cat_lessons:
+                continue
+            label = cat_labels.get(cat, cat.title())
+            lines.append(f"\n  --- {label} ({len(cat_lessons)}) ---")
+            for lesson in cat_lessons:
+                kw = lesson.get("keywords", [])
+                kw_tag = f" [triggers: {', '.join(kw)}]" if kw else ""
+                lines.append(f"  [{lesson['confidence']:.0%}] {lesson['slug']}: {lesson['text'][:200]}{kw_tag}")
 
     # --- Recent session ---
     session = packet.get("recent_session", {})
@@ -206,6 +231,9 @@ def record_lesson(
     *,
     confidence: float = 0.9,
     source: str = "incident",
+    category: str = "",
+    keywords: list[str] | None = None,
+    reminder: str = "",
 ) -> dict[str, Any]:
     """Record a hard-won lesson in the user_model.
 
@@ -215,14 +243,28 @@ def record_lesson(
         text: The lesson text — what to do or what not to do.
         confidence: How strongly to hold this lesson (0-1).
         source: Where the lesson came from ("incident", "observed", "manual").
+        category: Lesson category — "tooling", "workflow", "environment",
+            "api", or "architecture". Used for grouping in the briefing.
+        keywords: Trigger words that cause this lesson's reminder to be
+            injected into tool responses when the words appear in context.
+        reminder: One-line reminder shown when keywords match. Keep it short.
 
     Returns:
         The stored lesson as a dict.
     """
     key = f"lesson.{slug}"
-    db.set_user_model_entry(key, text, confidence=confidence, source=source)
-    log.info("onboarding.lesson.recorded", slug=slug, confidence=confidence, source=source)
-    return {"slug": slug, "text": text, "confidence": confidence, "source": source}
+    metadata = json.dumps({
+        "category": category,
+        "keywords": keywords or [],
+        "reminder": reminder,
+    }) if (category or keywords or reminder) else None
+    db.set_user_model_entry(key, text, confidence=confidence, source=source, metadata=metadata)
+    log.info("onboarding.lesson.recorded", slug=slug, confidence=confidence, source=source,
+             category=category, keywords=keywords)
+    return {
+        "slug": slug, "text": text, "confidence": confidence, "source": source,
+        "category": category, "keywords": keywords or [], "reminder": reminder,
+    }
 
 
 def list_lessons(db: Database) -> list[dict[str, Any]]:
@@ -232,12 +274,23 @@ def list_lessons(db: Database) -> list[dict[str, Any]]:
     for e in entries:
         if not e["key"].startswith("lesson."):
             continue
+        # Parse metadata if present.
+        meta = {"category": "", "keywords": [], "reminder": ""}
+        raw_meta = e["metadata"] if "metadata" in e.keys() else None
+        if raw_meta:
+            try:
+                meta = json.loads(raw_meta)
+            except (json.JSONDecodeError, TypeError):
+                pass
         lessons.append({
             "slug": e["key"].removeprefix("lesson."),
             "text": e["value"],
             "confidence": e["confidence"],
             "source": e["source"],
             "updated_at": e["updated_at"],
+            "category": meta.get("category", ""),
+            "keywords": meta.get("keywords", []),
+            "reminder": meta.get("reminder", ""),
         })
     # Sort by confidence descending, then alphabetically.
     lessons.sort(key=lambda lesson: (-lesson["confidence"], lesson["slug"]))

@@ -84,6 +84,9 @@ def build_context_packet(
     # --- System health ---
     system = _system_info(db, since)
 
+    # --- Network intelligence ---
+    network = _network_info(db)
+
     # --- Blackboard ---
     bb = blackboard.snapshot()
 
@@ -103,6 +106,7 @@ def build_context_packet(
         "related_knowledge": knowledge,
         "rag_results": rag_results,
         "system": system,
+        "network": network,
         "blackboard": {
             "current_goal": bb["current_goal"],
             "current_workspace": bb["current_workspace"],
@@ -314,4 +318,21 @@ def _time_info(db: Database) -> dict[str, Any]:
         return build_time_packet(db)
     except Exception as e:
         log.warning("context_packet.time_failed", error=str(e))
+        return {"available": False, "error": str(e)}
+
+
+def _network_info(db: Database) -> dict[str, Any]:
+    """Network intelligence — current health snapshot.
+
+    Injected into every context packet so agents can reason about network
+    state without calling maos_network_status explicitly. Enables future
+    behavior: choose local models when cloud latency is poor, explain slow
+    responses, delay large uploads, detect ISP problems.
+    """
+    try:
+        from app.network import NetworkProvider
+        status = NetworkProvider(db).get_status()
+        return status.to_dict()
+    except Exception as e:
+        log.warning("context_packet.network_failed", error=str(e))
         return {"available": False, "error": str(e)}

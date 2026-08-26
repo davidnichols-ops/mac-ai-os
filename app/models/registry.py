@@ -8,15 +8,33 @@ from __future__ import annotations
 
 from app.config.settings import Settings
 from app.log import get_logger
+from app.models.api_provider import APIModel
 from app.models.base import EmbeddingModel, Model
 from app.models.chroma_embedding import ChromaDefaultEmbeddingModel
 from app.models.mlx_provider import MLXEmbeddingModel, MLXModel
+from app.models.mlxvlm_provider import MLXVLMModel
 from app.models.ollama_provider import OllamaEmbeddingModel, OllamaModel
+from app.models.rapid_mlx_provider import RapidMLXModel
 
 log = get_logger(__name__)
 
+
+def _resolve_api_key(key: str | None) -> str:
+    """Resolve an API key, expanding ${ENV_VAR} references."""
+    import os
+    import re
+    if not key:
+        return os.environ.get("TOGETHER_API_KEY", "")
+    # Expand ${VAR} references
+    def _expand(m):
+        return os.environ.get(m.group(1), "")
+    return re.sub(r"\$\{(\w+)\}", _expand, key)
+
 _MODEL_FACTORIES = {
     "mlx": lambda cfg, settings: MLXModel(
+        cfg.model, temperature=cfg.temperature, max_tokens=cfg.max_tokens
+    ),
+    "mlxvlm": lambda cfg, settings: MLXVLMModel(
         cfg.model, temperature=cfg.temperature, max_tokens=cfg.max_tokens
     ),
     "ollama": lambda cfg, settings: OllamaModel(
@@ -24,6 +42,23 @@ _MODEL_FACTORIES = {
         base_url=settings.ollama.base_url,
         temperature=cfg.temperature,
         max_tokens=cfg.max_tokens,
+    ),
+    "api": lambda cfg, settings: APIModel(
+        cfg.model,
+        base_url=cfg.base_url or "https://api-inference.together.ai/v1",
+        api_key=_resolve_api_key(cfg.api_key),
+        temperature=cfg.temperature,
+        max_tokens=cfg.max_tokens,
+    ),
+    "rapid_mlx": lambda cfg, settings: RapidMLXModel(
+        cfg.model,
+        base_url=cfg.base_url or "http://127.0.0.1:8083/v1",
+        api_key=cfg.api_key or "device-local",
+        temperature=cfg.temperature,
+        max_tokens=cfg.max_tokens,
+        model_path=cfg.model_path,
+        binary=cfg.binary,
+        auto_start=cfg.auto_start,
     ),
 }
 

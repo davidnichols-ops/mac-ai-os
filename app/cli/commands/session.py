@@ -151,3 +151,37 @@ def ask(
     else:
         typer.echo(result.error or "failed", err=True)
         raise typer.Exit(1)
+
+
+@session_app.command("search")
+def search(
+    query: str = typer.Argument(..., help="Full-text query over session summaries and events"),
+    limit: int = typer.Option(10, "--limit", "-n", help="Number of results to show"),
+) -> None:
+    """Full-text search across sessions and events (FTS5).
+
+    Rebuilds the index on demand so results are always current, then returns
+    the most relevant past sessions for the query. This is the recall signal
+    that lets a new session carry forward prior context.
+    """
+    rt = build_runtime()
+    from app.session_search import SessionSearch
+
+    searcher = SessionSearch(rt.db)
+    searcher.rebuild()
+    results = searcher.search(query, limit=limit)
+
+    if not results:
+        print_panel(f"No sessions matched '{query}'.", title="Session Search")
+        return
+
+    lines = [f"{len(results)} session(s) matched '{query}':", ""]
+    for r in results:
+        lines.append(f"  #{r['session_id']}  {r['start_time'][:19]}  "
+                     f"(project={r['project'] or '?'})")
+        if r["summary"]:
+            lines.append(f"      {r['summary'][:100]}")
+        if r["snippet"]:
+            lines.append(f"      …{r['snippet']}…")
+        lines.append("")
+    print_panel("\n".join(lines), title="Session Search")

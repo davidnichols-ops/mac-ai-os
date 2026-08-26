@@ -1,0 +1,4132 @@
+{
+  "schema": "engineering-knowledge-graph/v1",
+  "generated_at": "2026-08-06T07:37:08.785017+00:00",
+  "nodes": [
+    {
+      "id": "ecosystem",
+      "kind": "ecosystem"
+    },
+    {
+      "id": "AAFP-research",
+      "kind": "repository",
+      "path": "~/Projects/AAFP-research"
+    },
+    {
+      "id": "X-MaC-digital-twin",
+      "kind": "repository",
+      "path": "~/Projects/X-MaC-digital-twin"
+    },
+    {
+      "id": "aafp",
+      "kind": "repository",
+      "path": "~/Projects/aafp"
+    },
+    {
+      "id": "aafp-go",
+      "kind": "repository",
+      "path": "~/Projects/aafp-go"
+    },
+    {
+      "id": "apple-photos-export",
+      "kind": "repository",
+      "path": "~/Projects/apple-photos-export"
+    },
+    {
+      "id": "apple-quality-recognition-engine",
+      "kind": "repository",
+      "path": "~/Projects/apple-quality-recognition-engine"
+    },
+    {
+      "id": "apple_quality_recognition_engine",
+      "kind": "repository",
+      "path": "~/Projects/apple_quality_recognition_engine"
+    },
+    {
+      "id": "aura-lab",
+      "kind": "repository",
+      "path": "~/Projects/aura-lab"
+    },
+    {
+      "id": "cloud-to-butt",
+      "kind": "repository",
+      "path": "~/Projects/cloud-to-butt"
+    },
+    {
+      "id": "cloud-to-butt-revolutionized",
+      "kind": "repository",
+      "path": "~/Projects/cloud-to-butt-revolutionized"
+    },
+    {
+      "id": "coremltools",
+      "kind": "repository",
+      "path": "~/Projects/coremltools"
+    },
+    {
+      "id": "cvconform",
+      "kind": "repository",
+      "path": "~/Projects/cvconform"
+    },
+    {
+      "id": "dnichols-ops-",
+      "kind": "repository",
+      "path": "~/Projects/dnichols-ops-"
+    },
+    {
+      "id": "elonwatch",
+      "kind": "repository",
+      "path": "~/Projects/elonwatch"
+    },
+    {
+      "id": "elonwatch-mac",
+      "kind": "repository",
+      "path": "~/Projects/elonwatch-mac"
+    },
+    {
+      "id": "go",
+      "kind": "repository",
+      "path": "~/Projects/go"
+    },
+    {
+      "id": "grokhack",
+      "kind": "repository",
+      "path": "~/Projects/grokhack"
+    },
+    {
+      "id": "hackerone-cli",
+      "kind": "repository",
+      "path": "~/Projects/hackerone-cli"
+    },
+    {
+      "id": "heartland-factory",
+      "kind": "repository",
+      "path": "~/Projects/heartland-factory"
+    },
+    {
+      "id": "infernet",
+      "kind": "repository",
+      "path": "~/Projects/infernet"
+    },
+    {
+      "id": "jarvis-word",
+      "kind": "repository",
+      "path": "~/Projects/jarvis-word"
+    },
+    {
+      "id": "local-operator",
+      "kind": "repository",
+      "path": "~/Projects/local-operator"
+    },
+    {
+      "id": "mif_env_mapper-v1.0.0",
+      "kind": "repository",
+      "path": "~/Projects/mif_env_mapper-v1.0.0"
+    },
+    {
+      "id": "onnxruntime",
+      "kind": "repository",
+      "path": "~/Projects/onnxruntime"
+    },
+    {
+      "id": "petals",
+      "kind": "repository",
+      "path": "~/Projects/petals"
+    },
+    {
+      "id": "repo-archaeologist",
+      "kind": "repository",
+      "path": "~/Projects/repo-archaeologist"
+    },
+    {
+      "id": "roboflow-python",
+      "kind": "repository",
+      "path": "~/Projects/roboflow-python"
+    },
+    {
+      "id": "rusty-duck-website",
+      "kind": "repository",
+      "path": "~/Projects/rusty-duck-website"
+    },
+    {
+      "id": "sandbox-of-doom",
+      "kind": "repository",
+      "path": "~/Projects/sandbox-of-doom"
+    },
+    {
+      "id": "sentinel-graph",
+      "kind": "repository",
+      "path": "~/Projects/sentinel-graph"
+    },
+    {
+      "id": "tensorflow",
+      "kind": "repository",
+      "path": "~/Projects/tensorflow"
+    },
+    {
+      "id": "traditional-ai",
+      "kind": "repository",
+      "path": "~/Projects/traditional-ai"
+    },
+    {
+      "id": "trajectory-os",
+      "kind": "repository",
+      "path": "~/Projects/trajectory-os"
+    },
+    {
+      "id": "transformers",
+      "kind": "repository",
+      "path": "~/Projects/transformers"
+    },
+    {
+      "id": "trustcard",
+      "kind": "repository",
+      "path": "~/Projects/trustcard"
+    },
+    {
+      "id": "ultralytics",
+      "kind": "repository",
+      "path": "~/Projects/ultralytics"
+    },
+    {
+      "id": "upscayl",
+      "kind": "repository",
+      "path": "~/Projects/upscayl"
+    },
+    {
+      "id": "mac-ai-os",
+      "kind": "repository",
+      "path": "~/mac-ai-os"
+    }
+  ],
+  "edges": [
+    {
+      "source": "ecosystem",
+      "target": "AAFP-research",
+      "type": "contains",
+      "evidence": "~/Projects/AAFP-research"
+    },
+    {
+      "source": "ecosystem",
+      "target": "X-MaC-digital-twin",
+      "type": "contains",
+      "evidence": "~/Projects/X-MaC-digital-twin"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "anyhow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "async-trait",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "authors",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "blake3",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "byte-unit",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "categories",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "chrono",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "clap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "clap_complete",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "codegen-units",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "criterion",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "description",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "dirs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "documentation",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "edition",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "futures",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "glob",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "harness",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "homepage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "humantime",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "image",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "indicatif",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "keywords",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "libc",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "license",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "lto",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "name",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "notify",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "opt-level",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "panic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "plist",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "readme",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "regex",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "repository",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "rusqlite",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "serde",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "serde_json",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "serde_yaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "strip",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tempfile",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "thiserror",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tokio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tokio-test",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "toml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tracing",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tracing-appender",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "tracing-subscriber",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "uuid",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "version",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "X-MaC-digital-twin",
+      "target": "walkdir",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "aafp",
+      "type": "contains",
+      "evidence": "~/Projects/aafp"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-benchmark",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-cbor",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-conformance",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-core",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-crypto",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-discovery",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-economics",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-identity",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-loadtest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-messaging",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-nat",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-perception",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-sdk",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-transport-a2a",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-transport-mcp",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aafp-transport-quic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aes-gcm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "anyhow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "async-trait",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "aws-lc-rs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "bytes",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "chacha20poly1305",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "ciborium",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "clap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "criterion",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "dotenvy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "edition",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "fips204",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "hex",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "hkdf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "hmac",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "license",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "lto",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "members",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "opt-level",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "quinn",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "rand",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "rand_core",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "rcgen",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "repository",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "reqwest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "resolver",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "rustls",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "scraper",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "serde",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "serde_json",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "sha2",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "simd-json",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "thiserror",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "tokio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "tokio-util",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "tracing",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "tracing-subscriber",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "version",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aafp",
+      "target": "x25519-dalek",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "aafp-go",
+      "type": "contains",
+      "evidence": "~/Projects/aafp-go"
+    },
+    {
+      "source": "ecosystem",
+      "target": "apple-photos-export",
+      "type": "contains",
+      "evidence": "~/Projects/apple-photos-export"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "chrono",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "clap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "colored",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "derive-new",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "edition",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "fern",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "log",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "name",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "plist",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "rand",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "rusqlite",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "unicode-normalization",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "apple-photos-export",
+      "target": "version",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "apple-quality-recognition-engine",
+      "type": "contains",
+      "evidence": "~/Projects/apple-quality-recognition-engine"
+    },
+    {
+      "source": "ecosystem",
+      "target": "apple_quality_recognition_engine",
+      "type": "contains",
+      "evidence": "~/Projects/apple_quality_recognition_engine"
+    },
+    {
+      "source": "ecosystem",
+      "target": "aura-lab",
+      "type": "contains",
+      "evidence": "~/Projects/aura-lab"
+    },
+    {
+      "source": "aura-lab",
+      "target": "click",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "librosa",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "mypy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "numba",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "numpy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "pedalboard",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "pytest-cov",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "rich",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "scipy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "aura-lab",
+      "target": "soundfile",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "cloud-to-butt",
+      "type": "contains",
+      "evidence": "~/Projects/cloud-to-butt"
+    },
+    {
+      "source": "ecosystem",
+      "target": "cloud-to-butt-revolutionized",
+      "type": "contains",
+      "evidence": "~/Projects/cloud-to-butt-revolutionized"
+    },
+    {
+      "source": "ecosystem",
+      "target": "coremltools",
+      "type": "contains",
+      "evidence": "~/Projects/coremltools"
+    },
+    {
+      "source": "ecosystem",
+      "target": "cvconform",
+      "type": "contains",
+      "evidence": "~/Projects/cvconform"
+    },
+    {
+      "source": "cvconform",
+      "target": "build",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "cibuildwheel",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "numpy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "onnx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "onnxruntime",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "pytest-cov",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "cvconform",
+      "target": "twine",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "dnichols-ops-",
+      "type": "contains",
+      "evidence": "~/Projects/dnichols-ops-"
+    },
+    {
+      "source": "ecosystem",
+      "target": "elonwatch",
+      "type": "contains",
+      "evidence": "~/Projects/elonwatch"
+    },
+    {
+      "source": "ecosystem",
+      "target": "elonwatch-mac",
+      "type": "contains",
+      "evidence": "~/Projects/elonwatch-mac"
+    },
+    {
+      "source": "ecosystem",
+      "target": "go",
+      "type": "contains",
+      "evidence": "~/Projects/go"
+    },
+    {
+      "source": "ecosystem",
+      "target": "grokhack",
+      "type": "contains",
+      "evidence": "~/Projects/grokhack"
+    },
+    {
+      "source": "grokhack",
+      "target": "agent-client-protocol",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "alacritty_terminal",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "ansi-to-tui",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "ansi-width",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "anstyle",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "anstyle-lossy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "anstyle-parse",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "anstyle-syntect",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "anyhow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "arboard",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "arc-swap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "assert_matches",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "async-compression",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "async-lsp",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "async-openai",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "async-stream",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "async-trait",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "axum",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "backon",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "backtrace",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "base64",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "blake3",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "bytes",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "camino",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "chrono",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "clap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "clap_complete",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "codegen-units",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "colored_json",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "core-foundation",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "crc32fast",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "criterion",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "crossbeam",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "crossterm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "cryptify",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "ctor",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "dashmap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "debug",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "derive_more",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "dhat",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "dirs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "doc_lazy_continuation",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "doc_overindented_list_items",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "documented",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "dunce",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "edition",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "educe",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "encoding_rs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "enum_delegate",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "env_logger",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "eventsource-stream",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fastrace",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fastrace-opentelemetry",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fastrace-reqwest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fastrace-tonic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fastrand",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "filetime",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "flate2",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fontdb",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fs2",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "futures",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "futures-util",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "fuzzy-matcher",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "gcloud-storage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "gethostname",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "gix",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "glob",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "globset",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "htmd",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "html-escape",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "http",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "http-body-util",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "humantime-serde",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "ignore",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "image",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "incremental",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "indexmap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "indicatif",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "infer",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "grokhack",
+      "target": "inherits",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "hackerone-cli",
+      "type": "contains",
+      "evidence": "~/Projects/hackerone-cli"
+    },
+    {
+      "source": "ecosystem",
+      "target": "heartland-factory",
+      "type": "contains",
+      "evidence": "~/Projects/heartland-factory"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "build:admin",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "build:all",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "build:studio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "build:worker",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "db:migrate",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "db:seed",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "deploy:spas",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "deploy:worker",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "description",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "dev:admin",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "dev:studio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "dev:worker",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "devDependencies",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "engines",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "factory",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "name",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "node",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "packageManager",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "private",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "scrape",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "scripts",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "test",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "typecheck",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "typescript",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "heartland-factory",
+      "target": "version",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "infernet",
+      "type": "contains",
+      "evidence": "~/Projects/infernet"
+    },
+    {
+      "source": "infernet",
+      "target": "cbor2",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "cryptography",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "huggingface-hub",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "msgpack",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "numpy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "paramiko",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "psutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "pytest-asyncio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "infernet",
+      "target": "zeroconf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "jarvis-word",
+      "type": "contains",
+      "evidence": "~/Projects/jarvis-word"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "cli",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "httpx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "pypdf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "pytest-asyncio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "jarvis-word",
+      "target": "server",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "local-operator",
+      "type": "contains",
+      "evidence": "~/Projects/local-operator"
+    },
+    {
+      "source": "local-operator",
+      "target": "accelerate",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "click",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "datasets",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "deepspeed",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "joblib",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "mlx-lm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "openai",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "peft",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "psutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "pytest-asyncio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "python-dotenv",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "rich",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "scikit-learn",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "sglang",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "structlog",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "together",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "local-operator",
+      "target": "vllm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "mif_env_mapper-v1.0.0",
+      "type": "contains",
+      "evidence": "~/Projects/mif_env_mapper-v1.0.0"
+    },
+    {
+      "source": "ecosystem",
+      "target": "onnxruntime",
+      "type": "contains",
+      "evidence": "~/Projects/onnxruntime"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "B028",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "C4",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "C408",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "E501",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "FURB",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "G004",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "ISC",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "N803",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "N812",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "N813",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "N999",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "NPY",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "NPY002",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PERF",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PERF203",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PERF401",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PIE",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PLC",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PLE",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PLW",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PYI",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PYI024",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "PYI041",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "RUF",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM102",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM103",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM108",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM114",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SIM116",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "SLOT",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "T10",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "UP",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "UP038",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "onnxruntime",
+      "target": "YTT",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "petals",
+      "type": "contains",
+      "evidence": "~/Projects/petals"
+    },
+    {
+      "source": "petals",
+      "target": "setuptools",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "petals",
+      "target": "wheel",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "repo-archaeologist",
+      "type": "contains",
+      "evidence": "~/Projects/repo-archaeologist"
+    },
+    {
+      "source": "ecosystem",
+      "target": "roboflow-python",
+      "type": "contains",
+      "evidence": "~/Projects/roboflow-python"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "ANN",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "ARG",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "BLE",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "COM",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "DTZ",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "E402",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "EM",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "ERA",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "F401",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "FBT",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "FIX",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "FLY",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "FURB",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "INP001",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "ISC",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PERF",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PIE",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PLC0415",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PLR",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PLW",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PT",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "PTH",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "RET",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "RUF",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "SIM",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "SLF",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "TD",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "TRY",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "UP",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "buck-out",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "build",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "cv2",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "dist",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "docs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "matplotlib",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "node_modules",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "numpy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "venv",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "yarn-error.log",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "roboflow-python",
+      "target": "yarn.lock",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "rusty-duck-website",
+      "type": "contains",
+      "evidence": "~/Projects/rusty-duck-website"
+    },
+    {
+      "source": "ecosystem",
+      "target": "sandbox-of-doom",
+      "type": "contains",
+      "evidence": "~/Projects/sandbox-of-doom"
+    },
+    {
+      "source": "ecosystem",
+      "target": "sentinel-graph",
+      "type": "contains",
+      "evidence": "~/Projects/sentinel-graph"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "aiosqlite",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "asyncpg",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "cryptography",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "fastapi",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "httpx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "mypy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pip-audit",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pydantic-settings",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pytest-asyncio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "pytest-cov",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "python-multipart",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "redis",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "sentence-transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "sentinel-graph",
+      "target": "transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "tensorflow",
+      "type": "contains",
+      "evidence": "~/Projects/tensorflow"
+    },
+    {
+      "source": "ecosystem",
+      "target": "traditional-ai",
+      "type": "contains",
+      "evidence": "~/Projects/traditional-ai"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "accelerate",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "beautifulsoup4",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "bitsandbytes",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "chromadb",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "datasets",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "huggingface-hub",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "jieba",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "lxml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "opencc-python-reimplemented",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "pandas",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "peft",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "requests",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "rich",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "sentence-transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "tqdm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "transformers",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "traditional-ai",
+      "target": "trl",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "trajectory-os",
+      "type": "contains",
+      "evidence": "~/Projects/trajectory-os"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "fastapi",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "mcp",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "networkx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "pytest-cov",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "python-dateutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "typer",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trajectory-os",
+      "target": "uvicorn",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "transformers",
+      "type": "contains",
+      "evidence": "~/Projects/transformers"
+    },
+    {
+      "source": "transformers",
+      "target": "C4",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "C901",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "E501",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "E741",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "FURB",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "PERF102",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "PIE794",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "PLC0208",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "PLC1802",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "RUF013",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "S110",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "SIM",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "SIM1",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "SIM905",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "UP",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "UP006",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "UP015",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "UP031",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "except",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "raise",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "transformers",
+      "target": "register_parameter",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "trustcard",
+      "type": "contains",
+      "evidence": "~/Projects/trustcard"
+    },
+    {
+      "source": "trustcard",
+      "target": "author",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "bin",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "bugs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "description",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "engines",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "exports",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "files",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "homepage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "keywords",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "license",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "mcp-http-proxy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "mcp-proxy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "mcp-trustcard",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "name",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "node",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "repository",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "scan:all",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "scripts",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "test",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "test:fast",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "type",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "url",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "trustcard",
+      "target": "version",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "ultralytics",
+      "type": "contains",
+      "evidence": "~/Projects/ultralytics"
+    },
+    {
+      "source": "ultralytics",
+      "target": "Changelog",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "Documentation",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "Homepage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "Source",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "ai-edge-litert",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "ai-edge-quantizer",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "albumentations",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "coremltools",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "dx_com",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "executorch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "faster-coco-eval",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "filelock",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "flask",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "googleapis-common-protos",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "h5py",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "ipython",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "lap",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "litert-torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "matplotlib",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "minijinja",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "mkdocs-ultralytics-plugin",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "mlflow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "nncf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "numpy",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "nvidia-ml-py",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "onnx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "onnxruntime",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "onnxslim",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "opencv-python",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "openvino",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "packaging",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "pillow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "polars",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "psutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "pytest-cov",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "pytest-xdist",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "requests",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "scikit-learn",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "setuptools",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "shapely",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "streamlit",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "tensorboard",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "tensorflow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "tensorstore",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "torch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "torchvision",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "types-pillow",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "types-psutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "types-pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "types-requests",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "types-shapely",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "ultralytics-thop",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "wandb",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "ydf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ultralytics",
+      "target": "zensical",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "upscayl",
+      "type": "contains",
+      "evidence": "~/Projects/upscayl"
+    },
+    {
+      "source": "upscayl",
+      "target": "@electron/notarize",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@radix-ui/react-dialog",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@radix-ui/react-popover",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@radix-ui/react-scroll-area",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@radix-ui/react-slot",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@radix-ui/react-toast",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@tailwindcss/typography",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@types/node",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@types/react",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "@types/react-dom",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "afterSign",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "ajv",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "allowElevation",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "allowToChangeInstallationDirectory",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "appId",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "arch",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "artifactName",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "asar",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "asarUnpack",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "author",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "autoprefixer",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "build",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "category",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "class-variance-authority",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "clean",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "clsx",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "cmdk",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "contents",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "contributors",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "cross-env",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "daisyui",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dependencies",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "description",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dev",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "devDependencies",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "disable-store",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:appimage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:appstore",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:deb",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:dmg",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:flatpak",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:linux",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mac",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mac-arm64",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mac-dev",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mac-zip",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mas",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:mas-dev",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:msi",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:pkg",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:rpm",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:win",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dist:zip",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dmg",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "dotenv",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-builder",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-is-dev",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-log",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-next",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-settings",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electron-updater",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "electronLanguages",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "email",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "enable-store",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "entitlements",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "entitlementsInherit",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "eslint-config-next",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "exiftool-vendored",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "extraFiles",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "files",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "filter",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "firebase",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "from",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "gatekeeperAssess",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "gray-matter",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "hardenedRuntime",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "homepage",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "upscayl",
+      "target": "icon",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "ecosystem",
+      "target": "mac-ai-os",
+      "type": "contains",
+      "evidence": "~/mac-ai-os"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "chromadb",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "configs",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "mcp",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "ollama",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "openai",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "psutil",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pydantic",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pydantic-settings",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pypdf",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pytest",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pytest-asyncio",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "pyyaml",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "rich",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "ruff",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "slack_bolt",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "slack_sdk",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "structlog",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "typer",
+      "type": "depends_on",
+      "evidence": "manifest"
+    },
+    {
+      "source": "mac-ai-os",
+      "target": "watchdog",
+      "type": "depends_on",
+      "evidence": "manifest"
+    }
+  ]
+}

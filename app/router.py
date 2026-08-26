@@ -56,7 +56,7 @@ def _keyword_route(goal: str, agents: list[str]) -> tuple[str, float]:
         # Confidence: more matches = higher confidence.
         confidence = min(0.5 + scored[best] * 0.15, 0.95)
         return best, confidence
-    return "research", 0.3  # low confidence fallback
+    return "general", 0.3  # low confidence fallback
 
 
 def _llm_route(
@@ -72,6 +72,8 @@ def _llm_route(
         "confidence: <0.0-1.0>\n"
         "reasoning: <one sentence>\n\n"
         "Rules:\n"
+        "- 'general' agent: general conversation, math, reasoning, knowledge questions "
+        "that don't fit other agents.\n"
         "- 'session' agent: questions about what the user was working on, session history, "
         "getting ready to continue, recent activity.\n"
         "- 'git' agent: git operations, commits, branches, diffs.\n"
@@ -110,7 +112,7 @@ def _llm_route(
 
     # If parsing failed, fall back.
     log.warning("router.llm_parse_failed", response=text[:200])
-    return "research", 0.3, "LLM response parsing failed"
+    return "general", 0.3, "LLM response parsing failed"
 
 
 class IntentRouter:

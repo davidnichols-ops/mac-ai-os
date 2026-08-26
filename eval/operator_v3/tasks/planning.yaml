@@ -1,0 +1,10 @@
+category: planning
+tasks:
+  - name: multi_step_task
+    prompt: "List files in the current directory, then read the first Python file you find"
+    expected_behavior: "calls file_list, then file_read — multi-step plan"
+    verify_min_tool_calls: 2
+  - name: choose_approach
+    prompt: "Find out what git branch we're on"
+    expected_behavior: "calls git with status or branch command"
+    verify_tool_used: ["git", "shell"]

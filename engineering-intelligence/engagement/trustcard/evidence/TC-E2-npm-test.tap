@@ -1,0 +1,3115 @@
+
+> mcp-trustcard@3.0.0 test
+> node --test test/*.test.js
+
+TAP version 13
+# Subtest: A1: a descriptor with a forged signature does NOT verify
+ok 1 - A1: a descriptor with a forged signature does NOT verify
+  ---
+  duration_ms: 8.27225
+  type: 'test'
+  ...
+# Subtest: A2: mutating a signed descriptor breaks digest + signature (detected)
+ok 2 - A2: mutating a signed descriptor breaks digest + signature (detected)
+  ---
+  duration_ms: 1.133834
+  type: 'test'
+  ...
+# Subtest: A3: trusted fetch tool with path-traversal arg is denied at Gate 2
+ok 3 - A3: trusted fetch tool with path-traversal arg is denied at Gate 2
+  ---
+  duration_ms: 1.119708
+  type: 'test'
+  ...
+# Subtest: A4: a scoped decision for agent-a does NOT authorize agent-b
+ok 4 - A4: a scoped decision for agent-a does NOT authorize agent-b
+  ---
+  duration_ms: 0.147208
+  type: 'test'
+  ...
+# Subtest: A5: a receipt's capabilityDigest pins the exact tool version — mutation is detectable
+ok 5 - A5: a receipt's capabilityDigest pins the exact tool version — mutation is detectable
+  ---
+  duration_ms: 1.333
+  type: 'test'
+  ...
+# Subtest: A6: deleting or reordering receipts breaks the chain
+ok 6 - A6: deleting or reordering receipts breaks the chain
+  ---
+  duration_ms: 1.016667
+  type: 'test'
+  ...
+# Subtest: A7: old key CAN authorize a rotation — but ONLY a rotation it signed
+ok 7 - A7: old key CAN authorize a rotation — but ONLY a rotation it signed
+  ---
+  duration_ms: 1.382209
+  type: 'test'
+  ...
+# Subtest: A8: a revocation not self-signed by the target key fails
+ok 8 - A8: a revocation not self-signed by the target key fails
+  ---
+  duration_ms: 1.165125
+  type: 'test'
+  ...
+# Subtest: FIXED: an expired rotation certificate is rejected
+ok 9 - FIXED: an expired rotation certificate is rejected
+  ---
+  duration_ms: 2.067834
+  type: 'test'
+  ...
+# Subtest: REGRESSION: a body-tampered receipt with its original digest breaks the chain
+ok 10 - REGRESSION: a body-tampered receipt with its original digest breaks the chain
+  ---
+  duration_ms: 1.358709
+  type: 'test'
+  ...
+# Subtest: GAP: a signed receipt proves a decision was recorded, not that execution occurred
+ok 11 - GAP: a signed receipt proves a decision was recorded, not that execution occurred
+  ---
+  duration_ms: 0.852208
+  type: 'test'
+  ...
+# Subtest: description rewrite (same schema) → ANNOTATION_DOWNGRADE, incompatible
+ok 12 - description rewrite (same schema) → ANNOTATION_DOWNGRADE, incompatible
+  ---
+  duration_ms: 2.862583
+  type: 'test'
+  ...
+# Subtest: permission expansion (readOnly→destructive) → PERMISSION axis EXPANSION
+ok 13 - permission expansion (readOnly→destructive) → PERMISSION axis EXPANSION
+  ---
+  duration_ms: 0.314708
+  type: 'test'
+  ...
+# Subtest: implementation swap with identical interface → implementation REPLACED
+ok 14 - implementation swap with identical interface → implementation REPLACED
+  ---
+  duration_ms: 0.219542
+  type: 'test'
+  ...
+# Subtest: publisher key change (same tools, same impl) → provenance movement, incompatible
+ok 15 - publisher key change (same tools, same impl) → provenance movement, incompatible
+  ---
+  duration_ms: 0.384375
+  type: 'test'
+  ...
+# Subtest: tool rename → interface change (name is in the projection)
+ok 16 - tool rename → interface change (name is in the projection)
+  ---
+  duration_ms: 0.244709
+  type: 'test'
+  ...
+# Subtest: pure no-op (identical everything) → all NONE, compatible
+ok 17 - pure no-op (identical everything) → all NONE, compatible
+  ---
+  duration_ms: 0.597375
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: exact match
+ok 18 - scopeSatisfies: exact match
+  ---
+  duration_ms: 1.120042
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: wildcard * matches everything
+ok 19 - scopeSatisfies: wildcard * matches everything
+  ---
+  duration_ms: 0.198916
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: prefix wildcard read:* matches read:files
+ok 20 - scopeSatisfies: prefix wildcard read:* matches read:files
+  ---
+  duration_ms: 0.102458
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: multiple required scopes all must be present
+ok 21 - scopeSatisfies: multiple required scopes all must be present
+  ---
+  duration_ms: 0.161667
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: empty required always satisfied
+ok 22 - scopeSatisfies: empty required always satisfied
+  ---
+  duration_ms: 0.079458
+  type: 'test'
+  ...
+# Subtest: AuthToken: valid token is valid
+ok 23 - AuthToken: valid token is valid
+  ---
+  duration_ms: 0.1405
+  type: 'test'
+  ...
+# Subtest: AuthToken: expired token is invalid
+ok 24 - AuthToken: expired token is invalid
+  ---
+  duration_ms: 1.476334
+  type: 'test'
+  ...
+# Subtest: AuthToken: inactive token is invalid
+ok 25 - AuthToken: inactive token is invalid
+  ---
+  duration_ms: 0.121041
+  type: 'test'
+  ...
+# Subtest: DevIssuer: issue and verify roundtrip
+ok 26 - DevIssuer: issue and verify roundtrip
+  ---
+  duration_ms: 1.495667
+  type: 'test'
+  ...
+# Subtest: DevIssuer: wrong secret fails verification
+ok 27 - DevIssuer: wrong secret fails verification
+  ---
+  duration_ms: 0.544
+  type: 'test'
+  ...
+# Subtest: DevIssuer: expired token is invalid
+ok 28 - DevIssuer: expired token is invalid
+  ---
+  duration_ms: 0.219208
+  type: 'test'
+  ...
+# Subtest: DevIssuer: no expiry token never expires
+ok 29 - DevIssuer: no expiry token never expires
+  ---
+  duration_ms: 0.184375
+  type: 'test'
+  ...
+# Subtest: DevIssuer: malformed token returns null
+ok 30 - DevIssuer: malformed token returns null
+  ---
+  duration_ms: 0.057625
+  type: 'test'
+  ...
+# Subtest: extractToken: from _meta.auth.token
+ok 31 - extractToken: from _meta.auth.token
+  ---
+  duration_ms: 0.07075
+  type: 'test'
+  ...
+# Subtest: extractToken: from _meta.authorization Bearer
+ok 32 - extractToken: from _meta.authorization Bearer
+  ---
+  duration_ms: 0.044834
+  type: 'test'
+  ...
+# Subtest: extractToken: from environment variable
+ok 33 - extractToken: from environment variable
+  ---
+  duration_ms: 0.059375
+  type: 'test'
+  ...
+# Subtest: extractToken: returns null when no token present
+ok 34 - extractToken: returns null when no token present
+  ---
+  duration_ms: 0.1435
+  type: 'test'
+  ...
+# Subtest: extractToken: _meta.auth.token takes precedence over env
+ok 35 - extractToken: _meta.auth.token takes precedence over env
+  ---
+  duration_ms: 0.083584
+  type: 'test'
+  ...
+# Subtest: stripAuth: removes auth fields from _meta
+ok 36 - stripAuth: removes auth fields from _meta
+  ---
+  duration_ms: 0.100958
+  type: 'test'
+  ...
+# Subtest: stripAuth: no _meta returns request unchanged
+ok 37 - stripAuth: no _meta returns request unchanged
+  ---
+  duration_ms: 0.051791
+  type: 'test'
+  ...
+# Subtest: checkCall: unscoped tool passes without token
+ok 38 - checkCall: unscoped tool passes without token
+  ---
+  duration_ms: 0.14
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool blocked without token
+ok 39 - checkCall: scoped tool blocked without token
+  ---
+  duration_ms: 0.170625
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool passes with sufficient token
+ok 40 - checkCall: scoped tool passes with sufficient token
+  ---
+  duration_ms: 0.05675
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool blocked with insufficient token
+ok 41 - checkCall: scoped tool blocked with insufficient token
+  ---
+  duration_ms: 0.110375
+  type: 'test'
+  ...
+# Subtest: checkCall: wildcard scope satisfies required scope
+ok 42 - checkCall: wildcard scope satisfies required scope
+  ---
+  duration_ms: 0.126416
+  type: 'test'
+  ...
+# Subtest: checkCall: * scope satisfies any required scope
+ok 43 - checkCall: * scope satisfies any required scope
+  ---
+  duration_ms: 0.05825
+  type: 'test'
+  ...
+# Subtest: checkCall: expired token blocked on scoped tool
+ok 44 - checkCall: expired token blocked on scoped tool
+  ---
+  duration_ms: 0.080458
+  type: 'test'
+  ...
+# Subtest: checkCall: multiple required scopes all must be present
+ok 45 - checkCall: multiple required scopes all must be present
+  ---
+  duration_ms: 0.075583
+  type: 'test'
+  ...
+# Subtest: buildManifest: scopeOverrides add requiredScopes to tools
+ok 46 - buildManifest: scopeOverrides add requiredScopes to tools
+  ---
+  duration_ms: 11.126792
+  type: 'test'
+  ...
+# Subtest: buildManifest: server-declared scopes from annotations._meta
+ok 47 - buildManifest: server-declared scopes from annotations._meta
+  ---
+  duration_ms: 0.481583
+  type: 'test'
+  ...
+# Subtest: buildManifest: scopeOverrides take precedence over server-declared
+ok 48 - buildManifest: scopeOverrides take precedence over server-declared
+  ---
+  duration_ms: 0.549
+  type: 'test'
+  ...
+# Subtest: requireScopes: denies when no token present
+ok 49 - requireScopes: denies when no token present
+  ---
+  duration_ms: 0.222083
+  type: 'test'
+  ...
+# Subtest: requireScopes: denies when token lacks scope
+ok 50 - requireScopes: denies when token lacks scope
+  ---
+  duration_ms: 0.104875
+  type: 'test'
+  ...
+# Subtest: requireScopes: allows when token has scope
+ok 51 - requireScopes: allows when token has scope
+  ---
+  duration_ms: 0.079791
+  type: 'test'
+  ...
+# Subtest: requireScopes: wildcard scope satisfies
+ok 52 - requireScopes: wildcard scope satisfies
+  ---
+  duration_ms: 0.16625
+  type: 'test'
+  ...
+# Subtest: requireScopes: only applies to specified tool
+ok 53 - requireScopes: only applies to specified tool
+  ---
+  duration_ms: 0.076083
+  type: 'test'
+  ...
+# Subtest: requireScopes: applies to all tools when no tool specified
+ok 54 - requireScopes: applies to all tools when no tool specified
+  ---
+  duration_ms: 0.066542
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes rule blocks call
+ok 55 - InvocationPolicy: requireScopes rule blocks call
+  ---
+  duration_ms: 0.232542
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes rule allows call with valid token
+ok 56 - InvocationPolicy: requireScopes rule allows call with valid token
+  ---
+  duration_ms: 0.095666
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes with require-approval verdict
+ok 57 - InvocationPolicy: requireScopes with require-approval verdict
+  ---
+  duration_ms: 0.084709
+  type: 'test'
+  ...
+# Subtest: TokenValidator: validates dev-issued tokens
+ok 58 - TokenValidator: validates dev-issued tokens
+  ---
+  duration_ms: 0.481167
+  type: 'test'
+  ...
+# Subtest: TokenValidator: returns null for empty token
+ok 59 - TokenValidator: returns null for empty token
+  ---
+  duration_ms: 0.089666
+  type: 'test'
+  ...
+# Subtest: TokenValidator: returns null for unknown token format
+ok 60 - TokenValidator: returns null for unknown token format
+  ---
+  duration_ms: 0.0835
+  type: 'test'
+  ...
+# Subtest: initialize: returns correct protocol version and server info
+ok 61 - initialize: returns correct protocol version and server info
+  ---
+  duration_ms: 61.813
+  type: 'test'
+  ...
+# Subtest: initialize: includes trustcard-aware toolsetDigest binding
+ok 62 - initialize: includes trustcard-aware toolsetDigest binding
+  ---
+  duration_ms: 64.161834
+  type: 'test'
+  ...
+# Subtest: tools/list: returns 3 well-annotated tools
+ok 63 - tools/list: returns 3 well-annotated tools
+  ---
+  duration_ms: 68.166667
+  type: 'test'
+  ...
+# Subtest: record_decision: returns receipt with digest and chain pointer
+ok 64 - record_decision: returns receipt with digest and chain pointer
+  ---
+  duration_ms: 80.462916
+  type: 'test'
+  ...
+# Subtest: hash chain: second decision links to first
+ok 65 - hash chain: second decision links to first
+  ---
+  duration_ms: 78.787625
+  type: 'test'
+  ...
+# Subtest: query_decisions: filters by agent
+ok 66 - query_decisions: filters by agent
+  ---
+  duration_ms: 87.6065
+  type: 'test'
+  ...
+# Subtest: query_decisions: filters by kind
+ok 67 - query_decisions: filters by kind
+  ---
+  duration_ms: 72.910333
+  type: 'test'
+  ...
+# Subtest: query_decisions: filters by time range
+ok 68 - query_decisions: filters by time range
+  ---
+  duration_ms: 71.989
+  type: 'test'
+  ...
+# Subtest: server_identity: returns capability descriptor with log stats
+ok 69 - server_identity: returns capability descriptor with log stats
+  ---
+  duration_ms: 66.883542
+  type: 'test'
+  ...
+# Subtest: persistence: decisions survive server restart
+ok 70 - persistence: decisions survive server restart
+  ---
+  duration_ms: 129.211583
+  type: 'test'
+  ...
+# Subtest: default kind: omits kind → defaults to 'decision'
+ok 71 - default kind: omits kind → defaults to 'decision'
+  ---
+  duration_ms: 56.043667
+  type: 'test'
+  ...
+# Subtest: FAILURE 1 — malformed JSON-RPC: parse error returns -32700
+ok 72 - FAILURE 1 — malformed JSON-RPC: parse error returns -32700
+  ---
+  duration_ms: 51.8205
+  type: 'test'
+  ...
+# Subtest: FAILURE 1 — missing required fields: returns -32602 invalid params
+ok 73 - FAILURE 1 — missing required fields: returns -32602 invalid params
+  ---
+  duration_ms: 52.134625
+  type: 'test'
+  ...
+# Subtest: FAILURE 1 — invalid kind enum: returns -32602
+ok 74 - FAILURE 1 — invalid kind enum: returns -32602
+  ---
+  duration_ms: 50.188042
+  type: 'test'
+  ...
+# Subtest: FAILURE 1 — field too long: rationale > 4000 chars returns -32602
+ok 75 - FAILURE 1 — field too long: rationale > 4000 chars returns -32602
+  ---
+  duration_ms: 46.5995
+  type: 'test'
+  ...
+# Subtest: FAILURE 1 — invalid JSON-RPC envelope: returns -32600
+ok 76 - FAILURE 1 — invalid JSON-RPC envelope: returns -32600
+  ---
+  duration_ms: 45.702792
+  type: 'test'
+  ...
+# Subtest: FAILURE 2 — unknown tool: returns -32601 method not found
+ok 77 - FAILURE 2 — unknown tool: returns -32601 method not found
+  ---
+  duration_ms: 43.921667
+  type: 'test'
+  ...
+# Subtest: FAILURE 2 — corrupt audit log: digest mismatch returns -32603
+ok 78 - FAILURE 2 — corrupt audit log: digest mismatch returns -32603
+  ---
+  duration_ms: 90.530625
+  type: 'test'
+  ...
+# Subtest: FAILURE 2 — broken chain: prev pointer mismatch returns -32603
+ok 79 - FAILURE 2 — broken chain: prev pointer mismatch returns -32603
+  ---
+  duration_ms: 99.131917
+  type: 'test'
+  ...
+# Subtest: FAILURE 2 — malformed JSON in log file: returns -32603
+ok 80 - FAILURE 2 — malformed JSON in log file: returns -32603
+  ---
+  duration_ms: 45.18025
+  type: 'test'
+  ...
+# Subtest: FAILURE 3 — unknown JSON-RPC method: returns -32601
+ok 81 - FAILURE 3 — unknown JSON-RPC method: returns -32601
+  ---
+  duration_ms: 47.9515
+  type: 'test'
+  ...
+# Subtest: FAILURE 3 — tools/call with missing name param: returns -32601
+ok 82 - FAILURE 3 — tools/call with missing name param: returns -32601
+  ---
+  duration_ms: 44.658709
+  type: 'test'
+  ...
+# Subtest: FAILURE 3 — notifications/initialized produces no response (no id)
+ok 83 - FAILURE 3 — notifications/initialized produces no response (no id)
+  ---
+  duration_ms: 47.672334
+  type: 'test'
+  ...
+# Subtest: FAILURE 3 — server exits cleanly on stdin close
+ok 84 - FAILURE 3 — server exits cleanly on stdin close
+  ---
+  duration_ms: 47.813292
+  type: 'test'
+  ...
+# Subtest: edge: empty query returns count 0
+ok 85 - edge: empty query returns count 0
+  ---
+  duration_ms: 44.7445
+  type: 'test'
+  ...
+# Subtest: edge: limit clamps results
+ok 86 - edge: limit clamps results
+  ---
+  duration_ms: 49.957125
+  type: 'test'
+  ...
+# Subtest: edge: limit=0 is invalid (minimum 1)
+ok 87 - edge: limit=0 is invalid (minimum 1)
+  ---
+  duration_ms: 49.018334
+  type: 'test'
+  ...
+# Subtest: edge: limit=1001 is invalid (maximum 1000)
+ok 88 - edge: limit=1001 is invalid (maximum 1000)
+  ---
+  duration_ms: 46.909041
+  type: 'test'
+  ...
+# Subtest: edge: tags with maxItems enforcement (21 tags fails)
+ok 89 - edge: tags with maxItems enforcement (21 tags fails)
+  ---
+  duration_ms: 45.430708
+  type: 'test'
+  ...
+# Subtest: edge: empty agent string fails validation
+ok 90 - edge: empty agent string fails validation
+  ---
+  duration_ms: 46.914792
+  type: 'test'
+  ...
+# Subtest: edge: invalid timestamp in since filter fails
+ok 91 - edge: invalid timestamp in since filter fails
+  ---
+  duration_ms: 47.319541
+  type: 'test'
+  ...
+# Subtest: edge: server_identity on empty log returns decisionCount 0
+ok 92 - edge: server_identity on empty log returns decisionCount 0
+  ---
+  duration_ms: 48.1535
+  type: 'test'
+  ...
+# Subtest: edge: toolsetDigest is deterministic across restarts
+ok 93 - edge: toolsetDigest is deterministic across restarts
+  ---
+  duration_ms: 94.185708
+  type: 'test'
+  ...
+# Subtest: edge: ping method returns empty result
+ok 94 - edge: ping method returns empty result
+  ---
+  duration_ms: 47.242084
+  type: 'test'
+  ...
+# Subtest: edge: observability — structured logs on stderr
+ok 95 - edge: observability — structured logs on stderr
+  ---
+  duration_ms: 148.291791
+  type: 'test'
+  ...
+# Subtest: edge: debug log level shows tool_call events
+ok 96 - edge: debug log level shows tool_call events
+  ---
+  duration_ms: 151.837959
+  type: 'test'
+  ...
+# Subtest: security: no dangerous param names in tool schemas
+ok 97 - security: no dangerous param names in tool schemas
+  ---
+  duration_ms: 52.438208
+  type: 'test'
+  ...
+# Subtest: security: all tools declare destructiveHint: false
+ok 98 - security: all tools declare destructiveHint: false
+  ---
+  duration_ms: 48.467083
+  type: 'test'
+  ...
+# Subtest: security: rationale is not included in query results (data minimization)
+ok 99 - security: rationale is not included in query results (data minimization)
+  ---
+  duration_ms: 52.13975
+  type: 'test'
+  ...
+# Subtest: security: no prompt-injection markers in tool descriptions
+ok 100 - security: no prompt-injection markers in tool descriptions
+  ---
+  duration_ms: 46.951583
+  type: 'test'
+  ...
+# Subtest: determinism: same decision inputs produce same digest (excluding timestamp)
+ok 101 - determinism: same decision inputs produce same digest (excluding timestamp)
+  ---
+  duration_ms: 3.903
+  type: 'test'
+  ...
+# Subtest: determinism: query is order-stable (returns in insertion order)
+ok 102 - determinism: query is order-stable (returns in insertion order)
+  ---
+  duration_ms: 52.641792
+  type: 'test'
+  ...
+# Subtest: JCS: object keys are sorted, whitespace removed
+ok 103 - JCS: object keys are sorted, whitespace removed
+  ---
+  duration_ms: 1.070416
+  type: 'test'
+  ...
+# Subtest: JCS: RFC 8785 §3.2.2.2 string examples
+ok 104 - JCS: RFC 8785 §3.2.2.2 string examples
+  ---
+  duration_ms: 0.143792
+  type: 'test'
+  ...
+# Subtest: JCS: RFC 8785 number canonicalization
+ok 105 - JCS: RFC 8785 number canonicalization
+  ---
+  duration_ms: 0.267083
+  type: 'test'
+  ...
+# Subtest: JCS: rejects non-finite numbers
+ok 106 - JCS: rejects non-finite numbers
+  ---
+  duration_ms: 0.296625
+  type: 'test'
+  ...
+# Subtest: JCS: undefined object values dropped, array undefined → null (JSON semantics)
+ok 107 - JCS: undefined object values dropped, array undefined → null (JSON semantics)
+  ---
+  duration_ms: 0.209542
+  type: 'test'
+  ...
+# Subtest: JCS: determinism — same logical value, different key order, same bytes
+ok 108 - JCS: determinism — same logical value, different key order, same bytes
+  ---
+  duration_ms: 0.54475
+  type: 'test'
+  ...
+# Subtest: jsonEqual: structural equality
+ok 109 - jsonEqual: structural equality
+  ---
+  duration_ms: 0.335584
+  type: 'test'
+  ...
+# Subtest: hashJson: stable, prefixed, base64url
+ok 110 - hashJson: stable, prefixed, base64url
+  ---
+  duration_ms: 0.293667
+  type: 'test'
+  ...
+# Subtest: THE case v1 cannot represent: I_id unchanged, M_id changed
+ok 111 - THE case v1 cannot represent: I_id unchanged, M_id changed
+  ---
+  duration_ms: 3.515834
+  type: 'test'
+  ...
+# Subtest: identical everything → no change, compatible
+ok 112 - identical everything → no change, compatible
+  ---
+  duration_ms: 0.700292
+  type: 'test'
+  ...
+# Subtest: permission expansion is not auto-acceptable
+ok 113 - permission expansion is not auto-acceptable
+  ---
+  duration_ms: 0.207708
+  type: 'test'
+  ...
+# Subtest: permission reduction (added safety hint) is auto-acceptable
+ok 114 - permission reduction (added safety hint) is auto-acceptable
+  ---
+  duration_ms: 0.198125
+  type: 'test'
+  ...
+# Subtest: schema narrowing is still interface-BREAKING regardless of permission axis
+ok 115 - schema narrowing is still interface-BREAKING regardless of permission axis
+  ---
+  duration_ms: 0.59825
+  type: 'test'
+  ...
+# Subtest: provenance key rotation requires re-approval
+ok 116 - provenance key rotation requires re-approval
+  ---
+  duration_ms: 0.119625
+  type: 'test'
+  ...
+# Subtest: unresolved implementation on both sides is not a change
+ok 117 - unresolved implementation on both sides is not a change
+  ---
+  duration_ms: 0.162875
+  type: 'test'
+  ...
+# Subtest: isVectorCompatible: only all-safe vectors pass
+ok 118 - isVectorCompatible: only all-safe vectors pass
+  ---
+  duration_ms: 0.073333
+  type: 'test'
+  ...
+# Subtest: axis levels are strictly ordered
+ok 119 - axis levels are strictly ordered
+  ---
+  duration_ms: 0.431959
+  type: 'test'
+  ...
+# Subtest: verb matching: does NOT flag read-only tools as destructive (false positive fixes)
+ok 120 - verb matching: does NOT flag read-only tools as destructive (false positive fixes)
+  ---
+  duration_ms: 2.718625
+  type: 'test'
+  ...
+# Subtest: verb matching: DOES flag actually destructive tools
+ok 121 - verb matching: DOES flag actually destructive tools
+  ---
+  duration_ms: 0.278167
+  type: 'test'
+  ...
+# Subtest: verb matching: does NOT match substrings (word boundary)
+ok 122 - verb matching: does NOT match substrings (word boundary)
+  ---
+  duration_ms: 0.095334
+  type: 'test'
+  ...
+# Subtest: verb matching: handles snake_case correctly
+ok 123 - verb matching: handles snake_case correctly
+  ---
+  duration_ms: 0.08
+  type: 'test'
+  ...
+# Subtest: parameter analysis: detects filesystem path params
+ok 124 - parameter analysis: detects filesystem path params
+  ---
+  duration_ms: 0.148042
+  type: 'test'
+  ...
+# Subtest: parameter analysis: detects shell command params
+ok 125 - parameter analysis: detects shell command params
+  ---
+  duration_ms: 0.098417
+  type: 'test'
+  ...
+# Subtest: parameter analysis: detects SQL params
+ok 126 - parameter analysis: detects SQL params
+  ---
+  duration_ms: 0.080291
+  type: 'test'
+  ...
+# Subtest: parameter analysis: detects URL params (SSRF risk)
+ok 127 - parameter analysis: detects URL params (SSRF risk)
+  ---
+  duration_ms: 0.088208
+  type: 'test'
+  ...
+# Subtest: parameter analysis: does NOT flag safe params
+ok 128 - parameter analysis: does NOT flag safe params
+  ---
+  duration_ms: 0.456667
+  type: 'test'
+  ...
+# Subtest: parameter analysis: handles tools with no params
+ok 129 - parameter analysis: handles tools with no params
+  ---
+  duration_ms: 0.5915
+  type: 'test'
+  ...
+# Subtest: parameter analysis: handles tools with no inputSchema
+ok 130 - parameter analysis: handles tools with no inputSchema
+  ---
+  duration_ms: 0.180083
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: detects GitHub tokens
+ok 131 - scanConfigForSecrets: detects GitHub tokens
+  ---
+  duration_ms: 1.104084
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: detects OpenAI keys
+ok 132 - scanConfigForSecrets: detects OpenAI keys
+  ---
+  duration_ms: 0.101458
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: detects Slack tokens
+ok 133 - scanConfigForSecrets: detects Slack tokens
+  ---
+  duration_ms: 0.072375
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: detects AWS keys
+ok 134 - scanConfigForSecrets: detects AWS keys
+  ---
+  duration_ms: 0.067292
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: detects Bearer tokens
+ok 135 - scanConfigForSecrets: detects Bearer tokens
+  ---
+  duration_ms: 0.894708
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: does NOT flag non-secret values
+ok 136 - scanConfigForSecrets: does NOT flag non-secret values
+  ---
+  duration_ms: 0.128834
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: redacts secrets in sample output
+ok 137 - scanConfigForSecrets: redacts secrets in sample output
+  ---
+  duration_ms: 0.086875
+  type: 'test'
+  ...
+# Subtest: scanConfigForSecrets: reports line numbers
+ok 138 - scanConfigForSecrets: reports line numbers
+  ---
+  duration_ms: 0.079667
+  type: 'test'
+  ...
+# Subtest: env-file parsing: parses KEY=value lines
+ok 139 - env-file parsing: parses KEY=value lines
+  ---
+  duration_ms: 0.128875
+  type: 'test'
+  ...
+# Subtest: env-file parsing: skips comments and blank lines
+ok 140 - env-file parsing: skips comments and blank lines
+  ---
+  duration_ms: 0.0715
+  type: 'test'
+  ...
+# Subtest: env-file parsing: strips surrounding quotes
+ok 141 - env-file parsing: strips surrounding quotes
+  ---
+  duration_ms: 0.197
+  type: 'test'
+  ...
+# Subtest: env-file parsing: handles values with = signs
+ok 142 - env-file parsing: handles values with = signs
+  ---
+  duration_ms: 0.06825
+  type: 'test'
+  ...
+# Subtest: env-file parsing: handles empty file
+ok 143 - env-file parsing: handles empty file
+  ---
+  duration_ms: 0.057625
+  type: 'test'
+  ...
+# Subtest: keygen → sign → verify round trip via CLI
+ok 144 - keygen → sign → verify round trip via CLI
+  ---
+  duration_ms: 309.876666
+  type: 'test'
+  ...
+# Subtest: verify rejects a tampered manifest (exit 1)
+ok 145 - verify rejects a tampered manifest (exit 1)
+  ---
+  duration_ms: 285.533417
+  type: 'test'
+  ...
+# Subtest: diff classifies breaking change and exits 1
+ok 146 - diff classifies breaking change and exits 1
+  ---
+  duration_ms: 84.379375
+  type: 'test'
+  ...
+# Subtest: diff of identical toolsets exits 0 with NONE
+ok 147 - diff of identical toolsets exits 0 with NONE
+  ---
+  duration_ms: 75.428458
+  type: 'test'
+  ...
+# Subtest: pins: empty store prints guidance, --json returns structure
+ok 148 - pins: empty store prints guidance, --json returns structure
+  ---
+  duration_ms: 68.08175
+  type: 'test'
+  ...
+# Subtest: heuristic detects destructive verbs
+ok 149 - heuristic detects destructive verbs
+  ---
+  duration_ms: 4.255833
+  type: 'test'
+  ...
+# Subtest: heuristic detects dangerous params
+ok 150 - heuristic detects dangerous params
+  ---
+  duration_ms: 2.679875
+  type: 'test'
+  ...
+# Subtest: heuristic does not flag read-only tools
+ok 151 - heuristic does not flag read-only tools
+  ---
+  duration_ms: 0.362292
+  type: 'test'
+  ...
+# Subtest: semantic engine catches novel dangerous patterns
+ok 152 - semantic engine catches novel dangerous patterns
+  ---
+  duration_ms: 0.554292
+  type: 'test'
+  ...
+# Subtest: semantic engine returns low score for benign tools
+ok 153 - semantic engine returns low score for benign tools
+  ---
+  duration_ms: 0.342625
+  type: 'test'
+  ...
+# Subtest: fusion: both engines agree on clearly dangerous tool
+ok 154 - fusion: both engines agree on clearly dangerous tool
+  ---
+  duration_ms: 5.83975
+  type: 'test'
+  ...
+# Subtest: fusion: flags tool with only semantic match
+ok 155 - fusion: flags tool with only semantic match
+  ---
+  duration_ms: 1.321875
+  type: 'test'
+  ...
+# Subtest: fusion: does not flag benign tools
+ok 156 - fusion: does not flag benign tools
+  ---
+  duration_ms: 0.43
+  type: 'test'
+  ...
+# Subtest: analyzeAllTools returns summary with risk level
+ok 157 - analyzeAllTools returns summary with risk level
+  ---
+  duration_ms: 0.987333
+  type: 'test'
+  ...
+# Subtest: tokenize handles snake_case and special chars
+ok 158 - tokenize handles snake_case and special chars
+  ---
+  duration_ms: 0.561625
+  type: 'test'
+  ...
+# Subtest: cosine similarity of identical vectors is 1
+ok 159 - cosine similarity of identical vectors is 1
+  ---
+  duration_ms: 0.270792
+  type: 'test'
+  ...
+# Subtest: cosine similarity of orthogonal vectors is 0
+ok 160 - cosine similarity of orthogonal vectors is 0
+  ---
+  duration_ms: 0.084958
+  type: 'test'
+  ...
+# Subtest: tfidf vector has expected terms
+ok 161 - tfidf vector has expected terms
+  ---
+  duration_ms: 0.072667
+  type: 'test'
+  ...
+# Subtest: fusion: tool poisoning detection — innocent name, dangerous description
+ok 162 - fusion: tool poisoning detection — innocent name, dangerous description
+  ---
+  duration_ms: 0.441792
+  type: 'test'
+  ...
+# Subtest: fusion: schema shadowing detection — tool shadows a real one
+ok 163 - fusion: schema shadowing detection — tool shadows a real one
+  ---
+  duration_ms: 0.442583
+  type: 'test'
+  ...
+# Subtest: supply chain: worm recon tool disguised as code search
+ok 164 - supply chain: worm recon tool disguised as code search
+  ---
+  duration_ms: 0.371416
+  type: 'test'
+  ...
+# Subtest: supply chain: worm spread tool disguised as cache sync
+ok 165 - supply chain: worm spread tool disguised as cache sync
+  ---
+  duration_ms: 0.36775
+  type: 'test'
+  ...
+# Subtest: supply chain: worm persistence tool with cron param
+ok 166 - supply chain: worm persistence tool with cron param
+  ---
+  duration_ms: 0.337709
+  type: 'test'
+  ...
+# Subtest: supply chain: exfiltration tool with include_secrets param
+ok 167 - supply chain: exfiltration tool with include_secrets param
+  ---
+  duration_ms: 0.370375
+  type: 'test'
+  ...
+# Subtest: supply chain: real GitHub tools are NOT flagged as dangerous
+ok 168 - supply chain: real GitHub tools are NOT flagged as dangerous
+  ---
+  duration_ms: 0.992625
+  type: 'test'
+  ...
+# Subtest: suspicious phrase: prompt injection detected
+ok 169 - suspicious phrase: prompt injection detected
+  ---
+  duration_ms: 0.4285
+  type: 'test'
+  ...
+# Subtest: FP fix: create_directory is NOT dangerous (idempotent, non-destructive)
+ok 170 - FP fix: create_directory is NOT dangerous (idempotent, non-destructive)
+  ---
+  duration_ms: 0.338333
+  type: 'test'
+  ...
+# Subtest: FP fix: sequentialthinking is NOT dangerous (cognitive tool, 'clear' is not destructive here)
+ok 171 - FP fix: sequentialthinking is NOT dangerous (cognitive tool, 'clear' is not destructive here)
+  ---
+  duration_ms: 0.33625
+  type: 'test'
+  ...
+# Subtest: Context-aware: 'clear' IS dangerous when paired with destructive noun (clear cache)
+ok 172 - Context-aware: 'clear' IS dangerous when paired with destructive noun (clear cache)
+  ---
+  duration_ms: 0.36025
+  type: 'test'
+  ...
+# Subtest: Context-aware: 'reset' IS dangerous when paired with destructive noun (reset database)
+ok 173 - Context-aware: 'reset' IS dangerous when paired with destructive noun (reset database)
+  ---
+  duration_ms: 0.293375
+  type: 'test'
+  ...
+# Subtest: Context-aware: 'clear' is NOT dangerous in a cognitive context (clear thoughts)
+ok 174 - Context-aware: 'clear' is NOT dangerous in a cognitive context (clear thoughts)
+  ---
+  duration_ms: 0.120791
+  type: 'test'
+  ...
+# Subtest: Safe pattern: mkdir is NOT dangerous
+ok 175 - Safe pattern: mkdir is NOT dangerous
+  ---
+  duration_ms: 0.222625
+  type: 'test'
+  ...
+# Subtest: injection: <IMPORTANT> tag in description is flagged
+ok 176 - injection: <IMPORTANT> tag in description is flagged
+  ---
+  duration_ms: 0.134459
+  type: 'test'
+  ...
+# Subtest: injection: [SYSTEM OVERRIDE] bracket is flagged
+ok 177 - injection: [SYSTEM OVERRIDE] bracket is flagged
+  ---
+  duration_ms: 0.118084
+  type: 'test'
+  ...
+# Subtest: injection: 'ignore previous instructions' is flagged
+ok 178 - injection: 'ignore previous instructions' is flagged
+  ---
+  duration_ms: 0.101042
+  type: 'test'
+  ...
+# Subtest: injection: 'do not mention to the user' secrecy is flagged
+ok 179 - injection: 'do not mention to the user' secrecy is flagged
+  ---
+  duration_ms: 0.638459
+  type: 'test'
+  ...
+# Subtest: injection: sensitive file path (~/.ssh/id_rsa) is flagged
+ok 180 - injection: sensitive file path (~/.ssh/id_rsa) is flagged
+  ---
+  duration_ms: 0.250209
+  type: 'test'
+  ...
+# Subtest: injection: 'exfiltrate' language is flagged
+ok 181 - injection: 'exfiltrate' language is flagged
+  ---
+  duration_ms: 0.144708
+  type: 'test'
+  ...
+# Subtest: injection: base64 blob in description is flagged
+ok 182 - injection: base64 blob in description is flagged
+  ---
+  duration_ms: 0.09675
+  type: 'test'
+  ...
+# Subtest: injection: 'curl http://' external call is flagged
+ok 183 - injection: 'curl http://' external call is flagged
+  ---
+  duration_ms: 0.184375
+  type: 'test'
+  ...
+# Subtest: injection: benign description has zero injection score
+ok 184 - injection: benign description has zero injection score
+  ---
+  duration_ms: 0.081334
+  type: 'test'
+  ...
+# Subtest: injection: 'reveal your system prompt' is flagged
+ok 185 - injection: 'reveal your system prompt' is flagged
+  ---
+  duration_ms: 0.083417
+  type: 'test'
+  ...
+# Subtest: fusion: prompt injection tool with benign schema is flagged as dangerous
+ok 186 - fusion: prompt injection tool with benign schema is flagged as dangerous
+  ---
+  duration_ms: 0.424083
+  type: 'test'
+  ...
+# Subtest: fusion: [SYSTEM OVERRIDE] tool with benign schema is flagged as dangerous
+ok 187 - fusion: [SYSTEM OVERRIDE] tool with benign schema is flagged as dangerous
+  ---
+  duration_ms: 0.29825
+  type: 'test'
+  ...
+# Subtest: fusion: injection + destructive tool gets higher confidence
+ok 188 - fusion: injection + destructive tool gets higher confidence
+  ---
+  duration_ms: 0.298667
+  type: 'test'
+  ...
+# Subtest: v2.2.1 FP fix: 'succeed silently' is NOT a secrecy marker (benign API idiom)
+ok 189 - v2.2.1 FP fix: 'succeed silently' is NOT a secrecy marker (benign API idiom)
+  ---
+  duration_ms: 0.089375
+  type: 'test'
+  ...
+# Subtest: v2.2.1 FP fix: 'fail silently' is NOT a secrecy marker (benign API idiom)
+ok 190 - v2.2.1 FP fix: 'fail silently' is NOT a secrecy marker (benign API idiom)
+  ---
+  duration_ms: 0.071917
+  type: 'test'
+  ...
+# Subtest: v2.2.1: 'read silently' IS a secrecy marker (covert action)
+ok 191 - v2.2.1: 'read silently' IS a secrecy marker (covert action)
+  ---
+  duration_ms: 0.085542
+  type: 'test'
+  ...
+# Subtest: v2.2.1: 'exfiltrate silently' IS a secrecy marker (covert action)
+ok 192 - v2.2.1: 'exfiltrate silently' IS a secrecy marker (covert action)
+  ---
+  duration_ms: 0.071833
+  type: 'test'
+  ...
+# Subtest: v2.2.1: 'secretly' is always a secrecy marker (no verb needed)
+ok 193 - v2.2.1: 'secretly' is always a secrecy marker (no verb needed)
+  ---
+  duration_ms: 0.065334
+  type: 'test'
+  ...
+# Subtest: v2.2.1 FP fix: create_directory with 'succeeds silently' is NOT dangerous
+ok 194 - v2.2.1 FP fix: create_directory with 'succeeds silently' is NOT dangerous
+  ---
+  duration_ms: 0.230125
+  type: 'test'
+  ...
+# Subtest: v2.2.1: unbracketed 'IMPORTANT SYSTEM UPDATE' is flagged
+ok 195 - v2.2.1: unbracketed 'IMPORTANT SYSTEM UPDATE' is flagged
+  ---
+  duration_ms: 0.126792
+  type: 'test'
+  ...
+# Subtest: v2.2.1: unbracketed 'URGENT SECURITY NOTICE' is flagged
+ok 196 - v2.2.1: unbracketed 'URGENT SECURITY NOTICE' is flagged
+  ---
+  duration_ms: 0.09325
+  type: 'test'
+  ...
+# Subtest: v2.2.1: 'CRITICAL SYSTEM REQUIREMENT' is flagged
+ok 197 - v2.2.1: 'CRITICAL SYSTEM REQUIREMENT' is flagged
+  ---
+  duration_ms: 0.071417
+  type: 'test'
+  ...
+# Subtest: v2.2.1: benign 'important' in normal context is NOT flagged
+ok 198 - v2.2.1: benign 'important' in normal context is NOT flagged
+  ---
+  duration_ms: 0.073084
+  type: 'test'
+  ...
+# Subtest: interfaceDigest === v1 toolDigest (identity bytes unchanged)
+ok 199 - interfaceDigest === v1 toolDigest (identity bytes unchanged)
+  ---
+  duration_ms: 6.886917
+  type: 'test'
+  ...
+# Subtest: interface identity: presentation-only change keeps I_id
+ok 200 - interface identity: presentation-only change keeps I_id
+  ---
+  duration_ms: 0.906209
+  type: 'test'
+  ...
+# Subtest: interface identity: material schema change alters I_id
+ok 201 - interface identity: material schema change alters I_id
+  ---
+  duration_ms: 0.5955
+  type: 'test'
+  ...
+# Subtest: interface identity: dangerous semantic change alters I_id
+ok 202 - interface identity: dangerous semantic change alters I_id
+  ---
+  duration_ms: 0.458833
+  type: 'test'
+  ...
+# Subtest: package name+version is NOT treated as an implementation digest
+ok 203 - package name+version is NOT treated as an implementation digest
+  ---
+  duration_ms: 1.161083
+  type: 'test'
+  ...
+# Subtest: unresolved implementation identity is represented honestly
+ok 204 - unresolved implementation identity is represented honestly
+  ---
+  duration_ms: 0.317333
+  type: 'test'
+  ...
+# Subtest: different artifact bytes → different implementation identity
+ok 205 - different artifact bytes → different implementation identity
+  ---
+  duration_ms: 0.555292
+  type: 'test'
+  ...
+# Subtest: same interface + same implementation → same descriptor identity
+ok 206 - same interface + same implementation → same descriptor identity
+  ---
+  duration_ms: 0.673667
+  type: 'test'
+  ...
+# Subtest: same interface + different implementation → different implementation digest
+ok 207 - same interface + different implementation → different implementation digest
+  ---
+  duration_ms: 1.974541
+  type: 'test'
+  ...
+# Subtest: valid descriptor signature verifies
+ok 208 - valid descriptor signature verifies
+  ---
+  duration_ms: 4.551875
+  type: 'test'
+  ...
+# Subtest: modified interface fails verification
+ok 209 - modified interface fails verification
+  ---
+  duration_ms: 1.581333
+  type: 'test'
+  ...
+# Subtest: modified implementation identity fails verification
+ok 210 - modified implementation identity fails verification
+  ---
+  duration_ms: 1.2075
+  type: 'test'
+  ...
+# Subtest: modified provenance fails verification
+ok 211 - modified provenance fails verification
+  ---
+  duration_ms: 1.103042
+  type: 'test'
+  ...
+# Subtest: wrong publisher key fails verification
+ok 212 - wrong publisher key fails verification
+  ---
+  duration_ms: 1.297084
+  type: 'test'
+  ...
+# Subtest: descriptor schema + content addressing are correct
+ok 213 - descriptor schema + content addressing are correct
+  ---
+  duration_ms: 0.757958
+  type: 'test'
+  ...
+# Subtest: descriptor set digest === v1 toolsetDigest over the same interfaces
+ok 214 - descriptor set digest === v1 toolsetDigest over the same interfaces
+  ---
+  duration_ms: 0.48875
+  type: 'test'
+  ...
+# Subtest: descriptorsToManifestTools round-trips the interface projections
+ok 215 - descriptorsToManifestTools round-trips the interface projections
+  ---
+  duration_ms: 0.218708
+  type: 'test'
+  ...
+# Subtest: descriptor can be pinned by content-address, independent of server name
+ok 216 - descriptor can be pinned by content-address, independent of server name
+  ---
+  duration_ms: 2.32525
+  type: 'test'
+  ...
+# Subtest: identical toolsets → NONE, compatible
+ok 217 - identical toolsets → NONE, compatible
+  ---
+  duration_ms: 1.946875
+  type: 'test'
+  ...
+# Subtest: cosmetic-only change (title/_meta) → SYNTACTIC, compatible
+ok 218 - cosmetic-only change (title/_meta) → SYNTACTIC, compatible
+  ---
+  duration_ms: 0.380041
+  type: 'test'
+  ...
+# Subtest: tool removed → BREAKING, not compatible
+ok 219 - tool removed → BREAKING, not compatible
+  ---
+  duration_ms: 2.1105
+  type: 'test'
+  ...
+# Subtest: tool added → NON_BREAKING, compatible
+ok 220 - tool added → NON_BREAKING, compatible
+  ---
+  duration_ms: 0.212916
+  type: 'test'
+  ...
+# Subtest: new required input param → BREAKING
+ok 221 - new required input param → BREAKING
+  ---
+  duration_ms: 2.3855
+  type: 'test'
+  ...
+# Subtest: new optional input param → NON_BREAKING
+ok 222 - new optional input param → NON_BREAKING
+  ---
+  duration_ms: 0.273458
+  type: 'test'
+  ...
+# Subtest: enum shrink → BREAKING; enum growth → NON_BREAKING
+ok 223 - enum shrink → BREAKING; enum growth → NON_BREAKING
+  ---
+  duration_ms: 0.96375
+  type: 'test'
+  ...
+# Subtest: constraint tightened → BREAKING; relaxed → NON_BREAKING
+ok 224 - constraint tightened → BREAKING; relaxed → NON_BREAKING
+  ---
+  duration_ms: 0.585042
+  type: 'test'
+  ...
+# Subtest: new constraint where none existed → BREAKING
+ok 225 - new constraint where none existed → BREAKING
+  ---
+  duration_ms: 0.719625
+  type: 'test'
+  ...
+# Subtest: type union narrowed → BREAKING; widened → NON_BREAKING
+ok 226 - type union narrowed → BREAKING; widened → NON_BREAKING
+  ---
+  duration_ms: 0.726167
+  type: 'test'
+  ...
+# Subtest: additionalProperties closed → BREAKING
+ok 227 - additionalProperties closed → BREAKING
+  ---
+  duration_ms: 0.236625
+  type: 'test'
+  ...
+# Subtest: composition keyword introduced → BREAKING
+ok 228 - composition keyword introduced → BREAKING
+  ---
+  duration_ms: 0.140709
+  type: 'test'
+  ...
+# Subtest: readOnlyHint → destructiveHint flip is PERMISSION_CHANGE, not compatible
+ok 229 - readOnlyHint → destructiveHint flip is PERMISSION_CHANGE, not compatible
+  ---
+  duration_ms: 0.136042
+  type: 'test'
+  ...
+# Subtest: outputSchema removed → PERMISSION_CHANGE
+ok 230 - outputSchema removed → PERMISSION_CHANGE
+  ---
+  duration_ms: 0.113875
+  type: 'test'
+  ...
+# Subtest: TOOL POISONING: description rewritten, schema identical → ANNOTATION_DOWNGRADE
+ok 231 - TOOL POISONING: description rewritten, schema identical → ANNOTATION_DOWNGRADE
+  ---
+  duration_ms: 0.311625
+  type: 'test'
+  ...
+# Subtest: immaterial description touch (same tokens) does not flag poisoning
+ok 232 - immaterial description touch (same tokens) does not flag poisoning
+  ---
+  duration_ms: 0.107834
+  type: 'test'
+  ...
+# Subtest: description change WITH schema change is not classified as poisoning
+ok 233 - description change WITH schema change is not classified as poisoning
+  ---
+  duration_ms: 0.121125
+  type: 'test'
+  ...
+# Subtest: severity ordering: BREAKING > PERMISSION_CHANGE > ANNOTATION_DOWNGRADE > NON_BREAKING > SYNTACTIC > NONE
+ok 234 - severity ordering: BREAKING > PERMISSION_CHANGE > ANNOTATION_DOWNGRADE > NON_BREAKING > SYNTACTIC > NONE
+  ---
+  duration_ms: 0.064666
+  type: 'test'
+  ...
+# Subtest: mixed diff: worst level wins and summary mentions all classes
+ok 235 - mixed diff: worst level wins and summary mentions all classes
+  ---
+  duration_ms: 0.117292
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: buildSubject constructs subject from identifiers
+ok 236 - evidence-adapters: buildSubject constructs subject from identifiers
+  ---
+  duration_ms: 1.372209
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: buildSubject with custom kind
+ok 237 - evidence-adapters: buildSubject with custom kind
+  ---
+  duration_ms: 0.302292
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — repo exists
+ok 238 - evidence-adapters: existenceToEvidence — repo exists
+  ---
+  duration_ms: 3.135542
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — repo dead (404)
+ok 239 - evidence-adapters: existenceToEvidence — repo dead (404)
+  ---
+  duration_ms: 1.852666
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — rate limited (observation failed)
+ok 240 - evidence-adapters: existenceToEvidence — rate limited (observation failed)
+  ---
+  duration_ms: 1.472166
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — successful scan
+ok 241 - evidence-adapters: healthcheckToEvidence — successful scan
+  ---
+  duration_ms: 1.317417
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — handshake failure
+ok 242 - evidence-adapters: healthcheckToEvidence — handshake failure
+  ---
+  duration_ms: 0.468541
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — config required (absence of evidence)
+ok 243 - evidence-adapters: healthcheckToEvidence — config required (absence of evidence)
+  ---
+  duration_ms: 0.254292
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — destructive capability detected
+ok 244 - evidence-adapters: healthcheckToEvidence — destructive capability detected
+  ---
+  duration_ms: 1.119083
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — stale protocol version
+ok 245 - evidence-adapters: healthcheckToEvidence — stale protocol version
+  ---
+  duration_ms: 0.942167
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: observationToEvidence — successful observation
+ok 246 - evidence-adapters: observationToEvidence — successful observation
+  ---
+  duration_ms: 0.728875
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: observationToEvidence — failed observation
+ok 247 - evidence-adapters: observationToEvidence — failed observation
+  ---
+  duration_ms: 0.252334
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: registryEntryToEvidence — produces identity record
+ok 248 - evidence-adapters: registryEntryToEvidence — produces identity record
+  ---
+  duration_ms: 0.318459
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: registryEntryToEvidence — remote server entry
+ok 249 - evidence-adapters: registryEntryToEvidence — remote server entry
+  ---
+  duration_ms: 0.232125
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: no adapter produces records with forbidden fields
+ok 250 - evidence-adapters: no adapter produces records with forbidden fields
+  ---
+  duration_ms: 1.183125
+  type: 'test'
+  ...
+# Subtest: evidence-store: append writes a record and getById retrieves it
+ok 251 - evidence-store: append writes a record and getById retrieves it
+  ---
+  duration_ms: 7.207917
+  type: 'test'
+  ...
+# Subtest: evidence-store: getById returns null for non-existent ID
+ok 252 - evidence-store: getById returns null for non-existent ID
+  ---
+  duration_ms: 0.931125
+  type: 'test'
+  ...
+# Subtest: evidence-store: appended record exists in JSONL file
+ok 253 - evidence-store: appended record exists in JSONL file
+  ---
+  duration_ms: 2.812042
+  type: 'test'
+  ...
+# Subtest: evidence-store: no update method exists
+ok 254 - evidence-store: no update method exists
+  ---
+  duration_ms: 0.633375
+  type: 'test'
+  ...
+# Subtest: evidence-store: rejects duplicate append (same record ID)
+ok 255 - evidence-store: rejects duplicate append (same record ID)
+  ---
+  duration_ms: 4.061791
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by subject (string identifier value)
+ok 256 - evidence-store: query by subject (string identifier value)
+  ---
+  duration_ms: 46.251833
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by subject with { key, value }
+ok 257 - evidence-store: query by subject with { key, value }
+  ---
+  duration_ms: 2.608291
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by subject identifier finds records across different key names
+ok 258 - evidence-store: query by subject identifier finds records across different key names
+  ---
+  duration_ms: 2.510958
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by predicate
+ok 259 - evidence-store: query by predicate
+  ---
+  duration_ms: 2.910042
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by layer
+ok 260 - evidence-store: query by layer
+  ---
+  duration_ms: 4.368542
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by observer.agent
+ok 261 - evidence-store: query by observer.agent
+  ---
+  duration_ms: 2.298292
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by observer.method
+ok 262 - evidence-store: query by observer.method
+  ---
+  duration_ms: 2.550083
+  type: 'test'
+  ...
+# Subtest: evidence-store: query by time range (since/until)
+ok 263 - evidence-store: query by time range (since/until)
+  ---
+  duration_ms: 4.668625
+  type: 'test'
+  ...
+# Subtest: evidence-store: query results are sorted by timestamp ascending
+ok 264 - evidence-store: query results are sorted by timestamp ascending
+  ---
+  duration_ms: 3.547167
+  type: 'test'
+  ...
+# Subtest: evidence-store: query respects limit
+ok 265 - evidence-store: query respects limit
+  ---
+  duration_ms: 7.019417
+  type: 'test'
+  ...
+# Subtest: evidence-store: latest returns most recent record per predicate
+ok 266 - evidence-store: latest returns most recent record per predicate
+  ---
+  duration_ms: 3.600375
+  type: 'test'
+  ...
+# Subtest: evidence-store: stats returns summary statistics
+ok 267 - evidence-store: stats returns summary statistics
+  ---
+  duration_ms: 2.9395
+  type: 'test'
+  ...
+# Subtest: evidence-store: rebuildIndex reconstructs from JSONL files
+ok 268 - evidence-store: rebuildIndex reconstructs from JSONL files
+  ---
+  duration_ms: 2.681541
+  type: 'test'
+  ...
+# Subtest: evidence-store: rebuildIndex handles empty store
+ok 269 - evidence-store: rebuildIndex handles empty store
+  ---
+  duration_ms: 0.383834
+  type: 'test'
+  ...
+# Subtest: evidence-store: flushIndex persists and reload restores
+ok 270 - evidence-store: flushIndex persists and reload restores
+  ---
+  duration_ms: 4.035292
+  type: 'test'
+  ...
+# Subtest: evidence-store: corrupt index triggers rebuild from JSONL
+ok 271 - evidence-store: corrupt index triggers rebuild from JSONL
+  ---
+  duration_ms: 2.942291
+  type: 'test'
+  ...
+# Subtest: evidence-store: rebuildIndex skips unparseable lines
+ok 272 - evidence-store: rebuildIndex skips unparseable lines
+  ---
+  duration_ms: 2.278792
+  type: 'test'
+  ...
+# Subtest: evidence-store: verify returns true for clean store
+ok 273 - evidence-store: verify returns true for clean store
+  ---
+  duration_ms: 2.610917
+  type: 'test'
+  ...
+# Subtest: evidence-store: verify detects tampered records
+ok 274 - evidence-store: verify detects tampered records
+  ---
+  duration_ms: 2.66775
+  type: 'test'
+  ...
+# Subtest: evidence-store: findByIdentifier finds records by any identifier value
+ok 275 - evidence-store: findByIdentifier finds records by any identifier value
+  ---
+  duration_ms: 2.715875
+  type: 'test'
+  ...
+# Subtest: evidence-store: contradictions finds conflicting observations
+ok 276 - evidence-store: contradictions finds conflicting observations
+  ---
+  duration_ms: 3.696417
+  type: 'test'
+  ...
+# Subtest: evidence-store: contradictions returns empty when no conflicts
+ok 277 - evidence-store: contradictions returns empty when no conflicts
+  ---
+  duration_ms: 1.94425
+  type: 'test'
+  ...
+# Subtest: evidence-store: appendBatch writes multiple records
+ok 278 - evidence-store: appendBatch writes multiple records
+  ---
+  duration_ms: 2.967875
+  type: 'test'
+  ...
+# Subtest: evidence-store: export returns all records with no filter
+ok 279 - evidence-store: export returns all records with no filter
+  ---
+  duration_ms: 2.213208
+  type: 'test'
+  ...
+# Subtest: evidence-store: export with filter returns matching records
+ok 280 - evidence-store: export with filter returns matching records
+  ---
+  duration_ms: 1.602792
+  type: 'test'
+  ...
+# Subtest: evidence-store: evidenceFilePath produces YYYY/MM/YYYY-MM-DD.jsonl
+ok 281 - evidence-store: evidenceFilePath produces YYYY/MM/YYYY-MM-DD.jsonl
+  ---
+  duration_ms: 0.086
+  type: 'test'
+  ...
+# Subtest: evidence-store: records on different days go to different files
+ok 282 - evidence-store: records on different days go to different files
+  ---
+  duration_ms: 1.612667
+  type: 'test'
+  ...
+# Subtest: evidence-store: records on same day go to same file
+ok 283 - evidence-store: records on same day go to same file
+  ---
+  duration_ms: 1.51
+  type: 'test'
+  ...
+# Subtest: evidence-store: multiple filters combine with AND logic
+ok 284 - evidence-store: multiple filters combine with AND logic
+  ---
+  duration_ms: 3.079083
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord produces a valid record
+ok 285 - evidence: buildEvidenceRecord produces a valid record
+  ---
+  duration_ms: 4.93325
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord defaults timestamp to now
+ok 286 - evidence: buildEvidenceRecord defaults timestamp to now
+  ---
+  duration_ms: 0.46425
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord accepts explicit timestamp
+ok 287 - evidence: buildEvidenceRecord accepts explicit timestamp
+  ---
+  duration_ms: 0.234333
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord works without reproducibility
+ok 288 - evidence: buildEvidenceRecord works without reproducibility
+  ---
+  duration_ms: 1.535667
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord works without related (defaults to [])
+ok 289 - evidence: buildEvidenceRecord works without related (defaults to [])
+  ---
+  duration_ms: 0.418125
+  type: 'test'
+  ...
+# Subtest: evidence: buildEvidenceRecord works without supersedes (defaults to null)
+ok 290 - evidence: buildEvidenceRecord works without supersedes (defaults to null)
+  ---
+  duration_ms: 0.329417
+  type: 'test'
+  ...
+# Subtest: evidence: digest is deterministic — same input produces same digest
+ok 291 - evidence: digest is deterministic — same input produces same digest
+  ---
+  duration_ms: 0.747834
+  type: 'test'
+  ...
+# Subtest: evidence: digest is independent of field order in input
+ok 292 - evidence: digest is independent of field order in input
+  ---
+  duration_ms: 0.667042
+  type: 'test'
+  ...
+# Subtest: evidence: digest matches manual JCS+SHA-256 computation
+ok 293 - evidence: digest matches manual JCS+SHA-256 computation
+  ---
+  duration_ms: 0.982875
+  type: 'test'
+  ...
+# Subtest: evidence: id is ev_ + digest
+ok 294 - evidence: id is ev_ + digest
+  ---
+  duration_ms: 0.839833
+  type: 'test'
+  ...
+# Subtest: evidence: changing timestamp changes digest
+ok 295 - evidence: changing timestamp changes digest
+  ---
+  duration_ms: 0.551708
+  type: 'test'
+  ...
+# Subtest: evidence: changing claim.value changes digest
+ok 296 - evidence: changing claim.value changes digest
+  ---
+  duration_ms: 0.266584
+  type: 'test'
+  ...
+# Subtest: evidence: changing claim.confidence changes digest
+ok 297 - evidence: changing claim.confidence changes digest
+  ---
+  duration_ms: 0.237
+  type: 'test'
+  ...
+# Subtest: evidence: changing claim.payload changes digest
+ok 298 - evidence: changing claim.payload changes digest
+  ---
+  duration_ms: 0.202208
+  type: 'test'
+  ...
+# Subtest: evidence: changing observer.method changes digest
+ok 299 - evidence: changing observer.method changes digest
+  ---
+  duration_ms: 0.201167
+  type: 'test'
+  ...
+# Subtest: evidence: changing subject.identifiers changes digest
+ok 300 - evidence: changing subject.identifiers changes digest
+  ---
+  duration_ms: 0.276583
+  type: 'test'
+  ...
+# Subtest: evidence: changing related changes digest
+ok 301 - evidence: changing related changes digest
+  ---
+  duration_ms: 2.005125
+  type: 'test'
+  ...
+# Subtest: evidence: changing supersedes changes digest
+ok 302 - evidence: changing supersedes changes digest
+  ---
+  duration_ms: 0.247292
+  type: 'test'
+  ...
+# Subtest: evidence: rejects missing observer
+ok 303 - evidence: rejects missing observer
+  ---
+  duration_ms: 0.43825
+  type: 'test'
+  ...
+# Subtest: evidence: rejects observer missing required fields
+ok 304 - evidence: rejects observer missing required fields
+  ---
+  duration_ms: 0.276125
+  type: 'test'
+  ...
+# Subtest: evidence: rejects empty observer fields
+ok 305 - evidence: rejects empty observer fields
+  ---
+  duration_ms: 0.141208
+  type: 'test'
+  ...
+# Subtest: evidence: rejects missing subject
+ok 306 - evidence: rejects missing subject
+  ---
+  duration_ms: 0.101667
+  type: 'test'
+  ...
+# Subtest: evidence: rejects invalid subject.kind
+ok 307 - evidence: rejects invalid subject.kind
+  ---
+  duration_ms: 0.107167
+  type: 'test'
+  ...
+# Subtest: evidence: rejects empty subject.identifiers
+ok 308 - evidence: rejects empty subject.identifiers
+  ---
+  duration_ms: 0.102083
+  type: 'test'
+  ...
+# Subtest: evidence: rejects non-string/number identifier values
+ok 309 - evidence: rejects non-string/number identifier values
+  ---
+  duration_ms: 0.259709
+  type: 'test'
+  ...
+# Subtest: evidence: rejects missing claim
+ok 310 - evidence: rejects missing claim
+  ---
+  duration_ms: 0.091833
+  type: 'test'
+  ...
+# Subtest: evidence: rejects claim missing required fields
+ok 311 - evidence: rejects claim missing required fields
+  ---
+  duration_ms: 0.228834
+  type: 'test'
+  ...
+# Subtest: evidence: rejects invalid layer (non-integer)
+ok 312 - evidence: rejects invalid layer (non-integer)
+  ---
+  duration_ms: 0.147041
+  type: 'test'
+  ...
+# Subtest: evidence: rejects layer out of range
+ok 313 - evidence: rejects layer out of range
+  ---
+  duration_ms: 0.121666
+  type: 'test'
+  ...
+# Subtest: evidence: rejects confidence out of range
+ok 314 - evidence: rejects confidence out of range
+  ---
+  duration_ms: 0.138417
+  type: 'test'
+  ...
+# Subtest: evidence: rejects claim.value === undefined
+ok 315 - evidence: rejects claim.value === undefined
+  ---
+  duration_ms: 1.884958
+  type: 'test'
+  ...
+# Subtest: evidence: rejects invalid timestamp
+ok 316 - evidence: rejects invalid timestamp
+  ---
+  duration_ms: 0.099541
+  type: 'test'
+  ...
+# Subtest: evidence: rejects related entries that are not ev_ IDs
+ok 317 - evidence: rejects related entries that are not ev_ IDs
+  ---
+  duration_ms: 0.089542
+  type: 'test'
+  ...
+# Subtest: evidence: rejects supersedes that is not an ev_ ID
+ok 318 - evidence: rejects supersedes that is not an ev_ ID
+  ---
+  duration_ms: 0.0795
+  type: 'test'
+  ...
+# Subtest: evidence: rejects layer mismatch with known predicate
+ok 319 - evidence: rejects layer mismatch with known predicate
+  ---
+  duration_ms: 0.242666
+  type: 'test'
+  ...
+# Subtest: evidence: rejects score field
+ok 320 - evidence: rejects score field
+  ---
+  duration_ms: 0.099417
+  type: 'test'
+  ...
+# Subtest: evidence: rejects trustState field
+ok 321 - evidence: rejects trustState field
+  ---
+  duration_ms: 0.101792
+  type: 'test'
+  ...
+# Subtest: evidence: rejects recommendation field
+ok 322 - evidence: rejects recommendation field
+  ---
+  duration_ms: 0.084667
+  type: 'test'
+  ...
+# Subtest: evidence: rejects expiresAt field
+ok 323 - evidence: rejects expiresAt field
+  ---
+  duration_ms: 0.077875
+  type: 'test'
+  ...
+# Subtest: evidence: rejects all forbidden fields
+ok 324 - evidence: rejects all forbidden fields
+  ---
+  duration_ms: 0.368833
+  type: 'test'
+  ...
+# Subtest: evidence: verifyEvidenceRecord also rejects forbidden fields
+ok 325 - evidence: verifyEvidenceRecord also rejects forbidden fields
+  ---
+  duration_ms: 0.15875
+  type: 'test'
+  ...
+# Subtest: evidence: observed true — value: true, confidence > 0
+ok 326 - evidence: observed true — value: true, confidence > 0
+  ---
+  duration_ms: 0.169583
+  type: 'test'
+  ...
+# Subtest: evidence: observed false — value: false, confidence > 0
+ok 327 - evidence: observed false — value: false, confidence > 0
+  ---
+  duration_ms: 0.154625
+  type: 'test'
+  ...
+# Subtest: evidence: observation failed — value: null, confidence: 0.0
+ok 328 - evidence: observation failed — value: null, confidence: 0.0
+  ---
+  duration_ms: 0.160125
+  type: 'test'
+  ...
+# Subtest: evidence: null value is distinct from false
+ok 329 - evidence: null value is distinct from false
+  ---
+  duration_ms: 0.167166
+  type: 'test'
+  ...
+# Subtest: evidence: not-observed = no record exists (represented by absence in store, not a special value)
+ok 330 - evidence: not-observed = no record exists (represented by absence in store, not a special value)
+  ---
+  duration_ms: 0.053167
+  type: 'test'
+  ...
+# Subtest: evidence: correctEvidence creates a record that supersedes the old one
+ok 331 - evidence: correctEvidence creates a record that supersedes the old one
+  ---
+  duration_ms: 0.456584
+  type: 'test'
+  ...
+# Subtest: evidence: original record is not modified by correctEvidence
+ok 332 - evidence: original record is not modified by correctEvidence
+  ---
+  duration_ms: 0.270583
+  type: 'test'
+  ...
+# Subtest: evidence: supersession chain can be followed
+ok 333 - evidence: supersession chain can be followed
+  ---
+  duration_ms: 1.103167
+  type: 'test'
+  ...
+# Subtest: evidence: serializeRecord produces canonical JCS output
+ok 334 - evidence: serializeRecord produces canonical JCS output
+  ---
+  duration_ms: 0.251375
+  type: 'test'
+  ...
+# Subtest: evidence: parseRecord round-trips correctly
+ok 335 - evidence: parseRecord round-trips correctly
+  ---
+  duration_ms: 1.63925
+  type: 'test'
+  ...
+# Subtest: evidence: parseRecord verifies digest integrity
+ok 336 - evidence: parseRecord verifies digest integrity
+  ---
+  duration_ms: 2.00575
+  type: 'test'
+  ...
+# Subtest: evidence: parseRecord rejects empty lines
+ok 337 - evidence: parseRecord rejects empty lines
+  ---
+  duration_ms: 0.964916
+  type: 'test'
+  ...
+# Subtest: evidence: parseRecord rejects invalid JSON
+ok 338 - evidence: parseRecord rejects invalid JSON
+  ---
+  duration_ms: 0.208792
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: all 5 layers have predicates
+ok 339 - evidence-predicates: all 5 layers have predicates
+  ---
+  duration_ms: 0.246666
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: predicateInfo returns metadata for known predicates
+ok 340 - evidence-predicates: predicateInfo returns metadata for known predicates
+  ---
+  duration_ms: 0.079667
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: predicateInfo returns null for unknown predicates
+ok 341 - evidence-predicates: predicateInfo returns null for unknown predicates
+  ---
+  duration_ms: 0.066625
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: isKnownPredicate works
+ok 342 - evidence-predicates: isKnownPredicate works
+  ---
+  duration_ms: 0.068083
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: registerPredicate adds new predicate
+ok 343 - evidence-predicates: registerPredicate adds new predicate
+  ---
+  duration_ms: 0.135958
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: registerPredicate rejects duplicate names
+ok 344 - evidence-predicates: registerPredicate rejects duplicate names
+  ---
+  duration_ms: 0.091958
+  type: 'test'
+  ...
+# Subtest: evidence-predicates: registerPredicate rejects invalid layer
+ok 345 - evidence-predicates: registerPredicate rejects invalid layer
+  ---
+  duration_ms: 0.087083
+  type: 'test'
+  ...
+# Subtest: evidence: accepts unknown predicates (vocabulary is advisory, not a gate)
+ok 346 - evidence: accepts unknown predicates (vocabulary is advisory, not a gate)
+  ---
+  duration_ms: 0.240833
+  type: 'test'
+  ...
+# Subtest: evidence: record format has no MCP-specific fields
+ok 347 - evidence: record format has no MCP-specific fields
+  ---
+  duration_ms: 0.155125
+  type: 'test'
+  ...
+# Subtest: evidence: subject.kind can be any valid kind, not just capability-provider
+ok 348 - evidence: subject.kind can be any valid kind, not just capability-provider
+  ---
+  duration_ms: 1.105875
+  type: 'test'
+  ...
+# Subtest: evidence: observer.agent can be non-trustcard (external observers)
+ok 349 - evidence: observer.agent can be non-trustcard (external observers)
+  ---
+  duration_ms: 0.152083
+  type: 'test'
+  ...
+# Subtest: evidence: verifyEvidenceRecord returns true for valid record
+ok 350 - evidence: verifyEvidenceRecord returns true for valid record
+  ---
+  duration_ms: 0.132875
+  type: 'test'
+  ...
+# Subtest: evidence: verifyEvidenceRecord rejects wrong $schema
+ok 351 - evidence: verifyEvidenceRecord rejects wrong $schema
+  ---
+  duration_ms: 0.131542
+  type: 'test'
+  ...
+# Subtest: evidence: verifyEvidenceRecord rejects tampered digest
+ok 352 - evidence: verifyEvidenceRecord rejects tampered digest
+  ---
+  duration_ms: 0.165042
+  type: 'test'
+  ...
+# Subtest: evidence: verifyEvidenceRecord rejects id/digest mismatch
+ok 353 - evidence: verifyEvidenceRecord rejects id/digest mismatch
+  ---
+  duration_ms: 0.1605
+  type: 'test'
+  ...
+# Subtest: evidence: isValidEvidenceRecord returns false for invalid records
+ok 354 - evidence: isValidEvidenceRecord returns false for invalid records
+  ---
+  duration_ms: 0.229917
+  type: 'test'
+  ...
+# Subtest: evidence: evidenceId returns the record's id
+ok 355 - evidence: evidenceId returns the record's id
+  ---
+  duration_ms: 0.099292
+  type: 'test'
+  ...
+# Subtest: evidence: layerName returns the human-readable layer name
+ok 356 - evidence: layerName returns the human-readable layer name
+  ---
+  duration_ms: 0.101167
+  type: 'test'
+  ...
+# Subtest: evidence: EVIDENCE_LAYERS maps all 5 layers
+ok 357 - evidence: EVIDENCE_LAYERS maps all 5 layers
+  ---
+  duration_ms: 0.098458
+  type: 'test'
+  ...
+# Subtest: evidence: numeric identifier values are accepted
+ok 358 - evidence: numeric identifier values are accepted
+  ---
+  duration_ms: 0.14575
+  type: 'test'
+  ...
+# Subtest: evidence: confidence 0.0 is valid (observation failed)
+ok 359 - evidence: confidence 0.0 is valid (observation failed)
+  ---
+  duration_ms: 0.140667
+  type: 'test'
+  ...
+# Subtest: evidence: confidence 1.0 is valid (authoritative)
+ok 360 - evidence: confidence 1.0 is valid (authoritative)
+  ---
+  duration_ms: 0.131334
+  type: 'test'
+  ...
+# Subtest: evidence: probeVersion is optional but accepted
+ok 361 - evidence: probeVersion is optional but accepted
+  ---
+  duration_ms: 0.14225
+  type: 'test'
+  ...
+# Subtest: evidence: multiple related IDs are accepted
+ok 362 - evidence: multiple related IDs are accepted
+  ---
+  duration_ms: 0.148083
+  type: 'test'
+  ...
+# Subtest: evidence: claim value can be a complex object
+ok 363 - evidence: claim value can be a complex object
+  ---
+  duration_ms: 0.186
+  type: 'test'
+  ...
+# Subtest: evidence: claim value can be a string (schema-valid predicate)
+ok 364 - evidence: claim value can be a string (schema-valid predicate)
+  ---
+  duration_ms: 0.128042
+  type: 'test'
+  ...
+# Subtest: evidence: claim value can be a number
+ok 365 - evidence: claim value can be a number
+  ---
+  duration_ms: 0.151917
+  type: 'test'
+  ...
+# Subtest: allows a read-only call on a pinned server
+ok 366 - allows a read-only call on a pinned server
+  ---
+  duration_ms: 4.082375
+  type: 'test'
+  ...
+# Subtest: denies when server is not pinned (requirePinned default)
+ok 367 - denies when server is not pinned (requirePinned default)
+  ---
+  duration_ms: 1.227458
+  type: 'test'
+  ...
+# Subtest: denies a revoked server, always
+ok 368 - denies a revoked server, always
+  ---
+  duration_ms: 0.592917
+  type: 'test'
+  ...
+# Subtest: denies unknown tools (not in the verified toolset)
+ok 369 - denies unknown tools (not in the verified toolset)
+  ---
+  duration_ms: 0.532334
+  type: 'test'
+  ...
+# Subtest: denies destructive tools unless policy allows
+ok 370 - denies destructive tools unless policy allows
+  ---
+  duration_ms: 1.399708
+  type: 'test'
+  ...
+# Subtest: audit mode allows but emits an event
+ok 371 - audit mode allows but emits an event
+  ---
+  duration_ms: 0.498459
+  type: 'test'
+  ...
+# Subtest: allowlist restricts to named tools
+ok 372 - allowlist restricts to named tools
+  ---
+  duration_ms: 0.779375
+  type: 'test'
+  ...
+# Subtest: strict mode validates args against pinned inputSchema
+ok 373 - strict mode validates args against pinned inputSchema
+  ---
+  duration_ms: 0.725667
+  type: 'test'
+  ...
+# Subtest: receipt binds toolset digest + args digest to result digest
+ok 374 - receipt binds toolset digest + args digest to result digest
+  ---
+  duration_ms: 1.038333
+  type: 'test'
+  ...
+# Subtest: validateArgs: required, types, enum, additionalProperties, nested
+ok 375 - validateArgs: required, types, enum, additionalProperties, nested
+  ---
+  duration_ms: 0.942625
+  type: 'test'
+  ...
+# Subtest: http proxy: forwards initialize
+ok 376 - http proxy: forwards initialize
+  ---
+  duration_ms: 228.443666
+  type: 'test'
+  ...
+# Subtest: http proxy: strips unapproved tools from tools/list
+ok 377 - http proxy: strips unapproved tools from tools/list
+  ---
+  duration_ms: 159.979041
+  type: 'test'
+  ...
+# Subtest: http proxy: blocks calls to unapproved tools
+ok 378 - http proxy: blocks calls to unapproved tools
+  ---
+  duration_ms: 103.806958
+  type: 'test'
+  ...
+# Subtest: http proxy: allows calls to approved tools
+ok 379 - http proxy: allows calls to approved tools
+  ---
+  duration_ms: 118.294208
+  type: 'test'
+  ...
+# Subtest: http proxy: health check endpoint
+ok 380 - http proxy: health check endpoint
+  ---
+  duration_ms: 79.489333
+  type: 'test'
+  ...
+# Subtest: redact: redacts GitHub tokens
+ok 381 - redact: redacts GitHub tokens
+  ---
+  duration_ms: 1.076292
+  type: 'test'
+  ...
+# Subtest: redact: redacts OpenAI keys
+ok 382 - redact: redacts OpenAI keys
+  ---
+  duration_ms: 0.323833
+  type: 'test'
+  ...
+# Subtest: redact: redacts Bearer tokens
+ok 383 - redact: redacts Bearer tokens
+  ---
+  duration_ms: 0.319625
+  type: 'test'
+  ...
+# Subtest: redact: does not modify non-secret text
+ok 384 - redact: does not modify non-secret text
+  ---
+  duration_ms: 0.4845
+  type: 'test'
+  ...
+# Subtest: redact: handles null/undefined input
+ok 385 - redact: handles null/undefined input
+  ---
+  duration_ms: 0.594375
+  type: 'test'
+  ...
+# Subtest: http proxy SSE: forwards initialize over SSE
+ok 386 - http proxy SSE: forwards initialize over SSE
+  ---
+  duration_ms: 102.684291
+  type: 'test'
+  ...
+# Subtest: http proxy SSE: strips unapproved tools from SSE tools/list
+ok 387 - http proxy SSE: strips unapproved tools from SSE tools/list
+  ---
+  duration_ms: 86.164667
+  type: 'test'
+  ...
+# Subtest: http proxy SSE: blocks calls to unapproved tools over SSE
+ok 388 - http proxy SSE: blocks calls to unapproved tools over SSE
+  ---
+  duration_ms: 67.856291
+  type: 'test'
+  ...
+# Subtest: http proxy SSE: allows calls to approved tools over SSE
+ok 389 - http proxy SSE: allows calls to approved tools over SSE
+  ---
+  duration_ms: 91.1235
+  type: 'test'
+  ...
+# Subtest: toolDigest: identical definitions → identical digest regardless of key order
+ok 390 - toolDigest: identical definitions → identical digest regardless of key order
+  ---
+  duration_ms: 1.841625
+  type: 'test'
+  ...
+# Subtest: toolDigest: volatile fields do NOT change the digest
+ok 391 - toolDigest: volatile fields do NOT change the digest
+  ---
+  duration_ms: 3.60525
+  type: 'test'
+  ...
+# Subtest: toolDigest: semantic changes DO change the digest
+ok 392 - toolDigest: semantic changes DO change the digest
+  ---
+  duration_ms: 1.36625
+  type: 'test'
+  ...
+# Subtest: toolsetDigest: order-independent over the set
+ok 393 - toolsetDigest: order-independent over the set
+  ---
+  duration_ms: 0.54375
+  type: 'test'
+  ...
+# Subtest: toolsetDigest: adding or removing a tool changes the set digest
+ok 394 - toolsetDigest: adding or removing a tool changes the set digest
+  ---
+  duration_ms: 0.425292
+  type: 'test'
+  ...
+# Subtest: serverDigest: binds serverInfo + protocol + toolset
+ok 395 - serverDigest: binds serverInfo + protocol + toolset
+  ---
+  duration_ms: 0.717333
+  type: 'test'
+  ...
+# Subtest: toolProjection: drops volatile, keeps annotation subset
+ok 396 - toolProjection: drops volatile, keeps annotation subset
+  ---
+  duration_ms: 0.309375
+  type: 'test'
+  ...
+# Subtest: canonicalJson sorts keys and strips whitespace
+ok 397 - canonicalJson sorts keys and strips whitespace
+  ---
+  duration_ms: 1.23725
+  type: 'test'
+  ...
+# Subtest: hash is deterministic and 16 chars
+ok 398 - hash is deterministic and 16 chars
+  ---
+  duration_ms: 0.794625
+  type: 'test'
+  ...
+# Subtest: hash differs for different schemas
+ok 399 - hash differs for different schemas
+  ---
+  duration_ms: 0.180041
+  type: 'test'
+  ...
+# Subtest: hash is order-independent
+ok 400 - hash is order-independent
+  ---
+  duration_ms: 0.136792
+  type: 'test'
+  ...
+# Subtest: buildManifest captures tool names and schema hashes
+ok 401 - buildManifest captures tool names and schema hashes
+  ---
+  duration_ms: 11.153417
+  type: 'test'
+  ...
+# Subtest: diffManifest detects added tools
+ok 402 - diffManifest detects added tools
+  ---
+  duration_ms: 1.519625
+  type: 'test'
+  ...
+# Subtest: diffManifest detects removed tools
+ok 403 - diffManifest detects removed tools
+  ---
+  duration_ms: 0.522084
+  type: 'test'
+  ...
+# Subtest: diffManifest detects schema drift
+ok 404 - diffManifest detects schema drift
+  ---
+  duration_ms: 0.350917
+  type: 'test'
+  ...
+# Subtest: diffManifest reports ok when everything matches
+ok 405 - diffManifest reports ok when everything matches
+  ---
+  duration_ms: 2.20825
+  type: 'test'
+  ...
+# Subtest: checkCall allows approved tools
+ok 406 - checkCall allows approved tools
+  ---
+  duration_ms: 1.390334
+  type: 'test'
+  ...
+# Subtest: checkCall blocks unapproved tools
+ok 407 - checkCall blocks unapproved tools
+  ---
+  duration_ms: 0.484125
+  type: 'test'
+  ...
+# Subtest: manifestHash changes when tools change
+ok 408 - manifestHash changes when tools change
+  ---
+  duration_ms: 0.486084
+  type: 'test'
+  ...
+# Subtest: manifestHash is stable for same tools
+ok 409 - manifestHash is stable for same tools
+  ---
+  duration_ms: 2.235667
+  type: 'test'
+  ...
+# {"ts":"2026-08-06T09:21:49.694Z","level":"error","event":"tool_exception","server":"test-server","tool":"crash","error":"unexpected","stack":"Error: unexpected\\n    at Object.handler (file://~/Projects/trustcard/test/mcp-server.test.js:83:45)\\n    at McpServer._handle (file://~/Projects/trustcard/lib/mcp-server.js:156:29)\\n    at TestContext.<anonymous> (file://~/Projects/trustcard/test/mcp-server.test.js:85:18)\\n    at Test.runInAsyncScope (node:async_hooks:214:14)\\n    at Test.run (node:internal/test_runner/test:1047:25)\\n    at Test.processPendingSubtests (node:internal/test_runner/test:744:18)\\n    at Test.postRun (node:internal/test_runner/test:1173:19)\\n    at Test.run (node:internal/test_runner/test:1101:12)\\n    at async Test.processPendingSubtests (node:internal/test_runner/test:744:7)"}
+# Subtest: constructor: requires name and version
+ok 410 - constructor: requires name and version
+  ---
+  duration_ms: 1.432083
+  type: 'test'
+  ...
+# Subtest: constructor: requires destructiveHint annotation on every tool
+ok 411 - constructor: requires destructiveHint annotation on every tool
+  ---
+  duration_ms: 0.376958
+  type: 'test'
+  ...
+# Subtest: constructor: requires handler and inputSchema
+ok 412 - constructor: requires handler and inputSchema
+  ---
+  duration_ms: 3.342291
+  type: 'test'
+  ...
+# Subtest: initialize: returns trustcard-aware handshake with toolsetDigest
+ok 413 - initialize: returns trustcard-aware handshake with toolsetDigest
+  ---
+  duration_ms: 3.594583
+  type: 'test'
+  ...
+# Subtest: tools/list: returns registered tools with annotations
+ok 414 - tools/list: returns registered tools with annotations
+  ---
+  duration_ms: 2.864625
+  type: 'test'
+  ...
+# Subtest: tools/call: handler returns { ok, value } → wrapped in MCP content
+ok 415 - tools/call: handler returns { ok, value } → wrapped in MCP content
+  ---
+  duration_ms: 0.378292
+  type: 'test'
+  ...
+# Subtest: tools/call: handler returns { ok: false, error } → JSON-RPC error
+ok 416 - tools/call: handler returns { ok: false, error } → JSON-RPC error
+  ---
+  duration_ms: 0.66175
+  type: 'test'
+  ...
+# Subtest: tools/call: handler throws ToolError → correct error code
+ok 417 - tools/call: handler throws ToolError → correct error code
+  ---
+  duration_ms: 0.279583
+  type: 'test'
+  ...
+# Subtest: tools/call: handler throws generic Error → -32603 internal error
+ok 418 - tools/call: handler throws generic Error → -32603 internal error
+  ---
+  duration_ms: 3.561208
+  type: 'test'
+  ...
+# Subtest: tools/call: handler returns raw value → wrapped in MCP content
+ok 419 - tools/call: handler returns raw value → wrapped in MCP content
+  ---
+  duration_ms: 0.861042
+  type: 'test'
+  ...
+# Subtest: tools/call: unknown tool → -32601
+ok 420 - tools/call: unknown tool → -32601
+  ---
+  duration_ms: 0.558416
+  type: 'test'
+  ...
+# Subtest: invalid JSON-RPC envelope → -32600
+ok 421 - invalid JSON-RPC envelope → -32600
+  ---
+  duration_ms: 0.196583
+  type: 'test'
+  ...
+# Subtest: unknown method → -32601
+ok 422 - unknown method → -32601
+  ---
+  duration_ms: 0.119667
+  type: 'test'
+  ...
+# Subtest: ping → empty result
+ok 423 - ping → empty result
+  ---
+  duration_ms: 1.377834
+  type: 'test'
+  ...
+# Subtest: notifications/initialized → null (no response)
+ok 424 - notifications/initialized → null (no response)
+  ---
+  duration_ms: 0.185625
+  type: 'test'
+  ...
+# Subtest: toolsetDigest is deterministic for the same toolset
+ok 425 - toolsetDigest is deterministic for the same toolset
+  ---
+  duration_ms: 0.235833
+  type: 'test'
+  ...
+# Subtest: wrapClient gates tools/call and emits a receipt
+ok 426 - wrapClient gates tools/call and emits a receipt
+  ---
+  duration_ms: 8.157625
+  type: 'test'
+  ...
+# Subtest: wrapClient passes through non-tool methods untouched
+ok 427 - wrapClient passes through non-tool methods untouched
+  ---
+  duration_ms: 0.549917
+  type: 'test'
+  ...
+# Subtest: reproducibilityReport: identical contract+args, diverging results flagged
+ok 428 - reproducibilityReport: identical contract+args, diverging results flagged
+  ---
+  duration_ms: 0.367083
+  type: 'test'
+  ...
+# Subtest: reproducibilityReport: different contract versions are separate groups
+ok 429 - reproducibilityReport: different contract versions are separate groups
+  ---
+  duration_ms: 0.23
+  type: 'test'
+  ...
+# Subtest: pinServer persists and reloads (TOFU continuity across restarts)
+ok 430 - pinServer persists and reloads (TOFU continuity across restarts)
+  ---
+  duration_ms: 5.445958
+  type: 'test'
+  ...
+# Subtest: repin increments repinCount and keeps firstPinnedAt
+ok 431 - repin increments repinCount and keeps firstPinnedAt
+  ---
+  duration_ms: 1.92625
+  type: 'test'
+  ...
+# Subtest: publisher TOFU: first pin, then continuity, and drift is an attack signal
+ok 432 - publisher TOFU: first pin, then continuity, and drift is an attack signal
+  ---
+  duration_ms: 2.248958
+  type: 'test'
+  ...
+# Subtest: removeServerPin deletes the pin
+ok 433 - removeServerPin deletes the pin
+  ---
+  duration_ms: 1.960792
+  type: 'test'
+  ...
+# Subtest: corrupt pin file does not crash and does not silently trust
+ok 434 - corrupt pin file does not crash and does not silently trust
+  ---
+  duration_ms: 1.149292
+  type: 'test'
+  ...
+# Subtest: pin file has the schema marker
+ok 435 - pin file has the schema marker
+  ---
+  duration_ms: 1.165917
+  type: 'test'
+  ...
+# Subtest: denyTools denies named tools, allows others
+ok 436 - denyTools denies named tools, allows others
+  ---
+  duration_ms: 1.221417
+  type: 'test'
+  ...
+# Subtest: requireApprovalForDestructive gates destructive invocations
+ok 437 - requireApprovalForDestructive gates destructive invocations
+  ---
+  duration_ms: 0.404959
+  type: 'test'
+  ...
+# Subtest: restrictToolToEnvironments denies outside allowed envs
+ok 438 - restrictToolToEnvironments denies outside allowed envs
+  ---
+  duration_ms: 0.216375
+  type: 'test'
+  ...
+# Subtest: constrainArg enforces an argument predicate (confused-deputy bound)
+ok 439 - constrainArg enforces an argument predicate (confused-deputy bound)
+  ---
+  duration_ms: 0.314791
+  type: 'test'
+  ...
+# Subtest: forbidArg denies when a forbidden argument is present
+ok 440 - forbidArg denies when a forbidden argument is present
+  ---
+  duration_ms: 0.196417
+  type: 'test'
+  ...
+# Subtest: first matching rule wins; a throwing predicate never widens access
+ok 441 - first matching rule wins; a throwing predicate never widens access
+  ---
+  duration_ms: 0.177125
+  type: 'test'
+  ...
+# Subtest: Gate 2: trusted tool, unauthorized invocation → denied at the guard
+ok 442 - Gate 2: trusted tool, unauthorized invocation → denied at the guard
+  ---
+  duration_ms: 3.801208
+  type: 'test'
+  ...
+# Subtest: Gate 2: require-approval throws a distinct, routable error
+ok 443 - Gate 2: require-approval throws a distinct, routable error
+  ---
+  duration_ms: 0.729791
+  type: 'test'
+  ...
+# Subtest: Gate 2 is optional: a guard without a policy behaves exactly like v1
+ok 444 - Gate 2 is optional: a guard without a policy behaves exactly like v1
+  ---
+  duration_ms: 0.826209
+  type: 'test'
+  ...
+# Subtest: ScopedDecisions: per-relying-party, per-environment decisions
+ok 445 - ScopedDecisions: per-relying-party, per-environment decisions
+  ---
+  duration_ms: 1.633375
+  type: 'test'
+  ...
+# Subtest: ScopedDecisions: wildcard environment fallback + clear
+ok 446 - ScopedDecisions: wildcard environment fallback + clear
+  ---
+  duration_ms: 0.333416
+  type: 'test'
+  ...
+# Subtest: keygen → build → sign → verify round trip
+ok 447 - keygen → build → sign → verify round trip
+  ---
+  duration_ms: 18.207166
+  type: 'test'
+  ...
+# Subtest: publisherFromSecret recovers the same keyId
+ok 448 - publisherFromSecret recovers the same keyId
+  ---
+  duration_ms: 0.806458
+  type: 'test'
+  ...
+# Subtest: manifest digests are internally consistent
+ok 449 - manifest digests are internally consistent
+  ---
+  duration_ms: 2.428792
+  type: 'test'
+  ...
+# Subtest: tampered tool definition → verification fails
+ok 450 - tampered tool definition → verification fails
+  ---
+  duration_ms: 2.954
+  type: 'test'
+  ...
+# Subtest: tampered signature → verification fails
+ok 451 - tampered signature → verification fails
+  ---
+  duration_ms: 1.762292
+  type: 'test'
+  ...
+# Subtest: wrong key → verification fails
+ok 452 - wrong key → verification fails
+  ---
+  duration_ms: 4.887875
+  type: 'test'
+  ...
+# Subtest: unsigned manifest → verification fails with 'missing signature'
+ok 453 - unsigned manifest → verification fails with 'missing signature'
+  ---
+  duration_ms: 1.54725
+  type: 'test'
+  ...
+# Subtest: expired manifest → verification fails
+ok 454 - expired manifest → verification fails
+  ---
+  duration_ms: 1.81225
+  type: 'test'
+  ...
+# Subtest: bindingConsistency: matching observation is consistent; drift is not
+ok 455 - bindingConsistency: matching observation is consistent; drift is not
+  ---
+  duration_ms: 1.220041
+  type: 'test'
+  ...
+# Subtest: proxy forwards initialize and tools/list
+ok 456 - proxy forwards initialize and tools/list
+  ---
+  duration_ms: 819.557375
+  type: 'test'
+  ...
+# Subtest: proxy strips unapproved tools from tools/list
+ok 457 - proxy strips unapproved tools from tools/list
+  ---
+  duration_ms: 804.779125
+  type: 'test'
+  ...
+# Subtest: proxy allows calls to approved tools
+ok 458 - proxy allows calls to approved tools
+  ---
+  duration_ms: 803.064042
+  type: 'test'
+  ...
+# Subtest: proxy blocks calls to unapproved tools
+ok 459 - proxy blocks calls to unapproved tools
+  ---
+  duration_ms: 803.144625
+  type: 'test'
+  ...
+# Subtest: proxy --strict mode returns error on drift and exits
+ok 460 - proxy --strict mode returns error on drift and exits
+  ---
+  duration_ms: 806.463792
+  type: 'test'
+  ...
+# Subtest: proxy --auto-update mode updates manifest on disk when new tools appear
+ok 461 - proxy --auto-update mode updates manifest on disk when new tools appear
+  ---
+  duration_ms: 806.719958
+  type: 'test'
+  ...
+# Subtest: proxy --strict mode allows through when no drift
+ok 462 - proxy --strict mode allows through when no drift
+  ---
+  duration_ms: 804.678792
+  type: 'test'
+  ...
+# Subtest: signed receipt verifies against the relying party's public key
+ok 463 - signed receipt verifies against the relying party's public key
+  ---
+  duration_ms: 5.739875
+  type: 'test'
+  ...
+# Subtest: a forged/edited receipt fails signature verification
+ok 464 - a forged/edited receipt fails signature verification
+  ---
+  duration_ms: 1.780875
+  type: 'test'
+  ...
+# Subtest: wrong public key fails verification
+ok 465 - wrong public key fails verification
+  ---
+  duration_ms: 1.488708
+  type: 'test'
+  ...
+# Subtest: chain: seq is monotonic and parentReceipt links to the previous digest
+ok 466 - chain: seq is monotonic and parentReceipt links to the previous digest
+  ---
+  duration_ms: 2.287042
+  type: 'test'
+  ...
+# Subtest: chain: a deleted middle receipt breaks the chain (detectable)
+ok 467 - chain: a deleted middle receipt breaks the chain (detectable)
+  ---
+  duration_ms: 3.006416
+  type: 'test'
+  ...
+# Subtest: chain: reordering receipts breaks the chain
+ok 468 - chain: reordering receipts breaks the chain
+  ---
+  duration_ms: 1.057417
+  type: 'test'
+  ...
+# Subtest: nonces are unique across receipts (replay resistance)
+ok 469 - nonces are unique across receipts (replay resistance)
+  ---
+  duration_ms: 0.878042
+  type: 'test'
+  ...
+# Subtest: guard emits signed+chained receipts when a receiptKey is configured
+ok 470 - guard emits signed+chained receipts when a receiptKey is configured
+  ---
+  duration_ms: 2.800167
+  type: 'test'
+  ...
+# Subtest: guard without a receiptKey emits the v1 unsigned receipt unchanged
+ok 471 - guard without a receiptKey emits the v1 unsigned receipt unchanged
+  ---
+  duration_ms: 0.925334
+  type: 'test'
+  ...
+# Subtest: key rotation: a valid old-signs-new certificate verifies
+ok 472 - key rotation: a valid old-signs-new certificate verifies
+  ---
+  duration_ms: 6.359209
+  type: 'test'
+  ...
+# Subtest: key rotation: forged rotation (signed by the WRONG key) fails
+ok 473 - key rotation: forged rotation (signed by the WRONG key) fails
+  ---
+  duration_ms: 2.748459
+  type: 'test'
+  ...
+# Subtest: key rotation: tampered new key fails verification
+ok 474 - key rotation: tampered new key fails verification
+  ---
+  duration_ms: 1.627
+  type: 'test'
+  ...
+# Subtest: key rotation: certificate is content-addressed
+ok 475 - key rotation: certificate is content-addressed
+  ---
+  duration_ms: 1.042041
+  type: 'test'
+  ...
+# Subtest: revocation: a valid self-signed revocation verifies
+ok 476 - revocation: a valid self-signed revocation verifies
+  ---
+  duration_ms: 1.122042
+  type: 'test'
+  ...
+# Subtest: revocation: only the holder of the key can revoke it (self-signed)
+ok 477 - revocation: only the holder of the key can revoke it (self-signed)
+  ---
+  duration_ms: 1.009083
+  type: 'test'
+  ...
+# Subtest: revocation: tampered certificate fails
+ok 478 - revocation: tampered certificate fails
+  ---
+  duration_ms: 0.858834
+  type: 'test'
+  ...
+# Subtest: trustLevel maps all six internal states to four human-facing levels
+ok 479 - trustLevel maps all six internal states to four human-facing levels
+  ---
+  duration_ms: 1.079625
+  type: 'test'
+  ...
+# Subtest: trustLevel defaults to OBSERVED for unknown states
+ok 480 - trustLevel defaults to OBSERVED for unknown states
+  ---
+  duration_ms: 0.261166
+  type: 'test'
+  ...
+# Subtest: TRUST_LEVELS exports the five level names
+ok 481 - TRUST_LEVELS exports the five level names
+  ---
+  duration_ms: 0.708375
+  type: 'test'
+  ...
+# Subtest: proxy manifest includes expiresAt by default (90 days)
+not ok 482 - proxy manifest includes expiresAt by default (90 days)
+  ---
+  duration_ms: 13.660125
+  type: 'test'
+  location: '~/Projects/trustcard/test/security-model.test.js:32:1'
+  failureType: 'testCodeFailure'
+  error: 'expiry should be ~90 days in the future'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file://~/Projects/trustcard/test/security-model.test.js:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy manifest accepts custom expiry via expiresInDays
+ok 483 - proxy manifest accepts custom expiry via expiresInDays
+  ---
+  duration_ms: 9.080833
+  type: 'test'
+  ...
+# Subtest: proxy manifest supports no-expiry with expiresInDays=null
+ok 484 - proxy manifest supports no-expiry with expiresInDays=null
+  ---
+  duration_ms: 0.649459
+  type: 'test'
+  ...
+# Subtest: checkCall blocks all calls when manifest is expired
+ok 485 - checkCall blocks all calls when manifest is expired
+  ---
+  duration_ms: 0.593042
+  type: 'test'
+  ...
+# Subtest: checkCall allows calls when manifest is not expired
+ok 486 - checkCall allows calls when manifest is not expired
+  ---
+  duration_ms: 1.476583
+  type: 'test'
+  ...
+# Subtest: checkCall on manifest with no expiresAt still works (backward compat)
+ok 487 - checkCall on manifest with no expiresAt still works (backward compat)
+  ---
+  duration_ms: 0.781
+  type: 'test'
+  ...
+# Subtest: expired manifest denial reason includes regeneration hint
+ok 488 - expired manifest denial reason includes regeneration hint
+  ---
+  duration_ms: 0.862959
+  type: 'test'
+  ...
+# Subtest: dangerous tool denial includes score and confidence
+ok 489 - dangerous tool denial includes score and confidence
+  ---
+  duration_ms: 1.49375
+  type: 'test'
+  ...
+# Subtest: live refresh emits a change vector (interface axis) on a breaking mutation
+ok 490 - live refresh emits a change vector (interface axis) on a breaking mutation
+  ---
+  duration_ms: 124.795958
+  type: 'test'
+  ...
+# Subtest: a descriptor built from the LIVE observed toolset verifies + pins by content address
+ok 491 - a descriptor built from the LIVE observed toolset verifies + pins by content address
+  ---
+  duration_ms: 115.523125
+  type: 'test'
+  ...
+# Subtest: Gate 2 end-to-end: trusted tool, unauthorized invocation denied on a live session
+ok 492 - Gate 2 end-to-end: trusted tool, unauthorized invocation denied on a live session
+  ---
+  duration_ms: 141.589459
+  type: 'test'
+  ...
+# Subtest: Gate 2 arg constraint bound to the live descriptor identity
+ok 493 - Gate 2 arg constraint bound to the live descriptor identity
+  ---
+  duration_ms: 98.0825
+  type: 'test'
+  ...
+# Subtest: connect: observes serverInfo, protocol, tools, and computes digests
+ok 494 - connect: observes serverInfo, protocol, tools, and computes digests
+  ---
+  duration_ms: 115.17025
+  type: 'test'
+  ...
+# Subtest: poisoned server: description-rewrite is detectable via diff vs stable baseline
+ok 495 - poisoned server: description-rewrite is detectable via diff vs stable baseline
+  ---
+  duration_ms: 213.809708
+  type: 'test'
+  ...
+# Subtest: breaking server: schema narrowing + removal is BREAKING vs baseline
+ok 496 - breaking server: schema narrowing + removal is BREAKING vs baseline
+  ---
+  duration_ms: 197.574167
+  type: 'test'
+  ...
+# Subtest: permission-flip server: identical schema+description, annotations flipped → PERMISSION_CHANGE
+ok 497 - permission-flip server: identical schema+description, annotations flipped → PERMISSION_CHANGE
+  ---
+  duration_ms: 180.60625
+  type: 'test'
+  ...
+# Subtest: syntactic-only drift: digest of semantic projection unchanged
+ok 498 - syntactic-only drift: digest of semantic projection unchanged
+  ---
+  duration_ms: 181.590333
+  type: 'test'
+  ...
+# Subtest: TOCTOU: mid-session tool mutation is caught by refresh()
+ok 499 - TOCTOU: mid-session tool mutation is caught by refresh()
+  ---
+  duration_ms: 97.539583
+  type: 'test'
+  ...
+# Subtest: stale-cache invalidation: notifications/tools/list_changed triggers re-observation
+ok 500 - stale-cache invalidation: notifications/tools/list_changed triggers re-observation
+  ---
+  duration_ms: 123.706583
+  type: 'test'
+  ...
+# Subtest: guarded call: allowed tool succeeds; destructive is denied at the gate
+ok 501 - guarded call: allowed tool succeeds; destructive is denied at the gate
+  ---
+  duration_ms: 93.076125
+  type: 'test'
+  ...
+# Subtest: handshake binding: a trustcard-aware server's committed digest is verified
+ok 502 - handshake binding: a trustcard-aware server's committed digest is verified
+  ---
+  duration_ms: 90.238875
+  type: 'test'
+  ...
+# Subtest: handshake binding: a server that commits to one toolset and serves another is SUSPECT
+ok 503 - handshake binding: a server that commits to one toolset and serves another is SUSPECT
+  ---
+  duration_ms: 89.244459
+  type: 'test'
+  ...
+# Subtest: guarded call on a server that mutated to destructive is denied after refresh+revoke
+ok 504 - guarded call on a server that mutated to destructive is denied after refresh+revoke
+  ---
+  duration_ms: 124.521708
+  type: 'test'
+  ...
+# Subtest: UNKNOWN → OBSERVED → PINNED lifecycle
+ok 505 - UNKNOWN → OBSERVED → PINNED lifecycle
+  ---
+  duration_ms: 5.931834
+  type: 'test'
+  ...
+# Subtest: identical re-observation → stays PINNED (digest match)
+ok 506 - identical re-observation → stays PINNED (digest match)
+  ---
+  duration_ms: 1.959333
+  type: 'test'
+  ...
+# Subtest: compatible change (added tool) → auto re-pin, stays PINNED
+ok 507 - compatible change (added tool) → auto re-pin, stays PINNED
+  ---
+  duration_ms: 1.640167
+  type: 'test'
+  ...
+# Subtest: breaking change → MISMATCH, and evaluate reports it
+ok 508 - breaking change → MISMATCH, and evaluate reports it
+  ---
+  duration_ms: 1.249458
+  type: 'test'
+  ...
+# Subtest: permission change → MISMATCH with PERMISSION_CHANGE reason
+ok 509 - permission change → MISMATCH with PERMISSION_CHANGE reason
+  ---
+  duration_ms: 0.624375
+  type: 'test'
+  ...
+# Subtest: REVOKED is terminal: subsequent transitions are refused
+ok 510 - REVOKED is terminal: subsequent transitions are refused
+  ---
+  duration_ms: 0.828875
+  type: 'test'
+  ...
+# Subtest: manual approve() resets even from REVOKED and re-pins
+ok 511 - manual approve() resets even from REVOKED and re-pins
+  ---
+  duration_ms: 0.430625
+  type: 'test'
+  ...
+# Subtest: MISMATCH can be approved back to PINNED (human re-approval)
+ok 512 - MISMATCH can be approved back to PINNED (human re-approval)
+  ---
+  duration_ms: 0.841459
+  type: 'test'
+  ...
+# Subtest: policy allowNewTools=false: added tool → MISMATCH not repin
+ok 513 - policy allowNewTools=false: added tool → MISMATCH not repin
+  ---
+  duration_ms: 1.506334
+  type: 'test'
+  ...
+# Subtest: every transition emits an audit event with from/to/reason
+ok 514 - every transition emits an audit event with from/to/reason
+  ---
+  duration_ms: 1.042708
+  type: 'test'
+  ...
+1..514
+# tests 514
+# suites 0
+# pass 513
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6085.710042

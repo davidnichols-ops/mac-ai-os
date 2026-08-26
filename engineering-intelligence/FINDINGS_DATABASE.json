@@ -1,0 +1,336 @@
+[
+  {
+    "affected_systems": [
+      "trustcard"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "bin/mcp-trustcard.js",
+      "bin/mcp-trustcard.js",
+      "lib/checks.js",
+      "lib/checks.js",
+      "lib/checks.js",
+      "lib/checks.js",
+      "lib/fingerprint.js"
+    ],
+    "finding_id": "trustcard:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "7 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "trustcard"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "trustcard:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  },
+  {
+    "affected_systems": [
+      "maos"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "app/db.py",
+      "app/db.py",
+      "app/storage.py",
+      "app/storage.py",
+      "app/storage.py",
+      "app/guards_evidence.py",
+      "app/workspace.py",
+      "app/load.py",
+      "app/workspace_profiler.py",
+      "tests/test_eis_security.py",
+      "tests/test_slack.py",
+      "tests/test_eis_weaving.py",
+      "tests/test_mcp.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/six.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py",
+      ".venv.broken.1785947337/lib/python3.13/site-packages/typing_extensions.py"
+    ],
+    "finding_id": "maos:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "1645 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "maos"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "maos:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  },
+  {
+    "affected_systems": [
+      "aafp"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "crates/aafp-perception/src/providers/pymupdf.rs",
+      "crates/aafp-discovery/src/persistent_dht.rs",
+      "crates/aafp-discovery/src/persistent_dht.rs",
+      "crates/aafp-discovery/src/persistent_dht.rs",
+      "crates/aafp-discovery/src/persistent_dht.rs",
+      "crates/aafp-identity/src/key_directory.rs",
+      "crates/aafp-identity/src/key_directory.rs"
+    ],
+    "finding_id": "aafp:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "7 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "aafp"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "aafp:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  },
+  {
+    "affected_systems": [
+      "infernet"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "scripts/orchestrate_3node.py",
+      "src/infernet/config.py",
+      "src/infernet/core/identity.py",
+      "src/infernet/backend/pytorch_backend.py",
+      "src/infernet/backend/pytorch_backend.py",
+      "src/infernet/backend/pytorch_backend.py",
+      "src/infernet/backend/pytorch_backend.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/cli/remote_cli.py",
+      "src/infernet/artifact/model.py",
+      "src/infernet/trust/store.py",
+      "src/infernet/trust/pinstore.py",
+      "src/infernet/trust/keys.py",
+      "src/infernet/trust/keys.py",
+      "src/infernet/remote/config.py",
+      "src/infernet/remote/config.py"
+    ],
+    "finding_id": "infernet:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "1767 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "infernet"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "infernet:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  },
+  {
+    "affected_systems": [
+      "cvconform"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "validate_docs.py",
+      "validate_docs.py",
+      "cvconform/config.py",
+      "cvconform/config.py",
+      "cvconform/verify.py",
+      "cvconform/verify.py",
+      "tests/test_ir.py",
+      "tests/test_fault_injection.py",
+      "tests/test_fault_injection.py",
+      "examples/demo_model.py",
+      "cvconform/faults/__init__.py",
+      "cvconform/faults/__init__.py",
+      "cvconform/corpus/__init__.py",
+      "cvconform/runtimes/onnx_rt.py"
+    ],
+    "finding_id": "cvconform:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "14 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "cvconform"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "cvconform:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  },
+  {
+    "affected_systems": [
+      "repository-infrastructure"
+    ],
+    "confidence": 2,
+    "cost": 2,
+    "evidence": [
+      "tools/overnight_harness.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "tests/test_security.py",
+      "ops-platform/ops_platform/config.py",
+      "ops-platform/ops_platform/config.py",
+      "ops-platform/ops_platform/adapters/repo_archaeologist.py",
+      "repo_archaeologist/collectors/dead_code.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/security.py",
+      "repo_archaeologist/collectors/imports.py",
+      "repo_archaeologist/collectors/structure.py"
+    ],
+    "finding_id": "repository-infrastructure:source-signals",
+    "hypothesis": "A source pattern may represent an exploitable trust-boundary weakness.",
+    "impact": "Potential command execution, data exposure, unsafe parsing, or path-boundary failure depending on context.",
+    "leverage": 4,
+    "observation": "22 conservative source signal(s) detected.",
+    "priority": 36.0,
+    "probability": 3,
+    "severity": 3,
+    "status": "suspected_weakness",
+    "test": "Review each signal and execute a bounded regression or negative test against the relevant path.",
+    "title": "Source-level security signals require runtime confirmation"
+  },
+  {
+    "affected_systems": [
+      "repository-infrastructure"
+    ],
+    "confidence": 5,
+    "cost": 3,
+    "evidence": [
+      "SECURITY_VALIDATION_REPORT.md"
+    ],
+    "finding_id": "repository-infrastructure:runtime-coverage",
+    "hypothesis": "Static inventory does not exercise hostile runtime behavior.",
+    "impact": "Production failures may remain undiscovered despite a clean static scan.",
+    "leverage": 5,
+    "observation": "The source campaign generated hypotheses but did not prove runtime behavior.",
+    "priority": 133.33,
+    "probability": 4,
+    "severity": 4,
+    "status": "missing_validation",
+    "test": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+    "title": "Runtime adversarial coverage is incomplete"
+  }
+]

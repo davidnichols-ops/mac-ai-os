@@ -1,5 +1,8 @@
 """Tests for the blackboard, attention daemon, and learner."""
 
+import json
+from types import SimpleNamespace
+
 from app.blackboard import Blackboard
 from app.db import Database
 from app.learning import Learner
@@ -15,6 +18,8 @@ def test_blackboard_basic():
     bb.set_confidence(0.85)
 
     assert bb.current_goal == "Implement workflow engine"
+    assert bb.goal_source == "manual"
+    assert bb.goal_updated_at != ""
     assert bb.current_workspace == "mac-ai-os"
     assert bb.confidence == 0.85
     assert bb.last_updated != ""
@@ -84,9 +89,27 @@ def test_blackboard_persist_restore(tmp_path):
     restored = bb2.restore(db)
     assert restored
     assert bb2.current_goal == "Persistent goal"
+    assert bb2.goal_source == "manual"
+    assert bb2.goal_updated_at != ""
     assert bb2.current_workspace == "persistent_ws"
     assert bb2.confidence == 0.95
     assert len(bb2.open_problems) == 1
+    db.close()
+
+
+def test_blackboard_restores_legacy_goal_provenance(tmp_path):
+    db = Database(str(tmp_path / "test.db"))
+    db.set_user_model_entry(
+        "_blackboard_state",
+        json.dumps({"current_goal": "Legacy goal", "last_updated": "2026-08-20T00:00:00+00:00"}),
+        confidence=1.0,
+        source="system",
+    )
+    bb = Blackboard()
+
+    assert bb.restore(db)
+    assert bb.goal_source == "legacy"
+    assert bb.goal_updated_at == "2026-08-20T00:00:00+00:00"
     db.close()
 
 
@@ -98,6 +121,8 @@ def test_blackboard_clear():
     bb.clear()
 
     assert bb.current_goal == ""
+    assert bb.goal_source == ""
+    assert bb.goal_updated_at == ""
     assert bb.current_workspace == ""
     assert len(bb.open_problems) == 0
     assert bb.confidence == 0.0
@@ -199,6 +224,84 @@ def test_attention_generates_suggestions(tmp_path):
     assert len(suggestions) > 0
     # Should suggest continuing the pending task.
     assert any("Important task" in s["action"] for s in suggestions)
+    db.close()
+
+
+def test_attention_preserves_explicit_goal(tmp_path):
+    from app.attention import AttentionDaemon
+
+    db = Database(str(tmp_path / "test.db"))
+    db.create_task("Stale high-priority task", source="ai", priority=100)
+    bb = Blackboard()
+    bb.set_goal("User-selected goal")
+    daemon = AttentionDaemon(db, bb)
+
+    daemon.cycle()
+
+    assert bb.current_goal == "User-selected goal"
+    assert bb.goal_source == "manual"
+    db.close()
+
+
+def test_attention_prefers_workspace_task_over_global_and_inbox(tmp_path):
+    from app.attention import AttentionDaemon
+
+    db = Database(str(tmp_path / "test.db"))
+    db.create_task("Global task", source="ai", priority=100)
+    db.create_task("GitHub: unrelated issue", source="github", priority=200)
+    db.create_task(
+        "Fix current workspace",
+        source="ai",
+        related_workspace="/Users/testuser/mac-ai-os",
+        priority=5,
+    )
+    daemon = AttentionDaemon(db, Blackboard())
+
+    task = daemon._focus_task("mac-ai-os")
+
+    assert task is not None
+    assert task["title"] == "Fix current workspace"
+    db.close()
+
+
+def test_attention_deduplicates_repeated_denials(tmp_path):
+    from app.attention import AttentionDaemon
+
+    db = Database(str(tmp_path / "test.db"))
+    for _ in range(3):
+        db.log_action(
+            "complete_todo",
+            approved=False,
+            executed=False,
+            error="irreversible action requires explicit confirmation",
+        )
+    daemon = AttentionDaemon(db, Blackboard())
+
+    problems = daemon._identify_problems({"status": "normal"})
+    denials = [problem for problem in problems if "complete_todo" in problem["problem"]]
+
+    assert len(denials) == 1
+    db.close()
+
+
+def test_attention_reports_disk_pressure_without_telemetry(tmp_path, monkeypatch):
+    from app.attention import AttentionDaemon
+
+    db = Database(str(tmp_path / "test.db"))
+    daemon = AttentionDaemon(db, Blackboard())
+    monkeypatch.setattr(
+        "app.attention.shutil.disk_usage",
+        lambda _: SimpleNamespace(total=100, used=92, free=8),
+    )
+
+    health = daemon._check_health()
+    problems = daemon._identify_problems(health)
+    suggestions = daemon._generate_suggestions(workspace="", health=health)
+
+    assert health["status"] == "disk_pressure"
+    assert health["disk_pct"] == 92.0
+    assert any("Disk pressure" in problem["problem"] for problem in problems)
+    assert any("disk pressure" in suggestion["action"].lower() for suggestion in suggestions)
     db.close()
 
 

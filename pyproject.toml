@@ -11,6 +11,7 @@ dependencies = [
     "typer>=0.12.3",
     "rich>=13.7",
     "pydantic>=2.7",
+    "python-dotenv>=1.0",
     "pydantic-settings>=2.3",
     "pyyaml>=6.0",
     "structlog>=24.1",
@@ -22,10 +23,17 @@ dependencies = [
     # We import it lazily so the project still imports off-Apple for tests.
     "watchdog>=6.0.0",
     "mcp>=1.27,<2",
+    "openai>=1.0",
+    "hf-xet>=1.5.2",
+    "slack-sdk>=3.43.0",
 ]
 
 [project.optional-dependencies]
 mlx = ["mlx-lm>=0.20.0"]
+slack = [
+    "slack_bolt>=1.18.0",
+    "slack_sdk>=3.20.0",
+]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
@@ -35,6 +43,7 @@ dev = [
 [project.scripts]
 mac-ai-os = "app.cli.app:run"
 maos = "app.cli.app:run"
+app = "app.cli.app:run"
 
 [build-system]
 requires = ["hatchling"]
@@ -50,6 +59,9 @@ packages = ["app"]
 testpaths = ["tests"]
 addopts = "-q"
 asyncio_mode = "auto"
+markers = [
+    "slow: slow-running stress tests",
+]
 
 [tool.ruff]
 line-length = 100

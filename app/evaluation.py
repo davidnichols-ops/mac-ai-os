@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from app.db import Database
@@ -143,17 +144,31 @@ def _eval_session(db: Database) -> tuple[int, dict[str, Any]]:
 
     with_summary = sum(1 for s in recent if s["summary"])
     with_project = sum(1 for s in recent if s["project"])
+    external_path = Path(__file__).resolve().parents[1] / "data" / "external_sessions.jsonl"
+    external = []
+    if external_path.exists():
+        with external_path.open() as f:
+            external = [json.loads(line) for line in f if line.strip()]
+    pending_titles = [str(t["title"]).lower() for t in db.pending_tasks()]
+    linked_external = sum(
+        1 for record in external
+        if any(term in str(record.get("content", "")).lower() for title in pending_titles for term in title.split() if len(term) > 4)
+    )
 
     count_score = min(total * 10, 50)  # 5+ sessions = 50
-    summary_score = (with_summary / len(recent) * 25) if recent else 0
-    project_score = (with_project / len(recent) * 25) if recent else 0
-    score = round(count_score + summary_score + project_score)
+    summary_score = (with_summary / len(recent) * 15) if recent else 0
+    project_score = (with_project / len(recent) * 10) if recent else 0
+    external_score = min(len(external), 10) / 10 * 15
+    linkage_score = min(linked_external, 10) / 10 * 10
+    score = round(count_score + summary_score + project_score + external_score + linkage_score)
 
     return score, {
         "count": total,
         "recent": len(recent),
         "with_summary": with_summary,
         "with_project": with_project,
+        "external_records": len(external),
+        "external_records_linked_to_pending_tasks": linked_external,
     }
 
 
@@ -165,14 +180,15 @@ def _eval_tasks(db: Database) -> tuple[int, dict[str, Any]]:
     if not all_tasks:
         return 0, {"count": 0, "reason": "no tasks created"}
 
-    with_workspace = sum(1 for t in all_tasks if t["related_workspace"])
-    with_priority = sum(1 for t in all_tasks if t["priority"] > 0)
-    ai_sourced = sum(1 for t in all_tasks if t["source"] == "ai")
+    assessed = pending or all_tasks[:10]
+    with_workspace = sum(1 for t in assessed if t["related_workspace"])
+    with_priority = sum(1 for t in assessed if t["priority"] > 0)
+    ai_sourced = sum(1 for t in assessed if t["source"] in ("ai", "evidence-derived", "ceo-office"))
 
     count_score = min(len(all_tasks) * 15, 40)
-    metadata_score = (with_workspace / len(all_tasks) * 20) if all_tasks else 0
-    priority_score = (with_priority / len(all_tasks) * 20) if all_tasks else 0
-    ai_score = (ai_sourced / len(all_tasks) * 20) if all_tasks else 0
+    metadata_score = (with_workspace / len(assessed) * 20) if assessed else 0
+    priority_score = (with_priority / len(assessed) * 20) if assessed else 0
+    ai_score = (ai_sourced / len(assessed) * 20) if assessed else 0
     score = round(count_score + metadata_score + priority_score + ai_score)
 
     return score, {
@@ -181,6 +197,7 @@ def _eval_tasks(db: Database) -> tuple[int, dict[str, Any]]:
         "with_workspace": with_workspace,
         "with_priority": with_priority,
         "ai_sourced": ai_sourced,
+        "assessed_active_tasks": len(assessed),
     }
 
 

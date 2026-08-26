@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from app.agents.base import Agent
 from app.agents.filesystem import FilesystemAgent
+from app.agents.general import GeneralAgent
 from app.agents.git import GitAgent
 from app.agents.repository import RepositoryAgent
 from app.agents.research import ResearchAgent
@@ -30,6 +31,7 @@ def default_agents(
     perception: Perception | None = None,
 ) -> dict[str, Agent]:
     return {
+        GeneralAgent.name: GeneralAgent(planner=planner, utility=utility),
         RepositoryAgent.name: RepositoryAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         FilesystemAgent.name: FilesystemAgent(planner=planner, utility=utility, retriever=retriever, tools=tools),
         ResearchAgent.name: ResearchAgent(planner=planner, utility=utility, retriever=retriever, tools=tools, perception=perception),

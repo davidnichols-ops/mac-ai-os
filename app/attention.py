@@ -19,9 +19,11 @@ just responding to prompts.
 
 from __future__ import annotations
 
+import shutil
 import threading
 import time
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from app.blackboard import Blackboard
@@ -87,9 +89,10 @@ class AttentionDaemon:
             confidence_parts.append(0.0)
 
         # 2. Detect current goal from pending tasks.
-        goal = self._detect_goal()
+        goal = self._detect_goal(workspace)
         if goal:
-            self.blackboard.set_goal(goal)
+            if goal != self.blackboard.current_goal or self.blackboard.goal_source == "attention":
+                self.blackboard.set_goal(goal, source="attention")
             context["goal"] = goal
             confidence_parts.append(0.2)
         else:
@@ -140,21 +143,47 @@ class AttentionDaemon:
             return ws.get("name") or ws.get("path", "")
         return ""
 
-    def _detect_goal(self) -> str:
-        """Detect the current goal from pending tasks."""
-        tasks = self.db.pending_tasks()
-        if tasks:
-            # Highest priority pending task is the likely current goal.
-            top = tasks[0]
-            return top["title"]
-        return ""
+    def _detect_goal(self, workspace: str = "") -> str:
+        """Detect the current goal without replacing an explicit goal."""
+        if self.blackboard.current_goal and self.blackboard.goal_source != "attention":
+            return self.blackboard.current_goal
+        task = self._focus_task(workspace)
+        return task["title"] if task else ""
+
+    def _focus_task(self, workspace: str = "") -> Any | None:
+        """Select the highest-priority actionable task for the current workspace."""
+        tasks = [
+            task
+            for task in self.db.pending_tasks()
+            if not self.db.task_is_blocked(task["id"])
+            and not task["title"].startswith(("Email:", "GitHub:"))
+        ]
+        if workspace:
+            workspace_name = Path(workspace).name
+            for task in tasks:
+                related = task["related_workspace"] or ""
+                if related and (
+                    related == workspace or Path(related).name == workspace_name
+                ):
+                    return task
+        # Highest priority pending task is the likely current goal.
+        return tasks[0] if tasks else None
 
     def _check_health(self) -> dict[str, Any]:
         """Check system health from recent telemetry."""
+        disk = shutil.disk_usage(Path.home())
+        disk_pct = disk.used / disk.total * 100 if disk.total else 0
+        disk_health = {
+            "disk_used_gb": round(disk.used / 1024**3, 1),
+            "disk_total_gb": round(disk.total / 1024**3, 1),
+            "disk_free_gb": round(disk.free / 1024**3, 1),
+            "disk_pct": round(disk_pct, 1),
+        }
         since = (datetime.now(UTC) - timedelta(hours=1)).isoformat()
         telemetry = self.db.telemetry_since(since, limit=1)
         if not telemetry:
-            return {"status": "no_data", "cpu": None, "memory": None}
+            status = "disk_pressure" if disk_pct >= 90 else "no_data"
+            return {"status": status, "cpu": None, "memory": None, **disk_health}
 
         t = telemetry[-1]
         mem_pct = (t["memory_used_gb"] / t["memory_total_gb"] * 100) if t["memory_total_gb"] else 0
@@ -163,6 +192,8 @@ class AttentionDaemon:
             status = "high_cpu"
         if mem_pct > 85:
             status = "memory_pressure"
+        if disk_pct >= 90:
+            status = "disk_pressure"
 
         return {
             "status": status,
@@ -171,6 +202,7 @@ class AttentionDaemon:
             "memory_total": round(t["memory_total_gb"], 1),
             "memory_pct": round(mem_pct, 1),
             "process_count": t["process_count"],
+            **disk_health,
         }
 
     def _identify_problems(self, health: dict[str, Any]) -> list[dict[str, Any]]:
@@ -180,16 +212,25 @@ class AttentionDaemon:
         since = (datetime.now(UTC) - timedelta(hours=1)).isoformat()
 
         # Health problems.
-        if health["status"] == "memory_pressure":
+        if health["status"] == "memory_pressure" or health.get("memory_pct", 0) > 85:
             problems.append({
                 "problem": "Memory pressure detected",
                 "evidence": f"{health.get('memory_pct', 0)}% used",
                 "timestamp": now,
             })
-        if health["status"] == "high_cpu":
+        if health["status"] == "high_cpu" or health.get("cpu", 0) and health["cpu"] > 80:
             problems.append({
                 "problem": "High CPU usage",
                 "evidence": f"{health.get('cpu', 0)}%",
+                "timestamp": now,
+            })
+        if health["status"] == "disk_pressure" or health.get("disk_pct", 0) >= 90:
+            problems.append({
+                "problem": "Disk pressure detected",
+                "evidence": (
+                    f"{health.get('disk_pct', 0)}% used; "
+                    f"{health.get('disk_free_gb', 0)} GB free"
+                ),
                 "timestamp": now,
             })
 
@@ -206,11 +247,15 @@ class AttentionDaemon:
 
         # Failed actions in the last hour.
         recent = self.db.recent_actions(limit=10)
+        seen_denials: set[tuple[str, str]] = set()
         for a in recent:
-            if not a["executed"] and a["timestamp"] > since:
+            error = a["error"] if a["error"] else ""
+            denial = (a["action_name"], error)
+            if not a["executed"] and a["timestamp"] > since and denial not in seen_denials:
+                seen_denials.add(denial)
                 problems.append({
                     "problem": f"Action '{a['action_name']}' was denied",
-                    "evidence": a["error"] if a["error"] else "",
+                    "evidence": error,
                     "timestamp": a["timestamp"],
                 })
 
@@ -223,12 +268,23 @@ class AttentionDaemon:
         suggestions: list[dict[str, Any]] = []
         now = datetime.now(UTC).isoformat()
 
+        if health.get("disk_pct", 0) >= 90:
+            suggestions.append({
+                "action": "Review disk pressure before large local jobs",
+                "reason": (
+                    f"{health.get('disk_pct', 0)}% used; "
+                    f"{health.get('disk_free_gb', 0)} GB free"
+                ),
+                "timestamp": now,
+            })
+
         # Suggest continuing pending tasks.
         tasks = self.db.pending_tasks()
-        if tasks:
+        task = self._focus_task(workspace)
+        if task:
             suggestions.append({
-                "action": f"Continue: {tasks[0]['title']}",
-                "reason": f"{len(tasks)} pending task(s)",
+                "action": f"Continue: {task['title']}",
+                "reason": f"{len(tasks)} pending task(s); selected for {workspace or 'global focus'}",
                 "timestamp": now,
             })
 

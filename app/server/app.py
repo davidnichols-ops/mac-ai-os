@@ -10,7 +10,9 @@ access to the full system: database, retriever, blackboard, actions.
 from __future__ import annotations
 
 import json
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
@@ -19,6 +21,19 @@ from app.runtime import Runtime
 from app.server.context import build_context_packet
 
 log = get_logger(__name__)
+
+_DEFAULT_ALLOWED_ORIGINS = {
+    "https://nevernote-three.vercel.app",
+}
+
+
+def _allowed_origins() -> set[str]:
+    configured = {
+        origin.strip().rstrip("/")
+        for origin in os.environ.get("MAOS_ALLOWED_ORIGINS", "").split(",")
+        if origin.strip()
+    }
+    return _DEFAULT_ALLOWED_ORIGINS | configured
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -29,11 +44,17 @@ class _Handler(BaseHTTPRequestHandler):
         path = parsed.path.rstrip("/") or "/"
         params = {k: v[0] for k, v in parse_qs(parsed.query).items()}
 
+        if path not in {"/", "/health"} and not self._authorized():
+            self._json(401, {"error": "missing or invalid MAOS capability token"})
+            return
+
         routes: dict[str, Any] = {
             "/": self._api_info,
             "/context": self._context,
             "/context/current": self._context,
             "/memory/search": self._memory_search,
+            "/rag/search": self._rag_search,
+            "/rag/status": self._rag_status,
             "/workspace/current": self._workspace_current,
             "/workspace/list": self._workspace_list,
             "/session/latest": self._session_latest,
@@ -63,8 +84,14 @@ class _Handler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path.rstrip("/")
 
+        if not self._authorized():
+            self._json(401, {"error": "missing or invalid MAOS capability token"})
+            return
+
         if path == "/actions/request":
             self._action_request()
+        elif path == "/rag/query":
+            self._rag_query()
         else:
             self._json(404, {"error": f"not found: {path}"})
 
@@ -77,6 +104,9 @@ class _Handler(BaseHTTPRequestHandler):
             "endpoints": [
                 "GET /context",
                 "GET /memory/search?q=",
+                "GET /rag/search?q=",
+                "GET /rag/status",
+                "POST /rag/query",
                 "GET /workspace/current",
                 "GET /workspace/list",
                 "GET /session/latest",
@@ -100,21 +130,20 @@ class _Handler(BaseHTTPRequestHandler):
         lookback = int(params.get("hours", "24"))
         packet = build_context_packet(
             rt.db, rt.blackboard,
-            retriever=rt.retriever,
+            retriever=self._device_rag(),
             lookback_hours=lookback,
             rag_query=rag_query,
         )
         self._json(200, packet)
 
     def _memory_search(self, params: dict) -> None:
-        rt = self._runtime()
         q = params.get("q", "")
         if not q:
             self._json(400, {"error": "missing query parameter 'q'"})
             return
         top_k = int(params.get("top_k", "5"))
         try:
-            results = rt.retriever.search(q, top_k=top_k)
+            results = self._device_rag().search(q, top_k=top_k)
             self._json(200, {
                 "query": q,
                 "count": len(results),
@@ -130,6 +159,43 @@ class _Handler(BaseHTTPRequestHandler):
             })
         except Exception as e:
             self._json(500, {"error": str(e)})
+
+    def _rag_search(self, params: dict) -> None:
+        q = params.get("q", "")
+        if not q:
+            self._json(400, {"error": "missing query parameter 'q'"})
+            return
+        top_k = max(1, min(int(params.get("top_k", "8")), 50))
+        results = self._device_rag().search(q, top_k=top_k)
+        self._json(200, {
+            "query": q,
+            "count": len(results),
+            "results": [
+                {
+                    "text": result.text,
+                    "source": result.source,
+                    "score": result.score,
+                    "metadata": result.metadata,
+                }
+                for result in results
+            ],
+        })
+
+    def _rag_status(self, _params: dict) -> None:
+        self._json(200, self._device_rag().status())
+
+    def _rag_query(self) -> None:
+        body = self._read_body()
+        if body is None:
+            return
+        question = str(body.get("question", "")).strip()
+        if not question:
+            self._json(400, {"error": "missing 'question'"})
+            return
+        top_k = max(1, min(int(body.get("top_k", 8)), 30))
+        rt = self._runtime()
+        model = getattr(rt, "qa_model", None) or rt.planner
+        self._json(200, self._device_rag().answer(question, model, top_k=top_k))
 
     def _workspace_current(self, _params: dict) -> None:
         from app.workspace import detect_active_workspace
@@ -264,16 +330,35 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _health(self, _params: dict) -> None:
         rt = self._runtime()
+        device_status = self._device_rag().status()
         self._json(200, {
             "status": "ok",
             "database": rt.db.query_one("SELECT 1 as ok") is not None,
-            "vectors": rt.retriever.count() if hasattr(rt.retriever, "count") else "unknown",
+            "device_rag": {
+                "files": device_status["files"],
+                "chunks": device_status["chunks"],
+                "semantic_backend": device_status["semantic_backend"],
+            },
         })
 
     # --- helpers ---
 
     def _runtime(self) -> Runtime:
         return self.server.runtime  # type: ignore[attr-defined]
+
+    def _device_rag(self):
+        return self.server.device_rag  # type: ignore[attr-defined]
+
+    def _authorized(self) -> bool:
+        expected = self.server.capability_token  # type: ignore[attr-defined]
+        if expected is None:
+            return True
+        scheme, _, provided = self.headers.get("Authorization", "").partition(" ")
+        if scheme.lower() != "bearer":
+            return False
+        from app.mcp.server import validate_token
+
+        return validate_token(provided.strip(), expected)
 
     def _read_body(self) -> dict | None:
         content_length = int(self.headers.get("Content-Length", 0))
@@ -292,18 +377,34 @@ class _Handler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin", "").rstrip("/")
+        if self._origin_allowed(origin):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self) -> None:
         self.send_response(204)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin", "").rstrip("/")
+        if self._origin_allowed(origin):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        if self.headers.get("Access-Control-Request-Private-Network") == "true":
+            self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
+
+    @staticmethod
+    def _origin_allowed(origin: str) -> bool:
+        return (
+            origin.startswith("http://127.0.0.1")
+            or origin.startswith("http://localhost")
+            or origin in _allowed_origins()
+        )
 
     def log_message(self, format: str, *args: Any) -> None:
         # Suppress default stderr logging — use structlog instead.
@@ -316,26 +417,64 @@ class _Server(ThreadingHTTPServer):
 
     runtime: Runtime
 
-    def __init__(self, addr: tuple[str, int], runtime: Runtime) -> None:
+    def __init__(
+        self,
+        addr: tuple[str, int],
+        runtime: Runtime,
+        *,
+        capability_token: str | None = None,
+    ) -> None:
+        from app.retrieval.device import DeviceCatalog, DeviceRAGService, build_device_rag
+
         self.runtime = runtime
+        self.capability_token = capability_token
+        if hasattr(runtime, "settings"):
+            self.device_rag = build_device_rag(runtime)
+        else:
+            db_path = getattr(getattr(runtime, "db", None), "path", Path("data/maos.db"))
+            self.device_rag = DeviceRAGService(
+                runtime.retriever,
+                DeviceCatalog(Path(db_path).with_name("device_rag.db")),
+            )
         super().__init__(addr, _Handler)
 
+    def server_close(self) -> None:
+        self.device_rag.catalog.close()
+        super().server_close()
 
-def create_server(runtime: Runtime, *, host: str = "127.0.0.1", port: int = 7777) -> _Server:
+
+def create_server(
+    runtime: Runtime,
+    *,
+    host: str = "127.0.0.1",
+    port: int = 7777,
+    require_token: bool = False,
+) -> _Server:
     """Create the HTTP server (doesn't start it)."""
-    server = _Server((host, port), runtime)
+    if host not in {"127.0.0.1", "localhost", "::1"}:
+        raise ValueError("MAOS device context may only bind to a loopback address")
+    if require_token:
+        from app.mcp.server import get_or_create_token
+
+        token = get_or_create_token()
+    else:
+        token = None
+    server = _Server((host, port), runtime, capability_token=token)
     log.info("server.created", host=host, port=port)
     return server
 
 
 def run_server(runtime: Runtime, *, host: str = "127.0.0.1", port: int = 7777) -> None:
     """Create and run the HTTP server (blocking)."""
-    server = create_server(runtime, host=host, port=port)
+    server = create_server(runtime, host=host, port=port, require_token=True)
     log.info("server.serving", url=f"http://{host}:{port}")
     print(f"\n  MAOS Context API — http://{host}:{port}\n")
     print("  Endpoints:")
     print("    GET  /context              — universal context packet")
     print("    GET  /memory/search?q=     — RAG search")
+    print("    GET  /rag/search?q=        — hybrid device search")
+    print("    GET  /rag/status           — device index coverage")
+    print("    POST /rag/query            — grounded answer with citations")
     print("    GET  /workspace/current    — active workspace")
     print("    GET  /session/latest       — latest session")
     print("    GET  /tasks                — pending tasks")
@@ -343,9 +482,12 @@ def run_server(runtime: Runtime, *, host: str = "127.0.0.1", port: int = 7777) -
     print("    GET  /blackboard           — working memory")
     print("    POST /actions/request      — execute an action")
     print("    GET  /health               — health check")
+    print("\n  Authentication: Bearer token from ~/.maos/token")
     print("\n  Press Ctrl+C to stop.\n")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\n  Shutting down...")
         server.shutdown()
+    finally:
+        server.server_close()

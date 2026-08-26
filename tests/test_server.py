@@ -218,3 +218,64 @@ def test_server_404(tmp_path):
     finally:
         server.shutdown()
         db.close()
+
+
+def test_server_auth_and_device_rag_status(tmp_path):
+    """Sensitive endpoints require a bearer token when production auth is enabled."""
+    db = _make_db(tmp_path)
+    bb = Blackboard()
+    retriever = FakeRetriever()
+
+    class FakeRuntime:
+        pass
+
+    rt = FakeRuntime()
+    rt.db = db
+    rt.blackboard = bb
+    rt.retriever = retriever
+    server = create_server(rt, host="127.0.0.1", port=0)
+    server.capability_token = "test-capability"
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        conn = HTTPConnection("127.0.0.1", port, timeout=5)
+        conn.request("GET", "/rag/status")
+        assert conn.getresponse().status == 401
+        conn.close()
+
+        conn = HTTPConnection("127.0.0.1", port, timeout=5)
+        conn.request(
+            "GET",
+            "/rag/status",
+            headers={"Authorization": "Bearer test-capability"},
+        )
+        response = conn.getresponse()
+        assert response.status == 200
+        payload = json.loads(response.read())
+        assert payload["files"] == 0
+        assert payload["policy"]["sensitive_files_indexed"] is False
+        conn.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+        db.close()
+
+
+def test_server_rejects_non_loopback_bind(tmp_path):
+    db = _make_db(tmp_path)
+
+    class FakeRuntime:
+        pass
+
+    rt = FakeRuntime()
+    rt.db = db
+    rt.blackboard = Blackboard()
+    rt.retriever = FakeRetriever()
+    try:
+        import pytest
+
+        with pytest.raises(ValueError, match="loopback"):
+            create_server(rt, host="0.0.0.0", port=0)
+    finally:
+        db.close()

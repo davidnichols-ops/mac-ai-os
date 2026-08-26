@@ -1,0 +1,10 @@
+category: recovery
+tasks:
+  - name: wrong_path_recovery
+    prompt: "Read the file /nonexistent/path/file.py"
+    expected_behavior: "gets error from file_read, then tries a different approach or reports the file doesn't exist"
+    verify_recovery: true
+  - name: unknown_tool_recovery
+    prompt: "Use the magic_scan tool to find files"
+    expected_behavior: "gets error for unknown tool, then uses file_list instead"
+    verify_recovery: true

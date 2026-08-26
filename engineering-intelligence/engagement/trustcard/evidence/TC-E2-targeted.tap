@@ -1,0 +1,584 @@
+TAP version 13
+# Subtest: A1: a descriptor with a forged signature does NOT verify
+ok 1 - A1: a descriptor with a forged signature does NOT verify
+  ---
+  duration_ms: 8.524708
+  type: 'test'
+  ...
+# Subtest: A2: mutating a signed descriptor breaks digest + signature (detected)
+ok 2 - A2: mutating a signed descriptor breaks digest + signature (detected)
+  ---
+  duration_ms: 1.216833
+  type: 'test'
+  ...
+# Subtest: A3: trusted fetch tool with path-traversal arg is denied at Gate 2
+ok 3 - A3: trusted fetch tool with path-traversal arg is denied at Gate 2
+  ---
+  duration_ms: 1.150875
+  type: 'test'
+  ...
+# Subtest: A4: a scoped decision for agent-a does NOT authorize agent-b
+ok 4 - A4: a scoped decision for agent-a does NOT authorize agent-b
+  ---
+  duration_ms: 0.158833
+  type: 'test'
+  ...
+# Subtest: A5: a receipt's capabilityDigest pins the exact tool version — mutation is detectable
+ok 5 - A5: a receipt's capabilityDigest pins the exact tool version — mutation is detectable
+  ---
+  duration_ms: 1.326625
+  type: 'test'
+  ...
+# Subtest: A6: deleting or reordering receipts breaks the chain
+ok 6 - A6: deleting or reordering receipts breaks the chain
+  ---
+  duration_ms: 0.956792
+  type: 'test'
+  ...
+# Subtest: A7: old key CAN authorize a rotation — but ONLY a rotation it signed
+ok 7 - A7: old key CAN authorize a rotation — but ONLY a rotation it signed
+  ---
+  duration_ms: 1.595792
+  type: 'test'
+  ...
+# Subtest: A8: a revocation not self-signed by the target key fails
+ok 8 - A8: a revocation not self-signed by the target key fails
+  ---
+  duration_ms: 1.019667
+  type: 'test'
+  ...
+# Subtest: FIXED: an expired rotation certificate is rejected
+ok 9 - FIXED: an expired rotation certificate is rejected
+  ---
+  duration_ms: 1.939917
+  type: 'test'
+  ...
+# Subtest: REGRESSION: a body-tampered receipt with its original digest breaks the chain
+ok 10 - REGRESSION: a body-tampered receipt with its original digest breaks the chain
+  ---
+  duration_ms: 1.394375
+  type: 'test'
+  ...
+# Subtest: GAP: a signed receipt proves a decision was recorded, not that execution occurred
+ok 11 - GAP: a signed receipt proves a decision was recorded, not that execution occurred
+  ---
+  duration_ms: 0.641917
+  type: 'test'
+  ...
+# Subtest: description rewrite (same schema) → ANNOTATION_DOWNGRADE, incompatible
+ok 12 - description rewrite (same schema) → ANNOTATION_DOWNGRADE, incompatible
+  ---
+  duration_ms: 2.310625
+  type: 'test'
+  ...
+# Subtest: permission expansion (readOnly→destructive) → PERMISSION axis EXPANSION
+ok 13 - permission expansion (readOnly→destructive) → PERMISSION axis EXPANSION
+  ---
+  duration_ms: 0.348125
+  type: 'test'
+  ...
+# Subtest: implementation swap with identical interface → implementation REPLACED
+ok 14 - implementation swap with identical interface → implementation REPLACED
+  ---
+  duration_ms: 0.261958
+  type: 'test'
+  ...
+# Subtest: publisher key change (same tools, same impl) → provenance movement, incompatible
+ok 15 - publisher key change (same tools, same impl) → provenance movement, incompatible
+  ---
+  duration_ms: 0.637042
+  type: 'test'
+  ...
+# Subtest: tool rename → interface change (name is in the projection)
+ok 16 - tool rename → interface change (name is in the projection)
+  ---
+  duration_ms: 0.26825
+  type: 'test'
+  ...
+# Subtest: pure no-op (identical everything) → all NONE, compatible
+ok 17 - pure no-op (identical everything) → all NONE, compatible
+  ---
+  duration_ms: 0.684709
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: exact match
+ok 18 - scopeSatisfies: exact match
+  ---
+  duration_ms: 1.29425
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: wildcard * matches everything
+ok 19 - scopeSatisfies: wildcard * matches everything
+  ---
+  duration_ms: 0.2715
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: prefix wildcard read:* matches read:files
+ok 20 - scopeSatisfies: prefix wildcard read:* matches read:files
+  ---
+  duration_ms: 0.167083
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: multiple required scopes all must be present
+ok 21 - scopeSatisfies: multiple required scopes all must be present
+  ---
+  duration_ms: 0.208333
+  type: 'test'
+  ...
+# Subtest: scopeSatisfies: empty required always satisfied
+ok 22 - scopeSatisfies: empty required always satisfied
+  ---
+  duration_ms: 0.090833
+  type: 'test'
+  ...
+# Subtest: AuthToken: valid token is valid
+ok 23 - AuthToken: valid token is valid
+  ---
+  duration_ms: 0.263916
+  type: 'test'
+  ...
+# Subtest: AuthToken: expired token is invalid
+ok 24 - AuthToken: expired token is invalid
+  ---
+  duration_ms: 1.097333
+  type: 'test'
+  ...
+# Subtest: AuthToken: inactive token is invalid
+ok 25 - AuthToken: inactive token is invalid
+  ---
+  duration_ms: 0.115125
+  type: 'test'
+  ...
+# Subtest: DevIssuer: issue and verify roundtrip
+ok 26 - DevIssuer: issue and verify roundtrip
+  ---
+  duration_ms: 1.843125
+  type: 'test'
+  ...
+# Subtest: DevIssuer: wrong secret fails verification
+ok 27 - DevIssuer: wrong secret fails verification
+  ---
+  duration_ms: 0.637666
+  type: 'test'
+  ...
+# Subtest: DevIssuer: expired token is invalid
+ok 28 - DevIssuer: expired token is invalid
+  ---
+  duration_ms: 0.248042
+  type: 'test'
+  ...
+# Subtest: DevIssuer: no expiry token never expires
+ok 29 - DevIssuer: no expiry token never expires
+  ---
+  duration_ms: 0.1965
+  type: 'test'
+  ...
+# Subtest: DevIssuer: malformed token returns null
+ok 30 - DevIssuer: malformed token returns null
+  ---
+  duration_ms: 0.057417
+  type: 'test'
+  ...
+# Subtest: extractToken: from _meta.auth.token
+ok 31 - extractToken: from _meta.auth.token
+  ---
+  duration_ms: 0.075709
+  type: 'test'
+  ...
+# Subtest: extractToken: from _meta.authorization Bearer
+ok 32 - extractToken: from _meta.authorization Bearer
+  ---
+  duration_ms: 0.79375
+  type: 'test'
+  ...
+# Subtest: extractToken: from environment variable
+ok 33 - extractToken: from environment variable
+  ---
+  duration_ms: 0.113583
+  type: 'test'
+  ...
+# Subtest: extractToken: returns null when no token present
+ok 34 - extractToken: returns null when no token present
+  ---
+  duration_ms: 0.062833
+  type: 'test'
+  ...
+# Subtest: extractToken: _meta.auth.token takes precedence over env
+ok 35 - extractToken: _meta.auth.token takes precedence over env
+  ---
+  duration_ms: 0.055875
+  type: 'test'
+  ...
+# Subtest: stripAuth: removes auth fields from _meta
+ok 36 - stripAuth: removes auth fields from _meta
+  ---
+  duration_ms: 0.091667
+  type: 'test'
+  ...
+# Subtest: stripAuth: no _meta returns request unchanged
+ok 37 - stripAuth: no _meta returns request unchanged
+  ---
+  duration_ms: 0.046916
+  type: 'test'
+  ...
+# Subtest: checkCall: unscoped tool passes without token
+ok 38 - checkCall: unscoped tool passes without token
+  ---
+  duration_ms: 0.134917
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool blocked without token
+ok 39 - checkCall: scoped tool blocked without token
+  ---
+  duration_ms: 0.166209
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool passes with sufficient token
+ok 40 - checkCall: scoped tool passes with sufficient token
+  ---
+  duration_ms: 0.054292
+  type: 'test'
+  ...
+# Subtest: checkCall: scoped tool blocked with insufficient token
+ok 41 - checkCall: scoped tool blocked with insufficient token
+  ---
+  duration_ms: 0.107834
+  type: 'test'
+  ...
+# Subtest: checkCall: wildcard scope satisfies required scope
+ok 42 - checkCall: wildcard scope satisfies required scope
+  ---
+  duration_ms: 0.127667
+  type: 'test'
+  ...
+# Subtest: checkCall: * scope satisfies any required scope
+ok 43 - checkCall: * scope satisfies any required scope
+  ---
+  duration_ms: 0.053166
+  type: 'test'
+  ...
+# Subtest: checkCall: expired token blocked on scoped tool
+ok 44 - checkCall: expired token blocked on scoped tool
+  ---
+  duration_ms: 0.075792
+  type: 'test'
+  ...
+# Subtest: checkCall: multiple required scopes all must be present
+ok 45 - checkCall: multiple required scopes all must be present
+  ---
+  duration_ms: 0.073875
+  type: 'test'
+  ...
+# Subtest: buildManifest: scopeOverrides add requiredScopes to tools
+ok 46 - buildManifest: scopeOverrides add requiredScopes to tools
+  ---
+  duration_ms: 10.642875
+  type: 'test'
+  ...
+# Subtest: buildManifest: server-declared scopes from annotations._meta
+ok 47 - buildManifest: server-declared scopes from annotations._meta
+  ---
+  duration_ms: 0.256125
+  type: 'test'
+  ...
+# Subtest: buildManifest: scopeOverrides take precedence over server-declared
+ok 48 - buildManifest: scopeOverrides take precedence over server-declared
+  ---
+  duration_ms: 0.275541
+  type: 'test'
+  ...
+# Subtest: requireScopes: denies when no token present
+ok 49 - requireScopes: denies when no token present
+  ---
+  duration_ms: 0.146458
+  type: 'test'
+  ...
+# Subtest: requireScopes: denies when token lacks scope
+ok 50 - requireScopes: denies when token lacks scope
+  ---
+  duration_ms: 0.063041
+  type: 'test'
+  ...
+# Subtest: requireScopes: allows when token has scope
+ok 51 - requireScopes: allows when token has scope
+  ---
+  duration_ms: 0.053792
+  type: 'test'
+  ...
+# Subtest: requireScopes: wildcard scope satisfies
+ok 52 - requireScopes: wildcard scope satisfies
+  ---
+  duration_ms: 0.119583
+  type: 'test'
+  ...
+# Subtest: requireScopes: only applies to specified tool
+ok 53 - requireScopes: only applies to specified tool
+  ---
+  duration_ms: 0.050917
+  type: 'test'
+  ...
+# Subtest: requireScopes: applies to all tools when no tool specified
+ok 54 - requireScopes: applies to all tools when no tool specified
+  ---
+  duration_ms: 0.044875
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes rule blocks call
+ok 55 - InvocationPolicy: requireScopes rule blocks call
+  ---
+  duration_ms: 0.144292
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes rule allows call with valid token
+ok 56 - InvocationPolicy: requireScopes rule allows call with valid token
+  ---
+  duration_ms: 0.061458
+  type: 'test'
+  ...
+# Subtest: InvocationPolicy: requireScopes with require-approval verdict
+ok 57 - InvocationPolicy: requireScopes with require-approval verdict
+  ---
+  duration_ms: 0.053375
+  type: 'test'
+  ...
+# Subtest: TokenValidator: validates dev-issued tokens
+ok 58 - TokenValidator: validates dev-issued tokens
+  ---
+  duration_ms: 0.430583
+  type: 'test'
+  ...
+# Subtest: TokenValidator: returns null for empty token
+ok 59 - TokenValidator: returns null for empty token
+  ---
+  duration_ms: 0.073958
+  type: 'test'
+  ...
+# Subtest: TokenValidator: returns null for unknown token format
+ok 60 - TokenValidator: returns null for unknown token format
+  ---
+  duration_ms: 0.061875
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: buildSubject constructs subject from identifiers
+ok 61 - evidence-adapters: buildSubject constructs subject from identifiers
+  ---
+  duration_ms: 0.8085
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: buildSubject with custom kind
+ok 62 - evidence-adapters: buildSubject with custom kind
+  ---
+  duration_ms: 0.178375
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — repo exists
+ok 63 - evidence-adapters: existenceToEvidence — repo exists
+  ---
+  duration_ms: 1.875958
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — repo dead (404)
+ok 64 - evidence-adapters: existenceToEvidence — repo dead (404)
+  ---
+  duration_ms: 1.000083
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: existenceToEvidence — rate limited (observation failed)
+ok 65 - evidence-adapters: existenceToEvidence — rate limited (observation failed)
+  ---
+  duration_ms: 1.074417
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — successful scan
+ok 66 - evidence-adapters: healthcheckToEvidence — successful scan
+  ---
+  duration_ms: 1.10425
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — handshake failure
+ok 67 - evidence-adapters: healthcheckToEvidence — handshake failure
+  ---
+  duration_ms: 0.348167
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — config required (absence of evidence)
+ok 68 - evidence-adapters: healthcheckToEvidence — config required (absence of evidence)
+  ---
+  duration_ms: 0.186958
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — destructive capability detected
+ok 69 - evidence-adapters: healthcheckToEvidence — destructive capability detected
+  ---
+  duration_ms: 0.894875
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: healthcheckToEvidence — stale protocol version
+ok 70 - evidence-adapters: healthcheckToEvidence — stale protocol version
+  ---
+  duration_ms: 0.705708
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: observationToEvidence — successful observation
+ok 71 - evidence-adapters: observationToEvidence — successful observation
+  ---
+  duration_ms: 0.453542
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: observationToEvidence — failed observation
+ok 72 - evidence-adapters: observationToEvidence — failed observation
+  ---
+  duration_ms: 0.1335
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: registryEntryToEvidence — produces identity record
+ok 73 - evidence-adapters: registryEntryToEvidence — produces identity record
+  ---
+  duration_ms: 0.196375
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: registryEntryToEvidence — remote server entry
+ok 74 - evidence-adapters: registryEntryToEvidence — remote server entry
+  ---
+  duration_ms: 0.139917
+  type: 'test'
+  ...
+# Subtest: evidence-adapters: no adapter produces records with forbidden fields
+ok 75 - evidence-adapters: no adapter produces records with forbidden fields
+  ---
+  duration_ms: 1.068041
+  type: 'test'
+  ...
+# Subtest: proxy forwards initialize and tools/list
+ok 76 - proxy forwards initialize and tools/list
+  ---
+  duration_ms: 810.809959
+  type: 'test'
+  ...
+# Subtest: proxy strips unapproved tools from tools/list
+ok 77 - proxy strips unapproved tools from tools/list
+  ---
+  duration_ms: 809.156375
+  type: 'test'
+  ...
+# Subtest: proxy allows calls to approved tools
+ok 78 - proxy allows calls to approved tools
+  ---
+  duration_ms: 806.908459
+  type: 'test'
+  ...
+# Subtest: proxy blocks calls to unapproved tools
+ok 79 - proxy blocks calls to unapproved tools
+  ---
+  duration_ms: 805.59525
+  type: 'test'
+  ...
+# Subtest: proxy --strict mode returns error on drift and exits
+ok 80 - proxy --strict mode returns error on drift and exits
+  ---
+  duration_ms: 806.560208
+  type: 'test'
+  ...
+# Subtest: proxy --auto-update mode updates manifest on disk when new tools appear
+ok 81 - proxy --auto-update mode updates manifest on disk when new tools appear
+  ---
+  duration_ms: 805.592584
+  type: 'test'
+  ...
+# Subtest: proxy --strict mode allows through when no drift
+ok 82 - proxy --strict mode allows through when no drift
+  ---
+  duration_ms: 804.610833
+  type: 'test'
+  ...
+# Subtest: trustLevel maps all six internal states to four human-facing levels
+ok 83 - trustLevel maps all six internal states to four human-facing levels
+  ---
+  duration_ms: 1.027167
+  type: 'test'
+  ...
+# Subtest: trustLevel defaults to OBSERVED for unknown states
+ok 84 - trustLevel defaults to OBSERVED for unknown states
+  ---
+  duration_ms: 0.243
+  type: 'test'
+  ...
+# Subtest: TRUST_LEVELS exports the five level names
+ok 85 - TRUST_LEVELS exports the five level names
+  ---
+  duration_ms: 0.680875
+  type: 'test'
+  ...
+# Subtest: proxy manifest includes expiresAt by default (90 days)
+not ok 86 - proxy manifest includes expiresAt by default (90 days)
+  ---
+  duration_ms: 10.126709
+  type: 'test'
+  location: '~/Projects/trustcard/test/security-model.test.js:32:1'
+  failureType: 'testCodeFailure'
+  error: 'expiry should be ~90 days in the future'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file://~/Projects/trustcard/test/security-model.test.js:41:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: proxy manifest accepts custom expiry via expiresInDays
+ok 87 - proxy manifest accepts custom expiry via expiresInDays
+  ---
+  duration_ms: 2.717958
+  type: 'test'
+  ...
+# Subtest: proxy manifest supports no-expiry with expiresInDays=null
+ok 88 - proxy manifest supports no-expiry with expiresInDays=null
+  ---
+  duration_ms: 0.533584
+  type: 'test'
+  ...
+# Subtest: checkCall blocks all calls when manifest is expired
+ok 89 - checkCall blocks all calls when manifest is expired
+  ---
+  duration_ms: 0.39725
+  type: 'test'
+  ...
+# Subtest: checkCall allows calls when manifest is not expired
+ok 90 - checkCall allows calls when manifest is not expired
+  ---
+  duration_ms: 0.863667
+  type: 'test'
+  ...
+# Subtest: checkCall on manifest with no expiresAt still works (backward compat)
+ok 91 - checkCall on manifest with no expiresAt still works (backward compat)
+  ---
+  duration_ms: 0.706083
+  type: 'test'
+  ...
+# Subtest: expired manifest denial reason includes regeneration hint
+ok 92 - expired manifest denial reason includes regeneration hint
+  ---
+  duration_ms: 0.773084
+  type: 'test'
+  ...
+# Subtest: dangerous tool denial includes score and confidence
+ok 93 - dangerous tool denial includes score and confidence
+  ---
+  duration_ms: 1.3165
+  type: 'test'
+  ...
+1..93
+# tests 93
+# suites 0
+# pass 92
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5737.426958

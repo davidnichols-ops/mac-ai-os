@@ -1,0 +1,34 @@
+{
+  "program": "trustcard",
+  "repository": "~/Projects/trustcard",
+  "authorization": {
+    "basis": "owned local repository remote davidnichols-ops/trustcard",
+    "mode": "offline_fixture_only",
+    "live_testing": false
+  },
+  "components": [
+    "lib/manifest.js",
+    "lib/auth.js",
+    "lib/provenance.js",
+    "lib/identity.js",
+    "lib/pin.js",
+    "lib/policy.js",
+    "lib/evidence.js",
+    "lib/receipts.js",
+    "bin/mcp-proxy.js"
+  ],
+  "trust_boundaries": [
+    "MCP client to proxy",
+    "proxy to downstream child process",
+    "live tools/list to approved manifest",
+    "authentication token to required scopes",
+    "signed identity/provenance to policy decision",
+    "receipt/audit log to later verification"
+  ],
+  "live_endpoints": [],
+  "evidence_limitations": [
+    "No production or third-party endpoint was contacted.",
+    "No credentials were used.",
+    "This campaign does not establish absence of vulnerabilities."
+  ]
+}

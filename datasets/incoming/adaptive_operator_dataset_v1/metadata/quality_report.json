@@ -1,0 +1,41 @@
+{
+  "generated": "2026-08-01",
+  "trajectories": {
+    "total": 2058,
+    "accepted": 2058,
+    "rejected": 0,
+    "duplicates_removed": 0
+  },
+  "sft": {
+    "total": 2297,
+    "valid": 2297,
+    "errors": {}
+  },
+  "evaluation": {
+    "total": 354,
+    "overlap_with_train": 0
+  },
+  "error_breakdown": {},
+  "compute_label_distribution": {
+    "FAST": 589,
+    "VERIFY": 216,
+    "THINK": 1324,
+    "ESCALATE": 11,
+    "RECOVER": 157
+  },
+  "category_coverage": {
+    "compute": 93,
+    "engineering": 42,
+    "research": 5,
+    "architecture": 52,
+    "tools": 128,
+    "debugging": 6,
+    "recovery": 35,
+    "failure": 26,
+    "testing": 2
+  },
+  "secret_scan": {
+    "patterns_checked": 9,
+    "secrets_found": 0
+  }
+}

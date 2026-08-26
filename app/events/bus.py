@@ -58,39 +58,55 @@ class EventBus:
 
     def publish(self, event: Event) -> None:
         """Dispatch an event to all matching handlers and persist to DB."""
+        self.publish_many([event])
+
+    def publish_many(self, events: list[Event]) -> None:
+        """Dispatch many events efficiently, using a single batched DB insert."""
+        if not events:
+            return
+
         with self._lock:
-            handlers = list(self._handlers.get(event.type, []))
+            type_handlers: dict[str, list[EventHandler]] = {}
+            for event in events:
+                if event.type not in type_handlers:
+                    type_handlers[event.type] = list(self._handlers.get(event.type, []))
             wildcard = list(self._wildcard_handlers)
 
-        # Persist first so the event is recorded even if a handler crashes.
+        # Persist first so events are recorded even if a handler crashes.
         if self._db is not None:
             try:
-                self._persist(event)
+                self._persist_many(events)
             except Exception as e:
-                log.warning("bus.persist_failed", event_type=event.type, error=str(e))
+                log.warning("bus.persist_many_failed", count=len(events), error=str(e))
 
         # Dispatch to specific handlers.
-        for handler in handlers:
-            try:
-                handler(event)
-            except Exception as e:
-                log.warning("bus.handler_failed", event_type=event.type,
-                            handler=handler.__name__, error=str(e))
+        for event in events:
+            for handler in type_handlers.get(event.type, []):
+                try:
+                    handler(event)
+                except Exception as e:
+                    log.warning("bus.handler_failed", event_type=event.type,
+                                handler=handler.__name__, error=str(e))
 
         # Dispatch to wildcard handlers.
-        for handler in wildcard:
-            try:
-                handler(event)
-            except Exception as e:
-                log.warning("bus.handler_failed", event_type=event.type,
-                            handler=handler.__name__, error=str(e))
+        for event in events:
+            for handler in wildcard:
+                try:
+                    handler(event)
+                except Exception as e:
+                    log.warning("bus.handler_failed", event_type=event.type,
+                                handler=handler.__name__, error=str(e))
 
-    def _persist(self, event: Event) -> None:
+    def _persist_many(self, events: list[Event]) -> None:
         import json
 
-        self._db.execute(
+        rows = [
+            (event.type, json.dumps(event.payload), event.timestamp)
+            for event in events
+        ]
+        self._db.executemany(
             """INSERT INTO events (type, payload, timestamp) VALUES (?, ?, ?)""",
-            (event.type, json.dumps(event.payload), event.timestamp),
+            rows,
         )
 
     def handler_count(self) -> int:

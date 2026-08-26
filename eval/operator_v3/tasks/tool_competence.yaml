@@ -1,0 +1,18 @@
+category: tool_competence
+tasks:
+  - name: inspect_files
+    prompt: "List all Python files in the current directory"
+    expected_behavior: "calls file_list or shell with ls"
+    verify_tool_used: ["file_list", "shell"]
+  - name: read_file
+    prompt: "Read the file pyproject.toml and report its contents"
+    expected_behavior: "calls file_read with a path"
+    verify_tool_used: ["file_read"]
+  - name: modify_code
+    prompt: "Create a file called test_eval.py with a simple test function"
+    expected_behavior: "calls file_write"
+    verify_tool_used: ["file_write"]
+  - name: run_commands
+    prompt: "Run echo hello and report the output"
+    expected_behavior: "calls shell with echo command"
+    verify_tool_used: ["shell"]

@@ -44,6 +44,9 @@ _LAST_WORK_RE = re.compile(
 class SessionAgent(Agent):
     """Reconstructs what the user was working on from system memory."""
 
+    name = "session"
+    description = "Reconstructs what you were working on from git, events, telemetry, and shell history."
+
     def __init__(
         self,
         planner: Model,

@@ -15,13 +15,13 @@ def _populate_activity(db, bus):
     for i in range(5):
         ts = (base + timedelta(minutes=i * 2)).isoformat()
         bus.publish(Event(FILE_INDEXED, {
-            "path": f"/Users/david/mac-ai-os/app/events/file{i}.py",
-            "source": "/Users/david/mac-ai-os",
+            "path": f"/Users/testuser/mac-ai-os/app/events/file{i}.py",
+            "source": "/Users/testuser/mac-ai-os",
         }, timestamp=ts))
 
     # Add a git commit.
     db.upsert_commit(
-        repo="/Users/david/mac-ai-os", hash="abc123", author="David",
+        repo="/Users/testuser/mac-ai-os", hash="abc123", author="David",
         author_date=base.isoformat(), message="Add event bus",
         files_changed="app/events/bus.py\napp/events/models.py",
         insertions=50, deletions=2,

@@ -1,0 +1,117 @@
+# Qwen3.5-9B Adaptive Operator v3 — Training Configuration
+#
+# This config defines the LoRA fine-tuning job for the v3 model.
+# The goal is NOT to maximize memorization, but to optimize:
+#   - tool selection
+#   - recovery behavior
+#   - verification
+#   - compute allocation
+
+base_model:
+  name: "Qwen/Qwen3.5-9B"
+  provider: "together_ai"  # or "huggingface" for self-hosted
+  context_length: 32768
+
+method:
+  type: "lora"
+  # LoRA hyperparameters — conservative to preserve base capabilities
+  rank: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+# Dataset configuration — weighted by importance
+datasets:
+  # Recovery behavior — highest weight
+  # Failed trajectories where the model recovered and completed the task
+  recovery:
+    weight: 3.0
+    source: "training/output/sft_recovery.jsonl"
+    format: "sft"
+    max_samples: 5000
+
+  # Tool selection — highest weight
+  # Trajectories demonstrating correct tool usage
+  tools:
+    weight: 3.0
+    source: "training/output/sft_tools.jsonl"
+    format: "sft"
+    max_samples: 10000
+
+  # Architecture/planning — medium weight
+  # Multi-step tasks requiring planning
+  architecture:
+    weight: 1.5
+    source: "training/output/sft_planning.jsonl"
+    format: "sft"
+    max_samples: 3000
+
+  # Compute policy — high weight
+  # FAST/THINK/VERIFY/RECOVER mode selection
+  compute_policy:
+    weight: 2.5
+    source: "training/output/compute_policy.jsonl"
+    format: "classification"
+    max_samples: 8000
+
+  # Preference pairs — for DPO phase (optional, after SFT)
+  preference:
+    weight: 1.0
+    source: "training/output/preference.jsonl"
+    format: "preference"
+    max_samples: 2000
+
+# Training hyperparameters
+training:
+  epochs: 3
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  lr_scheduler: "cosine"
+  max_seq_length: 4096
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+
+  # Early stopping
+  early_stopping_patience: 3
+  early_stopping_threshold: 0.001
+
+# Evaluation
+evaluation:
+  eval_steps: 50
+  eval_dataset: "eval/operator_v3/results/"
+  metrics:
+    - "tool_accuracy"       # did the model call the right tool?
+    - "recovery_rate"       # did the model recover from errors?
+    - "verification_rate"   # did the model verify its work?
+    - "compute_efficiency"  # did the model choose the right compute mode?
+
+# Training philosophy
+# Do NOT maximize memorization. Optimize:
+#   - tool selection (calling the right tool for the job)
+#   - recovery behavior (adapting after failure)
+#   - verification (checking work before declaring success)
+#   - compute allocation (FAST for trivial, THINK for complex)
+#
+# A model that memorizes specific tasks but can't generalize is useless.
+# A model that selects tools well, recovers from errors, and verifies
+# its work is valuable even if it makes occasional mistakes.
+
+# Output
+output:
+  adapter_dir: "models/adaptive-operator-v3/checkpoints/"
+  merged_model_dir: "models/adaptive-operator-v3/merged/"
+  mlx_model_dir: "models/adaptive-operator-v3/mlx/"
+  mlx_quantization: "4bit"
+  final_name: "Qwen3.5-9B-Adaptive-Operator-v3-MLX-4bit"
+
+# Reproducibility
+seed: 42

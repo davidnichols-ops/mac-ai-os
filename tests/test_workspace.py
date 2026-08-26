@@ -66,8 +66,8 @@ def test_detect_active_workspace(tmp_path):
     # Publish some file events for a project.
     for i in range(5):
         bus.publish(Event(FILE_INDEXED, {
-            "path": f"/Users/david/myproject/file{i}.py",
-            "source": "/Users/david/myproject",
+            "path": f"/Users/testuser/myproject/file{i}.py",
+            "source": "/Users/testuser/myproject",
         }))
 
     ws = detect_active_workspace(db)

@@ -1,0 +1,10 @@
+category: compute_allocation
+tasks:
+  - name: trivial_task
+    prompt: "What is 2 + 2?"
+    expected_behavior: "FAST mode — no tools needed, direct answer"
+    verify_no_tools: true
+  - name: ambiguous_task
+    prompt: "Analyze the codebase structure and suggest improvements"
+    expected_behavior: "THINK mode — should use tools to inspect before answering"
+    verify_tool_used: ["file_list", "file_read"]

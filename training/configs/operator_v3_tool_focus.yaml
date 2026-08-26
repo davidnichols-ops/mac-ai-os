@@ -1,0 +1,88 @@
+# Experiment C — Tool Focus Training Mixture (Production Dataset)
+#
+# Purpose: Improve Devin/Codex-like execution — correct tool selection,
+# proper argument construction, efficient tool chains.
+#
+# Run this AFTER the balanced mixture if tool competence metrics are weak.
+
+experiment:
+  name: "operator_v3_tool_focus"
+  description: "Tool-focused mixture for execution competence (production dataset)"
+  priority: 3
+
+base_model:
+  name: "Qwen/Qwen3.5-9B"
+  provider: "together_ai"
+  context_length: 32768
+
+method:
+  type: "lora"
+  rank: 64
+  alpha: 128
+  dropout: 0.05
+  target_modules: [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+
+# Dataset mixture — tool-heavy
+mixture:
+  sft:
+    weight: 0.35
+    source: "datasets/incoming/adaptive_operator_dataset_v1/sft/train.jsonl"
+    format: "sft"
+    max_samples: 800
+
+  tools:
+    weight: 0.35
+    source: "datasets/incoming/adaptive_operator_dataset_v1/tools/train.jsonl"
+    format: "sft"
+    max_samples: 572
+
+  compute_policy:
+    weight: 0.15
+    source: "datasets/incoming/adaptive_operator_dataset_v1/compute_policy/train.jsonl"
+    format: "sft"
+    max_samples: 400
+    filter:
+      compute_label: "FAST"  # focus on FAST mode for direct tool execution
+
+  recovery:
+    weight: 0.10
+    source: "datasets/incoming/adaptive_operator_dataset_v1/recovery/train.jsonl"
+    format: "sft"
+    max_samples: 100
+
+  architecture:
+    weight: 0.05
+    source: "datasets/incoming/adaptive_operator_dataset_v1/architecture/train.jsonl"
+    format: "sft"
+    max_samples: 100
+
+training:
+  epochs: 3
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  lr_scheduler: "cosine"
+  max_seq_length: 4096
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  early_stopping_patience: 3
+
+evaluation:
+  eval_steps: 50
+  eval_dataset: "datasets/incoming/adaptive_operator_dataset_v1/evaluation/test.jsonl"
+  harness_dir: "eval/operator_v3/"
+  categories: [tool_competence, planning, compute_allocation]
+  min_pass_rate:
+    tool_competence: 0.85
+    planning: 0.75
+    compute_allocation: 0.75
+
+output:
+  adapter_dir: "models/adaptive-operator-v3/checkpoints/tool_focus/"
+  merged_model_dir: "models/adaptive-operator-v3/merged/tool_focus/"
+  mlx_model_dir: "models/adaptive-operator-v3/mlx/tool_focus/"
+  mlx_quantization: "4bit"
+  final_name: "Qwen3.5-9B-Adaptive-Operator-v3-ToolFocus-MLX-4bit"
+
+seed: 42

@@ -207,6 +207,7 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
     @mcp.tool()
     def maos_record_lesson(
         slug: str, text: str, confidence: float = 0.9, source: str = "incident",
+        category: str = "", keywords: str = "", reminder: str = "",
     ) -> str:
         """Record a hard-won lesson in the user model.
 
@@ -219,11 +220,17 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
             text: The lesson — what to do or what not to do
             confidence: How strongly to hold this (0-1, default 0.9)
             source: Origin — 'incident', 'observed', or 'manual'
+            category: Lesson category — 'tooling', 'workflow', 'environment',
+                'api', or 'architecture'. Groups lessons in the briefing.
+            keywords: Comma-separated trigger words. When these appear in a
+                tool call's context, the reminder is injected into the response.
+            reminder: One-line reminder shown on keyword match. Keep it short.
         """
         return tools._instrument(
             runtime, "maos_record_lesson",
             tools.maos_record_lesson,
             slug=slug, text=text, confidence=confidence, source=source,
+            category=category, keywords=keywords, reminder=reminder,
         )
 
     @mcp.tool()
@@ -237,13 +244,86 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
             tools.maos_list_lessons,
         )
 
+    # --- Decision audit log tools ---
+
+    @mcp.tool()
+    def maos_record_decision(
+        agent: str,
+        action: str,
+        rationale: str,
+        kind: str = "decision",
+        tags: str = "",
+        confidence: float = 0.0,
+    ) -> str:
+        """Record a structured agent decision to the hash-chained audit log.
+
+        Each decision is linked to the previous one via a SHA-256 digest chain,
+        making the log tamper-evident. Use this to make agent reasoning auditable
+        and reproducible. Decisions appear in the context packet.
+
+        Args:
+            agent: Identifier of the agent making the decision (e.g. 'devin',
+                'claude-3', 'human:david').
+            action: The action being decided on (e.g. 'commit', 'deploy',
+                'merge', 'escalate').
+            rationale: Why the decision was made. This is the auditable reasoning trail.
+            kind: Decision category. 'decision' = chose an action (default),
+                'observation' = noted a fact, 'escalation' = sent to human,
+                'veto' = blocked an action.
+            tags: Comma-separated free-form tags for grouping decisions.
+            confidence: Confidence level 0-1 (default 0).
+        """
+        return tools._instrument(
+            runtime, "maos_record_decision",
+            tools.maos_record_decision,
+            agent=agent, action=action, rationale=rationale,
+            kind=kind, tags=tags, confidence=confidence,
+        )
+
+    @mcp.tool()
+    def maos_query_decisions(
+        agent: str = "",
+        kind: str = "",
+        limit: int = 100,
+    ) -> str:
+        """Query the decision audit log. Read-only and filtered.
+
+        Returns matching decisions with their digests and chain pointers. Does
+        not include rationale (data minimization) — the digest proves the
+        rationale was recorded.
+
+        Args:
+            agent: Filter to decisions by this agent only.
+            kind: Filter to decisions of this kind only.
+            limit: Maximum number of decisions to return (default 100, max 1000).
+        """
+        return tools._instrument(
+            runtime, "maos_query_decisions",
+            tools.maos_query_decisions,
+            agent=agent, kind=kind, limit=limit,
+        )
+
+    @mcp.tool()
+    def maos_verify_decisions() -> str:
+        """Verify the integrity of the decision hash chain.
+
+        Checks that every decision's digest matches its recomputed value and
+        that the chain links are intact. Returns valid=True if the chain is
+        tamper-free. Use this to detect tampering with the audit log.
+        """
+        return tools._instrument(
+            runtime, "maos_verify_decisions",
+            tools.maos_verify_decisions,
+        )
+
     # --- Email tools ---
 
     @mcp.tool()
     def maos_send_email(subject: str, body: str, to: str = "") -> str:
-        """Send an email via Gmail (from david.nichols.ops@gmail.com).
+        """Send an email via Gmail.
 
-        Tokens are refreshed automatically. Default recipient is david.
+        Tokens are refreshed automatically. The default recipient is the
+        MAOS_EMAIL_RECIPIENT environment variable or the 'to' argument.
         Use this when the agent needs to communicate something to the user
         outside of the current session.
         """
@@ -263,8 +343,8 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
 
         This is the anti-vibe-overload channel. When something isn't working,
         when a verification fails, when context is getting diluted with false
-        confidence, escalate instead of glossing over it. Sends to
-        david.nichols.ops@gmail.com with [MAOS] prefix.
+        confidence, escalate instead of glossing over it. Sends to the
+        configured MAOS email recipient with a [MAOS] prefix.
 
         Args:
             subject: Short summary of what needs attention.
@@ -277,6 +357,87 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
             tools.maos_escalate,
             subject=subject, body=body,
             context=context, lesson_slug=lesson_slug,
+        )
+
+    # --- Google Drive tools ---
+
+    @mcp.tool()
+    def maos_drive_list(folder_id: str = "", page_size: int = 50, query: str = "") -> str:
+        """List files in a Google Drive folder.
+
+        Returns file id, name, mimeType, size, modifiedTime for each file.
+        Use folder_id='root' or omit for the root folder.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_list",
+            tools.maos_drive_list,
+            folder_id=folder_id, page_size=page_size, query=query,
+        )
+
+    @mcp.tool()
+    def maos_drive_search(query: str, page_size: int = 20) -> str:
+        """Search Google Drive by name or content query.
+
+        Returns matching files with id, name, mimeType, size.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_search",
+            tools.maos_drive_search,
+            query=query, page_size=page_size,
+        )
+
+    @mcp.tool()
+    def maos_drive_upload(
+        name: str,
+        content_b64: str,
+        mime_type: str = "application/octet-stream",
+        parent_folder_id: str = "",
+    ) -> str:
+        """Upload a file to Google Drive (5TB Workspace account).
+
+        Creates or overwrites a file in the specified folder.
+        Content must be base64-encoded. Returns the file id and metadata.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_upload",
+            tools.maos_drive_upload,
+            name=name, content_b64=content_b64,
+            mime_type=mime_type, parent_folder_id=parent_folder_id,
+        )
+
+    @mcp.tool()
+    def maos_drive_download(file_id: str) -> str:
+        """Download a file from Google Drive by its file ID.
+
+        Returns the file content as base64-encoded string.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_download",
+            tools.maos_drive_download,
+            file_id=file_id,
+        )
+
+    @mcp.tool()
+    def maos_drive_mkdir(name: str, parent_folder_id: str = "") -> str:
+        """Create a folder on Google Drive (or get existing if it already exists).
+
+        Returns the folder id and metadata.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_mkdir",
+            tools.maos_drive_mkdir,
+            name=name, parent_folder_id=parent_folder_id,
+        )
+
+    @mcp.tool()
+    def maos_drive_quota() -> str:
+        """Get Google Drive storage quota info for the configured account.
+
+        Returns usage, limit, and user email.
+        """
+        return tools._instrument(
+            runtime, "maos_drive_quota",
+            tools.maos_drive_quota,
         )
 
     # --- Guard tools ---
@@ -463,6 +624,53 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
             tools.maos_time, format=format,
         )
 
+    # --- Network intelligence tools ---
+
+    @mcp.tool()
+    def maos_network_status(format: str = "text") -> str:
+        """Get current network health and bandwidth status.
+
+        Returns whether the network is healthy enough for cloud LLM calls,
+        the active interface (wifi/ethernet), current RX/TX bandwidth,
+        latency (TCP RTT probe), packet loss estimate, and a 0-100 quality
+        score. The network collector must be running for fresh data.
+
+        Use this before deciding whether to use cloud vs local models,
+        before large uploads, or to explain slow responses.
+
+        Pass format='json' for structured output.
+        """
+        return tools._instrument(
+            runtime, "maos_network_status",
+            tools.maos_network_status, format=format,
+        )
+
+    @mcp.tool()
+    def maos_network_history(
+        hours: int = 24, resolution: str = "hourly",
+    ) -> str:
+        """Get historical network bandwidth and latency data.
+
+        Returns aggregated history: per-bucket RX/TX bytes, average rates,
+        latency, and any detected events (interruptions, degradation,
+        interface transitions).
+
+        Args:
+            hours: Lookback window in hours (default 24).
+            resolution: 'hourly' (default, indefinite retention) or 'minute'
+                (30-day retention, more detail).
+        """
+        return tools._instrument(
+            runtime, "maos_network_history",
+            tools.maos_network_history,
+            hours=hours, resolution=resolution,
+        )
+
+    @mcp.resource("maos://network/current")
+    def current_network() -> str:
+        """Current network health: interface, bandwidth, latency, quality score."""
+        return resources.read_network_resource(runtime)
+
     @mcp.tool()
     def maos_read_file(path: str, max_lines: int = 2000) -> str:
         """Read a file with time awareness and reading behavior tracking.
@@ -484,6 +692,459 @@ def create_mcp_server(runtime: Runtime, *, require_token: bool = True) -> Any:
         return tools._instrument(
             runtime, "maos_read_file",
             tools.maos_read_file, path=path, max_lines=max_lines,
+        )
+
+    # --- Storage management tools ---
+
+    @mcp.tool()
+    def maos_storage_scan(mode: str = "full", format: str = "text") -> str:
+        """Run a comprehensive storage analysis on the Mac.
+
+        Decomposes the mysterious macOS "System Data" category into
+        identifiable, reclaimable components. Combines native macOS
+        introspection (tmutil, diskutil, /private/var/vm, unified log
+        archive, Spotlight, APFS snapshots), X-MaC disk + clean engines,
+        NeoDisk scan cache detection, and user-managed cache scan.
+
+        Modes:
+          - "full": Everything (default). Includes xmac disk + clean.
+          - "fast": Native macOS only — no filesystem walk.
+          - "system": Only system data decomposition.
+          - "caches": Only user cache scan.
+
+        Pass format='json' for structured output.
+        """
+        return tools._instrument(
+            runtime, "maos_storage_scan",
+            tools.maos_storage_scan, mode=mode, format=format,
+        )
+
+    @mcp.tool()
+    def maos_storage_system_data(format: str = "text") -> str:
+        """Decompose macOS "System Data" into identifiable components.
+
+        The focused tool for solving the "120 GB of system data" mystery.
+        Checks every known location that macOS categorizes as "System
+        Data" or "Other": sleepimage, swapfiles, unified log archive,
+        system logs, Spotlight index, asset cache, Time Machine local
+        snapshots, APFS OS update snapshots, per-user temp files, and
+        system databases.
+
+        Each entry reports: actual size, whether it's reclaimable, whether
+        it's safe to delete, and the exact command to reclaim it.
+
+        Pass format='json' for structured output.
+        """
+        return tools._instrument(
+            runtime, "maos_storage_system_data",
+            tools.maos_storage_system_data, format=format,
+        )
+
+    @mcp.tool()
+    def maos_storage_fix_script(
+        output_path: str = "./storage-fixes.sh",
+        include_caches: bool = True,
+        include_system: bool = True,
+        include_tm: bool = True,
+    ) -> str:
+        """Generate a reviewable remediation shell script for storage cleanup.
+
+        ALL destructive commands are COMMENTED OUT in the generated script.
+        The user reviews, uncomments what they want, and runs it. This tool
+        NEVER executes destructive commands — it only produces the script.
+
+        Includes system data cleanup, Time Machine snapshot deletion, and
+        user cache cleanup commands.
+        """
+        return tools._instrument(
+            runtime, "maos_storage_fix_script",
+            tools.maos_storage_fix_script,
+            output_path=output_path,
+            include_caches=include_caches,
+            include_system=include_system,
+            include_tm=include_tm,
+        )
+
+    @mcp.tool()
+    def maos_storage_maintain() -> str:
+        """Run safe macOS maintenance tasks via X-MaC.
+
+        Delegates to xmac maintain: flush DNS, reindex Spotlight, rebuild
+        LaunchServices, run periodic scripts, purge RAM, clear Quick Look.
+        Safe tasks run automatically; sudo tasks emitted as findings.
+        """
+        return tools._instrument(
+            runtime, "maos_storage_maintain",
+            tools.maos_storage_maintain,
+        )
+
+    @mcp.tool()
+    def maos_storage_delete_tm_snapshot(date: str) -> str:
+        """Delete a Time Machine local snapshot by date.
+
+        The #1 way to reclaim "System Data" space. Local snapshots pin
+        purgeable space that only clears on the next backup. Deleting
+        them reclaims the space immediately.
+
+        Use maos_storage_scan first to list available snapshots and
+        their dates.
+
+        Args:
+            date: Snapshot date string, e.g. "2026-07-24-152803".
+        """
+        return tools._instrument(
+            runtime, "maos_storage_delete_tm_snapshot",
+            tools.maos_storage_delete_tm_snapshot, date=date,
+        )
+
+    @mcp.tool()
+    def maos_storage_hidden(format: str = "text") -> str:
+        """Scan for hidden data consumers that macOS categorizes as 'System Data'.
+
+        Goes beyond standard system data decomposition and user caches.
+        Finds hidden consumers in non-obvious locations: Devin CLI session
+        database (3GB+), AI/ML tool data, developer tool data, app support
+        directories, cloud storage sync, SDKs, app containers, and
+        system-level data (/Library/Updates, Xcode CLT, system assets).
+
+        Each entry reports: actual size, safe to clear, regenerates, and
+        the exact command to reclaim it.
+
+        Pass format='json' for structured output.
+        """
+        return tools._instrument(
+            runtime, "maos_storage_hidden",
+            tools.maos_storage_hidden, format=format,
+        )
+
+    # --- Coding Agent Tools (Devin CLI parity) ---
+
+    @mcp.tool()
+    def maos_write_file(path: str, content: str) -> str:
+        """Write content to a file, creating it if needed.
+
+        Creates parent directories. Overwrites existing files.
+        """
+        return tools._instrument(runtime, "maos_write_file", tools.maos_write_file, path=path, content=content)
+
+    @mcp.tool()
+    def maos_edit_file(path: str, old_string: str, new_string: str, replace_all: bool = False) -> str:
+        """Edit a file by replacing old_string with new_string.
+
+        The old_string must be unique unless replace_all=True.
+        """
+        return tools._instrument(runtime, "maos_edit_file", tools.maos_edit_file, path=path, old_string=old_string, new_string=new_string, replace_all=replace_all)
+
+    @mcp.tool()
+    def maos_grep(
+        pattern: str, path: str = ".", glob_pattern: str = "",
+        case_insensitive: bool = False, max_results: int = 100, context_lines: int = 0,
+    ) -> str:
+        """Search file contents using ripgrep.
+
+        Returns matching lines with file paths and line numbers.
+        """
+        return tools._instrument(
+            runtime, "maos_grep", tools.maos_grep,
+            pattern=pattern, path=path, glob_pattern=glob_pattern,
+            case_insensitive=case_insensitive, max_results=max_results, context_lines=context_lines,
+        )
+
+    @mcp.tool()
+    def maos_glob(pattern: str, path: str = ".") -> str:
+        """Find files by glob pattern.
+
+        Supports brace expansion (e.g. '**/*.{ts,tsx}').
+        """
+        return tools._instrument(runtime, "maos_glob", tools.maos_glob, pattern=pattern, path=path)
+
+    @mcp.tool()
+    def maos_find_file(pattern: str, path: str = ".") -> str:
+        """Find files by name pattern using recursive glob matching."""
+        return tools._instrument(runtime, "maos_find_file", tools.maos_find_file, pattern=pattern, path=path)
+
+    @mcp.tool()
+    def maos_run_command(command: str, cwd: str = "", timeout: int = 120, env: dict[str, str] | None = None) -> str:
+        """Execute a shell command and return stdout, stderr, and exit code.
+
+        Blocked: rm -rf /, mkfs, fork bombs. Restricted: sudo, kill -9, shutdown.
+        """
+        return tools._instrument(runtime, "maos_run_command", tools.maos_run_command, command=command, cwd=cwd, timeout=timeout, env=env)
+
+    @mcp.tool()
+    def maos_web_search(query: str, num_results: int = 5) -> str:
+        """Search the web for information.
+
+        Returns relevant web page titles, URLs, and summaries.
+        """
+        return tools._instrument(runtime, "maos_web_search", tools.maos_web_search, query=query, num_results=num_results)
+
+    @mcp.tool()
+    def maos_fetch_url(url: str) -> str:
+        """Fetch a web page and return its content as readable text."""
+        return tools._instrument(runtime, "maos_fetch_url", tools.maos_fetch_url, url=url)
+
+    @mcp.tool()
+    def maos_notebook_read(path: str) -> str:
+        """Read a Jupyter notebook (.ipynb) and extract all cells with outputs."""
+        return tools._instrument(runtime, "maos_notebook_read", tools.maos_notebook_read, path=path)
+
+    @mcp.tool()
+    def maos_notebook_edit(
+        path: str, cell_number: int, new_source: str,
+        cell_type: str = "code", edit_mode: str = "replace",
+    ) -> str:
+        """Edit a cell in a Jupyter notebook.
+
+        edit_mode: 'replace' (default), 'insert', or 'delete'.
+        """
+        return tools._instrument(
+            runtime, "maos_notebook_edit", tools.maos_notebook_edit,
+            path=path, cell_number=cell_number, new_source=new_source,
+            cell_type=cell_type, edit_mode=edit_mode,
+        )
+
+    @mcp.tool()
+    def maos_git_status(repo_dir: str = "") -> str:
+        """Get git status for a repository."""
+        return tools._instrument(runtime, "maos_git_status", tools.maos_git_status, repo_dir=repo_dir)
+
+    @mcp.tool()
+    def maos_git_diff(repo_dir: str = "", staged: bool = False, base: str = "", target: str = "") -> str:
+        """Get git diff for a repository."""
+        return tools._instrument(runtime, "maos_git_diff", tools.maos_git_diff, repo_dir=repo_dir, staged=staged, base=base, target=target)
+
+    @mcp.tool()
+    def maos_git_commit(message: str, repo_dir: str = "", add_all: bool = False) -> str:
+        """Stage files and create a git commit."""
+        return tools._instrument(runtime, "maos_git_commit", tools.maos_git_commit, message=message, repo_dir=repo_dir, add_all=add_all)
+
+    @mcp.tool()
+    def maos_git_log(repo_dir: str = "", limit: int = 20, oneline: bool = True) -> str:
+        """Get git log for a repository."""
+        return tools._instrument(runtime, "maos_git_log", tools.maos_git_log, repo_dir=repo_dir, limit=limit, oneline=oneline)
+
+    @mcp.tool()
+    def maos_git_branch(repo_dir: str = "", action: str = "list", branch_name: str = "") -> str:
+        """Manage git branches. Actions: list, create, switch, delete."""
+        return tools._instrument(runtime, "maos_git_branch", tools.maos_git_branch, repo_dir=repo_dir, action=action, branch_name=branch_name)
+
+    @mcp.tool()
+    def maos_run_subagent(task: str, spec: str, title: str = "", profile: str = "general", is_background: bool = False) -> str:
+        """Spawn a subagent to handle a task autonomously.
+
+        The spec flag is MANDATORY — it determines which AI system to
+        route through: devin, grokhack, claude-code, local, or openrouter.
+        """
+        return tools._instrument(runtime, "maos_run_subagent", tools.maos_run_subagent, task=task, spec=spec, title=title, profile=profile, is_background=is_background)
+
+    @mcp.tool()
+    def maos_todo_write(todos: list[dict[str, str]] | None = None) -> str:
+        """Create or update a structured todo list for the current session.
+
+        Each todo has 'content' and 'status' (pending, in_progress, completed).
+        """
+        return tools._instrument(runtime, "maos_todo_write", tools.maos_todo_write, todos=todos)
+
+    @mcp.tool()
+    def maos_ask_user(questions: list[dict[str, Any]] | None = None) -> str:
+        """Present questions to the user and collect their answers.
+
+        For HTTP sessions, returns a prompt for the client to present.
+        """
+        return tools._instrument(runtime, "maos_ask_user", tools.maos_ask_user, questions=questions)
+
+    # --- Slack tools ---
+
+    @mcp.tool()
+    def maos_slack_send(channel: str, message: str, thread_ts: str = "") -> str:
+        """Send a message to a Slack channel or DM.
+
+        Uses the bot token (chat.postMessage). The channel can be a channel
+        ID (e.g. C0BMSQGTCJV), a channel name (e.g. #maos-ops), or a user
+        ID for a DM. Optionally reply in a thread by providing thread_ts.
+
+        Args:
+            channel: Channel ID, channel name, or user ID for DM.
+            message: The message text to send (Slack mrkdwn supported).
+            thread_ts: Optional timestamp of the parent message to reply in a thread.
+        """
+        return tools._instrument(
+            runtime, "maos_slack_send",
+            tools.maos_slack_send,
+            channel=channel, message=message, thread_ts=thread_ts,
+        )
+
+    @mcp.tool()
+    def maos_slack_read(channel: str, limit: int = 50, oldest: str = "") -> str:
+        """Read recent messages from a Slack channel.
+
+        Uses the bot token (conversations.history). Returns messages as JSON
+        with text, user, ts, and thread info. Use maos_slack_channels to find
+        channel IDs.
+
+        Args:
+            channel: Channel ID or name to read from.
+            limit: Maximum messages to return (default 50, max 200).
+            oldest: Optional Unix timestamp — only return messages after this.
+        """
+        return tools._instrument(
+            runtime, "maos_slack_read",
+            tools.maos_slack_read,
+            channel=channel, limit=limit, oldest=oldest,
+        )
+
+    @mcp.tool()
+    def maos_slack_channels(types: str = "public_channel,private_channel") -> str:
+        """List all visible Slack channels.
+
+        Uses the bot token (conversations.list). Returns channel names, IDs,
+        and type (public, private, im, mpim). Use this to find channel IDs
+        for maos_slack_send and maos_slack_read.
+
+        Args:
+            types: Comma-separated channel types to list (default:
+                public_channel,private_channel).
+        """
+        return tools._instrument(
+            runtime, "maos_slack_channels",
+            tools.maos_slack_channels,
+            types=types,
+        )
+
+    @mcp.tool()
+    def maos_slack_search(query: str, count: int = 20) -> str:
+        """Search Slack messages across the workspace.
+
+        Uses the user token (search.messages) — requires SLACK_USER_TOKEN.
+        Returns matching messages with channel, author, timestamp, and
+        permalink.
+
+        Args:
+            query: Search query (Slack search syntax supported).
+            count: Maximum results to return (default 20, max 100).
+        """
+        return tools._instrument(
+            runtime, "maos_slack_search",
+            tools.maos_slack_search,
+            query=query, count=count,
+        )
+
+    @mcp.tool()
+    def maos_slack_sync(days: int = 30) -> str:
+        """Trigger an incremental Slack history sync into MAOS.
+
+        Pulls recent messages from visible channels into the local SQLite
+        store and refreshes the RAG index so messages become searchable via
+        maos_search_memory. Uses the user token. Returns sync counts
+        (channels, messages, users).
+
+        Args:
+            days: How many days of history to sync (default 30).
+        """
+        return tools._instrument(
+            runtime, "maos_slack_sync",
+            tools.maos_slack_sync,
+            days=days,
+        )
+
+    # --- Project sync tools ---
+
+    @mcp.tool()
+    def maos_project_sync_status() -> str:
+        """Show sync state for all projects.
+
+        Displays which projects are in sync, which have local changes to
+        push, and which have pending forks from cloud AI agents. Calls
+        the project-sync CLI.
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_status",
+            tools.maos_project_sync_status,
+        )
+
+    @mcp.tool()
+    def maos_project_sync_push(project: str, agent: str = "cloud") -> str:
+        """Push a project to GDrive and record blockchain evidence.
+
+        Uploads the current local state to Google Drive and creates a
+        hash-chained evidence entry. Use after making local changes that
+        should be propagated to the cloud.
+
+        Args:
+            project: Project name in ~/Projects/.
+            agent: Agent name performing the push (default 'cloud').
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_push",
+            tools.maos_project_sync_push,
+            project=project, agent=agent,
+        )
+
+    @mcp.tool()
+    def maos_project_sync_pull(project: str, agent: str = "cloud") -> str:
+        """Pull a project from GDrive.
+
+        Downloads the latest cloud state from Google Drive and updates
+        the local copy.
+
+        Args:
+            project: Project name in ~/Projects/.
+            agent: Agent name performing the pull (default 'cloud').
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_pull",
+            tools.maos_project_sync_pull,
+            project=project, agent=agent,
+        )
+
+    @mcp.tool()
+    def maos_project_sync_forks() -> str:
+        """List pending forks — cloud AI changes not yet pulled locally.
+
+        A fork is registered when a cloud agent modifies a project. Use
+        this to check if any cloud agents have made changes that need to
+        be resolved.
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_forks",
+            tools.maos_project_sync_forks,
+        )
+
+    @mcp.tool()
+    def maos_project_sync_fork(project: str, agent: str, hash: str) -> str:
+        """Register a cloud AI fork.
+
+        Call this when a cloud agent has modified a project, recording
+        the project hash after the changes. This creates a pending fork
+        that must later be resolved by pulling from GDrive.
+
+        Args:
+            project: Project name.
+            agent: Agent name (e.g. 'devin', 'grokhack').
+            hash: Project hash after cloud AI changes.
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_fork",
+            tools.maos_project_sync_fork,
+            project=project, agent=agent, hash=hash,
+        )
+
+    @mcp.tool()
+    def maos_project_sync_resolve(project: str) -> str:
+        """Resolve a fork by pulling from GDrive.
+
+        After a cloud AI fork has been registered, this pulls the latest
+        state from Google Drive to reconcile the local copy and clears
+        the pending fork.
+
+        Args:
+            project: Project name to resolve.
+        """
+        return tools._instrument(
+            runtime, "maos_project_sync_resolve",
+            tools.maos_project_sync_resolve,
+            project=project,
         )
 
     # Store token for HTTP transport middleware.
@@ -532,6 +1193,9 @@ def run_mcp_server(
         # FastMCP streamable-http accepts host and port via settings.
         mcp.settings.host = host
         mcp.settings.port = port
+        # Allow ngrok/tunnel hosts so external clients (e.g. Gemini Spark)
+        # can reach the server through a public tunnel.
+        mcp.settings.transport_security = None
         mcp.run(transport="streamable-http")
 
     else:

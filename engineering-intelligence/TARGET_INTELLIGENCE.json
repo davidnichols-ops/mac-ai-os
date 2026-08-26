@@ -1,0 +1,191 @@
+{
+  "generated_at": "2026-08-06",
+  "authorization_policy": {
+    "default": "deny",
+    "allowed_modes": [
+      "owned_local_repository",
+      "explicit_written_scope"
+    ],
+    "live_testing_requires": [
+      "program_scope",
+      "exclusions",
+      "rate_limits",
+      "test_accounts",
+      "disclosure_channel"
+    ]
+  },
+  "targets": [
+    {
+      "program": "trustcard",
+      "scope": "~/Projects/trustcard",
+      "technology": [
+        "Node.js",
+        "MCP",
+        "JSON-RPC",
+        "Ed25519",
+        "HMAC"
+      ],
+      "attack_surface": [
+        "proxy",
+        "manifest",
+        "auth",
+        "policy",
+        "receipts",
+        "child process"
+      ],
+      "known_exclusions": [
+        "production endpoints",
+        "third-party MCP servers",
+        "real credentials"
+      ],
+      "potential_impact_areas": [
+        "authorization bypass",
+        "identity confusion",
+        "tool permission escalation",
+        "replay"
+      ],
+      "research_hypothesis": "Manifest, identity, authorization, and receipt state remain bound under local tool drift and replay challenges.",
+      "authorization": "owned_local_offline"
+    },
+    {
+      "program": "maos",
+      "scope": "~/mac-ai-os",
+      "technology": [
+        "Python",
+        "SQLite",
+        "MCP",
+        "MLX/Ollama"
+      ],
+      "attack_surface": [
+        "tool router",
+        "action executor",
+        "memory",
+        "context",
+        "MCP"
+      ],
+      "known_exclusions": [
+        "external production services",
+        "real credentials"
+      ],
+      "potential_impact_areas": [
+        "privilege separation",
+        "context leakage",
+        "prompt/tool injection"
+      ],
+      "research_hypothesis": "Execution-time authorization prevents hostile context from widening tool capabilities.",
+      "authorization": "owned_local_offline"
+    },
+    {
+      "program": "aafp",
+      "scope": "~/Projects/aafp",
+      "technology": [
+        "Rust",
+        "CBOR",
+        "QUIC",
+        "post-quantum cryptography"
+      ],
+      "attack_surface": [
+        "frame parser",
+        "handshake",
+        "replay cache",
+        "identity",
+        "DHT",
+        "relay"
+      ],
+      "known_exclusions": [
+        "live peers",
+        "internet probing",
+        "resource-exhaustion tests without hard bounds"
+      ],
+      "potential_impact_areas": [
+        "parser denial of service",
+        "identity confusion",
+        "replay",
+        "capability escalation"
+      ],
+      "research_hypothesis": "Malformed frames and incompatible negotiation are rejected within bounded resources.",
+      "authorization": "owned_local_offline"
+    },
+    {
+      "program": "cvconform",
+      "scope": "~/Projects/cvconform",
+      "technology": [
+        "Python",
+        "ONNX",
+        "CoreML",
+        "PyTorch"
+      ],
+      "attack_surface": [
+        "artifact loader",
+        "runtime adapters",
+        "differential comparator"
+      ],
+      "known_exclusions": [
+        "untrusted external model downloads",
+        "unbounded model execution"
+      ],
+      "potential_impact_areas": [
+        "false conformance",
+        "output misalignment",
+        "artifact handling"
+      ],
+      "research_hypothesis": "Differential results distinguish runtime failure, semantic output mismatch, and numerical drift.",
+      "authorization": "owned_local_offline"
+    },
+    {
+      "program": "infernet",
+      "scope": "~/Projects/infernet",
+      "technology": [
+        "Python",
+        "QUIC",
+        "MLX",
+        "llama.cpp",
+        "distributed execution"
+      ],
+      "attack_surface": [
+        "discovery",
+        "trust",
+        "routing",
+        "providers",
+        "remote sync"
+      ],
+      "known_exclusions": [
+        "live network peers",
+        "external artifact sources"
+      ],
+      "potential_impact_areas": [
+        "node impersonation",
+        "routing confusion",
+        "remote execution",
+        "artifact path handling"
+      ],
+      "research_hypothesis": "Untrusted discovery metadata cannot bypass trust and provider constraints.",
+      "authorization": "owned_local_offline"
+    },
+    {
+      "program": "repo-archaeologist",
+      "scope": "~/Projects/repo-archaeologist",
+      "technology": [
+        "Python",
+        "repository analysis"
+      ],
+      "attack_surface": [
+        "path resolution",
+        "archive/URL input",
+        "source scanning",
+        "report generation"
+      ],
+      "known_exclusions": [
+        "third-party repository cloning",
+        "unbounded remote URLs"
+      ],
+      "potential_impact_areas": [
+        "path traversal",
+        "unsafe archive extraction",
+        "secret exposure"
+      ],
+      "research_hypothesis": "Repository analysis remains confined to the intended workspace and handles hostile fixtures safely.",
+      "authorization": "owned_local_offline"
+    }
+  ]
+}

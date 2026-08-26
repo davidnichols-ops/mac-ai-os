@@ -11,8 +11,13 @@ Schema is created on first use and is idempotent.
 
 from __future__ import annotations
 
+import hashlib
+import json
 import sqlite3
+from collections.abc import Generator
+from contextlib import contextmanager
 from datetime import UTC, datetime
+from datetime import timedelta as _timedelta
 from pathlib import Path
 from typing import Any
 
@@ -181,6 +186,27 @@ CREATE TABLE IF NOT EXISTS user_model (
     source      TEXT NOT NULL DEFAULT 'observed',
     updated_at  TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS personal_memories (
+    id              TEXT PRIMARY KEY,
+    content_hash    TEXT NOT NULL UNIQUE,
+    title           TEXT NOT NULL DEFAULT '',
+    content         TEXT NOT NULL,
+    tags            TEXT NOT NULL DEFAULT '[]',
+    source          TEXT NOT NULL DEFAULT 'manual',
+    source_ref      TEXT NOT NULL DEFAULT '',
+    author_id       TEXT NOT NULL DEFAULT '',
+    archive_status  TEXT NOT NULL DEFAULT 'pending',
+    archive_path    TEXT NOT NULL DEFAULT '',
+    archive_hash    TEXT NOT NULL DEFAULT '',
+    archive_error   TEXT NOT NULL DEFAULT '',
+    created_at      TEXT NOT NULL,
+    updated_at      TEXT NOT NULL,
+    indexed_at      TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_personal_memories_hash ON personal_memories(content_hash);
+CREATE INDEX IF NOT EXISTS idx_personal_memories_archive ON personal_memories(archive_status);
 
 CREATE TABLE IF NOT EXISTS workflow_runs (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -363,6 +389,80 @@ CREATE TABLE IF NOT EXISTS file_reads (
 
 CREATE INDEX IF NOT EXISTS idx_file_reads_time ON file_reads(timestamp);
 CREATE INDEX IF NOT EXISTS idx_file_reads_path ON file_reads(path);
+
+-- Network intelligence layer (Phase 5.7).
+-- Raw per-interface samples (retention: 24h, enforced by NetworkCollector).
+CREATE TABLE IF NOT EXISTS network_samples (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp       TEXT NOT NULL,
+    interface       TEXT NOT NULL,
+    network_type    TEXT NOT NULL DEFAULT 'unknown',
+    connection_state TEXT NOT NULL DEFAULT 'unknown',
+    rx_bytes        INTEGER NOT NULL DEFAULT 0,
+    tx_bytes        INTEGER NOT NULL DEFAULT 0,
+    rx_rate_bps     REAL NOT NULL DEFAULT 0,
+    tx_rate_bps     REAL NOT NULL DEFAULT 0,
+    latency_ms      REAL,
+    packet_loss     REAL,
+    rtt_ok          INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_network_samples_time ON network_samples(timestamp);
+CREATE INDEX IF NOT EXISTS idx_network_samples_iface_time ON network_samples(interface, timestamp);
+
+-- Minute aggregates (retention: 30 days).
+CREATE TABLE IF NOT EXISTS network_minute (
+    bucket          TEXT NOT NULL,
+    interface       TEXT NOT NULL,
+    network_type    TEXT NOT NULL DEFAULT 'unknown',
+    rx_bytes        INTEGER NOT NULL DEFAULT 0,
+    tx_bytes        INTEGER NOT NULL DEFAULT 0,
+    rx_rate_avg     REAL NOT NULL DEFAULT 0,
+    tx_rate_avg     REAL NOT NULL DEFAULT 0,
+    rx_rate_peak    REAL NOT NULL DEFAULT 0,
+    tx_rate_peak    REAL NOT NULL DEFAULT 0,
+    latency_avg     REAL,
+    latency_p95     REAL,
+    packet_loss_avg REAL,
+    sample_count    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (bucket, interface)
+);
+
+CREATE INDEX IF NOT EXISTS idx_network_minute_bucket ON network_minute(bucket);
+CREATE INDEX IF NOT EXISTS idx_network_minute_iface ON network_minute(interface);
+
+-- Hourly aggregates (retention: indefinite).
+CREATE TABLE IF NOT EXISTS network_hourly (
+    bucket          TEXT NOT NULL,
+    interface       TEXT NOT NULL,
+    network_type    TEXT NOT NULL DEFAULT 'unknown',
+    rx_bytes        INTEGER NOT NULL DEFAULT 0,
+    tx_bytes        INTEGER NOT NULL DEFAULT 0,
+    rx_rate_avg     REAL NOT NULL DEFAULT 0,
+    tx_rate_avg     REAL NOT NULL DEFAULT 0,
+    latency_avg     REAL,
+    packet_loss_avg REAL,
+    minute_count    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (bucket, interface)
+);
+
+CREATE INDEX IF NOT EXISTS idx_network_hourly_bucket ON network_hourly(bucket);
+
+-- Network events: connection interruptions, degradation, interface transitions.
+-- Append-only event log (the spec's events.jsonl equivalent, but in SQLite
+-- so it joins with the rest of the activity timeline).
+CREATE TABLE IF NOT EXISTS network_events (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp       TEXT NOT NULL,
+    event_type      TEXT NOT NULL,
+    interface       TEXT NOT NULL DEFAULT '',
+    network_type    TEXT NOT NULL DEFAULT '',
+    detail          TEXT NOT NULL DEFAULT '{}',
+    severity        TEXT NOT NULL DEFAULT 'info'
+);
+
+CREATE INDEX IF NOT EXISTS idx_network_events_time ON network_events(timestamp);
+CREATE INDEX IF NOT EXISTS idx_network_events_type ON network_events(event_type);
 """
 
 
@@ -376,6 +476,7 @@ class Database:
         self._conn.row_factory = sqlite3.Row
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA foreign_keys=ON")
+        self._txn_depth: int = 0
         self._init_schema()
         log.info("db.init", path=str(self.path))
 
@@ -404,6 +505,11 @@ class Database:
         if "profiled_at" not in ws_cols:
             self.execute("ALTER TABLE workspaces ADD COLUMN profiled_at TEXT")
 
+        # Lesson metadata: category, keywords, reminder for contextual injection.
+        um_cols = {row["name"] for row in self.query("PRAGMA table_info(user_model)")}
+        if "metadata" not in um_cols:
+            self.execute("ALTER TABLE user_model ADD COLUMN metadata TEXT")
+
         # Phase 1 (workflow evolution): workflow_runs new columns.
         wr_cols = {row["name"] for row in self.query("PRAGMA table_info(workflow_runs)")}
         if "workflow_id" not in wr_cols:
@@ -423,14 +529,46 @@ class Database:
         self.execute("CREATE INDEX IF NOT EXISTS idx_workflow_runs_status ON workflow_runs(status)")
         self.execute("CREATE INDEX IF NOT EXISTS idx_workflow_runs_workflow_id ON workflow_runs(workflow_id)")
 
+        # Hash-chained decisions: add digest + prev_digest columns for tamper-evidence.
+        dec_cols = {row["name"] for row in self.query("PRAGMA table_info(decisions)")}
+        if "digest" not in dec_cols:
+            self.execute("ALTER TABLE decisions ADD COLUMN digest TEXT")
+        if "prev_digest" not in dec_cols:
+            self.execute("ALTER TABLE decisions ADD COLUMN prev_digest TEXT")
+        if "kind" not in dec_cols:
+            self.execute("ALTER TABLE decisions ADD COLUMN kind TEXT NOT NULL DEFAULT 'decision'")
+        if "tags" not in dec_cols:
+            self.execute("ALTER TABLE decisions ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'")
+
     @property
     def conn(self) -> sqlite3.Connection:
         return self._conn
 
     def execute(self, sql: str, params: tuple[Any, ...] = ()) -> sqlite3.Cursor:
         cur = self._conn.execute(sql, params)
-        self._conn.commit()
+        if self._txn_depth == 0:
+            self._conn.commit()
         return cur
+
+    def executemany(self, sql: str, params: list[tuple[Any, ...]]) -> sqlite3.Cursor:
+        cur = self._conn.executemany(sql, params)
+        if self._txn_depth == 0:
+            self._conn.commit()
+        return cur
+
+    @contextmanager
+    def transaction(self) -> Generator[None, None, None]:
+        """Batch writes and commit at the end; rollback on exception."""
+        self._txn_depth += 1
+        try:
+            yield
+        except Exception:
+            self._conn.rollback()
+            raise
+        finally:
+            self._txn_depth -= 1
+            if self._txn_depth == 0:
+                self._conn.commit()
 
     def query(self, sql: str, params: tuple[Any, ...] = ()) -> list[sqlite3.Row]:
         cur = self._conn.execute(sql, params)
@@ -624,6 +762,161 @@ class Database:
         row = self.query_one("SELECT COUNT(*) as n FROM telemetry_snapshots")
         return row["n"] if row else 0
 
+    # --- network intelligence helpers ----------------------------------------
+
+    def insert_network_sample(self, sample: dict) -> int:
+        """Insert one raw network sample. Returns the row id."""
+        cur = self.execute(
+            """INSERT INTO network_samples
+                   (timestamp, interface, network_type, connection_state,
+                    rx_bytes, tx_bytes, rx_rate_bps, tx_rate_bps,
+                    latency_ms, packet_loss, rtt_ok)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                sample["timestamp"],
+                sample["interface"],
+                sample.get("network_type", "unknown"),
+                sample.get("connection_state", "unknown"),
+                sample.get("rx_bytes", 0),
+                sample.get("tx_bytes", 0),
+                sample.get("rx_rate_bps", 0.0),
+                sample.get("tx_rate_bps", 0.0),
+                sample.get("latency_ms"),
+                sample.get("packet_loss"),
+                sample.get("rtt_ok"),
+            ),
+        )
+        return cur.lastrowid
+
+    def latest_network_sample(self, interface: str = "") -> sqlite3.Row | None:
+        if interface:
+            return self.query_one(
+                "SELECT * FROM network_samples WHERE interface = ? "
+                "ORDER BY timestamp DESC LIMIT 1",
+                (interface,),
+            )
+        return self.query_one(
+            "SELECT * FROM network_samples ORDER BY timestamp DESC LIMIT 1"
+        )
+
+    def network_samples_since(self, since: str, limit: int = 500) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM network_samples WHERE timestamp >= ? "
+            "ORDER BY timestamp ASC LIMIT ?",
+            (since, limit),
+        )
+
+    def network_sample_count(self) -> int:
+        row = self.query_one("SELECT COUNT(*) as n FROM network_samples")
+        return row["n"] if row else 0
+
+    def upsert_network_minute(self, agg: dict) -> None:
+        """Upsert a minute aggregate (keyed by bucket + interface)."""
+        self.execute(
+            """INSERT INTO network_minute
+                   (bucket, interface, network_type, rx_bytes, tx_bytes,
+                    rx_rate_avg, tx_rate_avg, rx_rate_peak, tx_rate_peak,
+                    latency_avg, latency_p95, packet_loss_avg, sample_count)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(bucket, interface) DO UPDATE SET
+                   network_type   = excluded.network_type,
+                   rx_bytes       = excluded.rx_bytes,
+                   tx_bytes       = excluded.tx_bytes,
+                   rx_rate_avg    = excluded.rx_rate_avg,
+                   tx_rate_avg    = excluded.tx_rate_avg,
+                   rx_rate_peak   = excluded.rx_rate_peak,
+                   tx_rate_peak   = excluded.tx_rate_peak,
+                   latency_avg    = excluded.latency_avg,
+                   latency_p95    = excluded.latency_p95,
+                   packet_loss_avg = excluded.packet_loss_avg,
+                   sample_count   = excluded.sample_count""",
+            (
+                agg["bucket"], agg["interface"], agg.get("network_type", "unknown"),
+                agg["rx_bytes"], agg["tx_bytes"],
+                agg["rx_rate_avg"], agg["tx_rate_avg"],
+                agg["rx_rate_peak"], agg["tx_rate_peak"],
+                agg.get("latency_avg"), agg.get("latency_p95"),
+                agg.get("packet_loss_avg"), agg["sample_count"],
+            ),
+        )
+
+    def upsert_network_hourly(self, agg: dict) -> None:
+        self.execute(
+            """INSERT INTO network_hourly
+                   (bucket, interface, network_type, rx_bytes, tx_bytes,
+                    rx_rate_avg, tx_rate_avg, latency_avg, packet_loss_avg,
+                    minute_count)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(bucket, interface) DO UPDATE SET
+                   network_type   = excluded.network_type,
+                   rx_bytes       = excluded.rx_bytes,
+                   tx_bytes       = excluded.tx_bytes,
+                   rx_rate_avg    = excluded.rx_rate_avg,
+                   tx_rate_avg    = excluded.tx_rate_avg,
+                   latency_avg    = excluded.latency_avg,
+                   packet_loss_avg = excluded.packet_loss_avg,
+                   minute_count   = excluded.minute_count""",
+            (
+                agg["bucket"], agg["interface"], agg.get("network_type", "unknown"),
+                agg["rx_bytes"], agg["tx_bytes"],
+                agg["rx_rate_avg"], agg["tx_rate_avg"],
+                agg.get("latency_avg"), agg.get("packet_loss_avg"),
+                agg["minute_count"],
+            ),
+        )
+
+    def network_minute_since(self, since: str, limit: int = 1000) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM network_minute WHERE bucket >= ? "
+            "ORDER BY bucket ASC LIMIT ?",
+            (since, limit),
+        )
+
+    def network_hourly_since(self, since: str, limit: int = 500) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM network_hourly WHERE bucket >= ? "
+            "ORDER BY bucket ASC LIMIT ?",
+            (since, limit),
+        )
+
+    def insert_network_event(self, event: dict) -> int:
+        cur = self.execute(
+            """INSERT INTO network_events
+                   (timestamp, event_type, interface, network_type, detail, severity)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                event["timestamp"],
+                event["event_type"],
+                event.get("interface", ""),
+                event.get("network_type", ""),
+                json.dumps(event.get("detail", {})),
+                event.get("severity", "info"),
+            ),
+        )
+        return cur.lastrowid
+
+    def network_events_since(self, since: str, limit: int = 100) -> list[sqlite3.Row]:
+        return self.query(
+            "SELECT * FROM network_events WHERE timestamp >= ? "
+            "ORDER BY timestamp DESC LIMIT ?",
+            (since, limit),
+        )
+
+    def prune_network_samples_before(self, before: str) -> int:
+        """Delete raw samples older than `before`. Returns rows deleted."""
+        cur = self._conn.execute(
+            "DELETE FROM network_samples WHERE timestamp < ?", (before,)
+        )
+        self._conn.commit()
+        return cur.rowcount
+
+    def prune_network_minute_before(self, before: str) -> int:
+        cur = self._conn.execute(
+            "DELETE FROM network_minute WHERE bucket < ?", (before,)
+        )
+        self._conn.commit()
+        return cur.rowcount
+
     # --- entity / relationship helpers (knowledge graph) ---------------------
 
     def get_or_create_entity(
@@ -794,18 +1087,56 @@ class Database:
         row = self.query_one("SELECT COUNT(*) as n FROM shell_commands")
         return row["n"] if row else 0
 
-    # --- decision log helpers -------------------------------------------------
+    # --- decision log helpers (hash-chained) ----------------------------------
+
+    @staticmethod
+    def _compute_decision_digest(
+        prev_digest: str | None, timestamp: str, agent: str, decision: str,
+        reasoning: str, kind: str, tags: list[str],
+    ) -> str:
+        """Compute a SHA-256 digest over the canonical JSON of a decision record.
+
+        The digest chains to the previous decision's digest, making the log
+        tamper-evident: modifying any entry breaks all subsequent digests.
+        """
+        payload = json.dumps(
+            {
+                "prev": prev_digest,
+                "ts": timestamp,
+                "agent": agent,
+                "decision": decision,
+                "rationale": reasoning,
+                "kind": kind,
+                "tags": tags,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        return "sha256:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     def log_decision(
         self, agent: str, decision: str, *, reasoning: str = "",
         confidence: float = 0.0, outcome: str = "", query: str = "",
+        kind: str = "decision", tags: list[str] | None = None,
     ) -> int:
+        tag_list = tags if tags is not None else []
+        timestamp = datetime.now(UTC).isoformat()
+
+        # Get the last decision's digest for chain linking.
+        last = self.query_one("SELECT digest FROM decisions ORDER BY id DESC LIMIT 1")
+        prev_digest = last["digest"] if last else None
+
+        digest = self._compute_decision_digest(
+            prev_digest, timestamp, agent, decision, reasoning, kind, tag_list,
+        )
+
         cur = self.execute(
             """INSERT INTO decisions
-                   (timestamp, agent, decision, reasoning_summary, confidence, outcome, query)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (datetime.now(UTC).isoformat(), agent, decision,
-             reasoning, confidence, outcome, query),
+                   (timestamp, agent, decision, reasoning_summary, confidence,
+                    outcome, query, kind, tags, digest, prev_digest)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (timestamp, agent, decision, reasoning, confidence, outcome, query,
+             kind, json.dumps(tag_list), digest, prev_digest),
         )
         return cur.lastrowid
 
@@ -821,6 +1152,40 @@ class Database:
     def decision_count(self) -> int:
         row = self.query_one("SELECT COUNT(*) as n FROM decisions")
         return row["n"] if row else 0
+
+    def verify_decision_chain(self) -> dict[str, Any]:
+        """Verify the integrity of the decision hash chain.
+
+        Returns a dict with:
+          - valid: bool — True if the entire chain is intact
+          - verified: int — number of records verified
+          - errors: list[str] — descriptions of any broken links
+        """
+        rows = self.query("SELECT * FROM decisions ORDER BY id ASC")
+        expected_prev: str | None = None
+        errors: list[str] = []
+        verified = 0
+        for row in rows:
+            if row["prev_digest"] != expected_prev:
+                errors.append(
+                    f"decision {row['id']}: chain broken — "
+                    f"expected prev={expected_prev}, got prev={row['prev_digest']}"
+                )
+            recomputed = self._compute_decision_digest(
+                row["prev_digest"], row["timestamp"], row["agent"],
+                row["decision"], row["reasoning_summary"],
+                row["kind"] or "decision",
+                json.loads(row["tags"] or "[]"),
+            )
+            if recomputed != row["digest"]:
+                errors.append(
+                    f"decision {row['id']}: digest mismatch — "
+                    f"expected {recomputed}, got {row['digest']}"
+                )
+            else:
+                verified += 1
+            expected_prev = row["digest"]
+        return {"valid": len(errors) == 0, "verified": verified, "errors": errors}
 
     # --- task helpers ---------------------------------------------------------
 
@@ -846,16 +1211,23 @@ class Database:
     def delete_task(self, task_id: int) -> None:
         self.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
 
-    def pending_tasks(self, workspace: str | None = None) -> list[sqlite3.Row]:
+    def pending_tasks(
+        self, workspace: str | None = None, limit: int = 0,
+    ) -> list[sqlite3.Row]:
         if workspace:
-            return self.query(
+            sql = (
                 "SELECT * FROM tasks WHERE status = 'pending' AND related_workspace = ? "
-                "ORDER BY priority DESC, created_at ASC",
-                (workspace,),
+                "ORDER BY priority DESC, created_at ASC"
             )
-        return self.query(
-            "SELECT * FROM tasks WHERE status = 'pending' ORDER BY priority DESC, created_at ASC"
-        )
+            params: tuple[Any, ...] = (workspace,)
+            if limit > 0:
+                sql += " LIMIT ?"
+                params += (limit,)
+            return self.query(sql, params)
+        sql = "SELECT * FROM tasks WHERE status = 'pending' ORDER BY priority DESC, created_at ASC"
+        if limit > 0:
+            return self.query(sql + " LIMIT ?", (limit,))
+        return self.query(sql)
 
     def all_tasks(self, limit: int = 50) -> list[sqlite3.Row]:
         return self.query("SELECT * FROM tasks ORDER BY created_at DESC LIMIT ?", (limit,))
@@ -1031,18 +1403,19 @@ class Database:
 
     def set_user_model_entry(
         self, key: str, value: str, *, confidence: float = 0.5, source: str = "observed",
+        metadata: str | None = None,
     ) -> None:
         existing = self.query_one("SELECT id FROM user_model WHERE key = ?", (key,))
         if existing:
             self.execute(
-                "UPDATE user_model SET value = ?, confidence = ?, source = ?, updated_at = ? WHERE key = ?",
-                (value, confidence, source, datetime.now(UTC).isoformat(), key),
+                "UPDATE user_model SET value = ?, confidence = ?, source = ?, metadata = ?, updated_at = ? WHERE key = ?",
+                (value, confidence, source, metadata, datetime.now(UTC).isoformat(), key),
             )
         else:
             self.execute(
-                """INSERT INTO user_model (key, value, confidence, source, updated_at)
-                   VALUES (?, ?, ?, ?, ?)""",
-                (key, value, confidence, source, datetime.now(UTC).isoformat()),
+                """INSERT INTO user_model (key, value, confidence, source, metadata, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (key, value, confidence, source, metadata, datetime.now(UTC).isoformat()),
             )
 
     def get_user_model_entry(self, key: str) -> dict | None:
@@ -1054,6 +1427,100 @@ class Database:
 
     def delete_user_model_entry(self, key: str) -> None:
         self.execute("DELETE FROM user_model WHERE key = ?", (key,))
+
+    # --- personal memory helpers ----------------------------------------------
+
+    def upsert_personal_memory(
+        self,
+        memory_id: str,
+        content_hash: str,
+        content: str,
+        *,
+        title: str = "",
+        tags: str = "[]",
+        source: str = "manual",
+        source_ref: str = "",
+        author_id: str = "",
+        archive_status: str = "pending",
+        archive_path: str = "",
+        archive_hash: str = "",
+        archive_error: str = "",
+        indexed_at: str | None = None,
+    ) -> None:
+        now = datetime.now(UTC).isoformat()
+        self.execute(
+            """INSERT INTO personal_memories (
+                   id, content_hash, title, content, tags, source, source_ref,
+                   author_id, archive_status, archive_path, archive_hash,
+                   archive_error, created_at, updated_at, indexed_at
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(id) DO UPDATE SET
+                   content_hash = excluded.content_hash,
+                   title = excluded.title,
+                   content = excluded.content,
+                   tags = excluded.tags,
+                   source = excluded.source,
+                   source_ref = excluded.source_ref,
+                   author_id = excluded.author_id,
+                   archive_status = excluded.archive_status,
+                   archive_path = excluded.archive_path,
+                   archive_hash = excluded.archive_hash,
+                   archive_error = excluded.archive_error,
+                   updated_at = excluded.updated_at,
+                   indexed_at = excluded.indexed_at""",
+            (
+                memory_id, content_hash, title, content, tags, source, source_ref,
+                author_id, archive_status, archive_path, archive_hash,
+                archive_error, now, now, indexed_at,
+            ),
+        )
+
+    def personal_memory_by_hash(self, content_hash: str) -> dict[str, Any] | None:
+        row = self.query_one(
+            "SELECT * FROM personal_memories WHERE content_hash = ?",
+            (content_hash,),
+        )
+        return dict(row) if row else None
+
+    def personal_memory(self, memory_id: str) -> dict[str, Any] | None:
+        row = self.query_one("SELECT * FROM personal_memories WHERE id = ?", (memory_id,))
+        return dict(row) if row else None
+
+    def update_personal_memory_archive(
+        self,
+        memory_id: str,
+        *,
+        status: str,
+        archive_path: str = "",
+        archive_hash: str = "",
+        error: str = "",
+    ) -> None:
+        self.execute(
+            """UPDATE personal_memories
+               SET archive_status = ?, archive_path = ?, archive_hash = ?,
+                   archive_error = ?, updated_at = ?
+               WHERE id = ?""",
+            (
+                status, archive_path, archive_hash, error,
+                datetime.now(UTC).isoformat(), memory_id,
+            ),
+        )
+
+    def pending_personal_memories(self, limit: int = 100) -> list[dict[str, Any]]:
+        rows = self.query(
+            """SELECT * FROM personal_memories
+               WHERE archive_status IN ('pending', 'failed')
+               ORDER BY created_at ASC LIMIT ?""",
+            (limit,),
+        )
+        return [dict(row) for row in rows]
+
+    def list_personal_memories(self, limit: int = 50) -> list[dict[str, Any]]:
+        rows = self.query(
+            "SELECT * FROM personal_memories ORDER BY created_at DESC LIMIT ?",
+            (limit,),
+        )
+        return [dict(row) for row in rows]
 
     # --- workflow run helpers -------------------------------------------------
 
@@ -1387,6 +1854,70 @@ class Database:
         return self.query_one(
             "SELECT * FROM context_evaluations ORDER BY timestamp DESC LIMIT 1"
         )
+
+    # --- retention / rotation -------------------------------------------------
+
+    # Tables that grow unboundedly with interactions, mapped to their timestamp
+    # column.  These are the tables that would push DB size past 10 GB at 50 M
+    # interactions.  Order matters: child tables (process_snapshots) are pruned
+    # before their parent (telemetry_snapshots) to respect FK constraints.
+    _RETENTION_TABLES: list[tuple[str, str]] = [
+        ("process_snapshots", "telemetry_id"),      # child of telemetry_snapshots
+        ("telemetry_snapshots", "timestamp"),
+        ("events", "timestamp"),
+        ("shell_commands", "timestamp"),
+        ("action_log", "timestamp"),
+        ("mcp_requests", "timestamp"),
+        ("context_evaluations", "timestamp"),
+        ("workspace_snapshots", "timestamp"),
+        ("file_reads", "timestamp"),
+        ("decisions", "timestamp"),
+        ("workflow_runs", "timestamp"),
+        ("sessions", "end_time"),
+    ]
+
+    def apply_retention(self, days: int = 30) -> dict[str, int]:
+        """Delete rows older than *days* days from high-growth tables.
+
+        Returns a mapping of table name to number of rows deleted.
+        Addresses scaling blocker #655: projected >10 GB SQLite at 50 M
+        interactions.  By pruning transient telemetry/event/log data older
+        than a configurable window we keep the DB bounded.
+
+        Tables that are canonical (file_hashes, git_commits, entities,
+        relationships, tasks, user_model, workspaces) are NOT pruned —
+        they are small or semantically permanent.
+        """
+        cutoff = (datetime.now(UTC) - _timedelta(days=days)).isoformat()
+        deleted: dict[str, int] = {}
+        with self.transaction():
+            for table, ts_col in self._RETENTION_TABLES:
+                # process_snapshots has no timestamp column; prune by
+                # joining to telemetry_snapshots.
+                if table == "process_snapshots":
+                    cur = self.execute(
+                        """DELETE FROM process_snapshots
+                           WHERE telemetry_id IN (
+                               SELECT id FROM telemetry_snapshots
+                               WHERE timestamp < ?
+                           )""",
+                        (cutoff,),
+                    )
+                else:
+                    cur = self.execute(
+                        f"DELETE FROM {table} WHERE {ts_col} < ?",
+                        (cutoff,),
+                    )
+                deleted[table] = cur.rowcount
+        log.info("db.retention.applied", days=days, cutoff=cutoff, deleted=deleted)
+        return deleted
+
+    def db_size_mb(self) -> float:
+        """Return the current database file size in megabytes."""
+        try:
+            return self.path.stat().st_size / (1024 * 1024)
+        except OSError:
+            return 0.0
 
 
 # Module-level singleton accessor (lazy, not a global singleton pattern —

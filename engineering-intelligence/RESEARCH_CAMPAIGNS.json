@@ -1,0 +1,126 @@
+{
+  "campaigns": [
+    {
+      "campaign_id": "campaign:trustcard:runtime-coverage",
+      "command": [
+        "echo",
+        "approval-required",
+        "trustcard:runtime-coverage"
+      ],
+      "objective": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "requires_approval": true,
+      "target": "trustcard"
+    },
+    {
+      "campaign_id": "campaign:maos:runtime-coverage",
+      "command": [
+        "echo",
+        "approval-required",
+        "maos:runtime-coverage"
+      ],
+      "objective": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "requires_approval": true,
+      "target": "maos"
+    },
+    {
+      "campaign_id": "campaign:aafp:runtime-coverage",
+      "command": [
+        "echo",
+        "approval-required",
+        "aafp:runtime-coverage"
+      ],
+      "objective": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "requires_approval": true,
+      "target": "aafp"
+    },
+    {
+      "campaign_id": "campaign:infernet:runtime-coverage",
+      "command": [
+        "echo",
+        "approval-required",
+        "infernet:runtime-coverage"
+      ],
+      "objective": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "requires_approval": true,
+      "target": "infernet"
+    },
+    {
+      "campaign_id": "campaign:cvconform:runtime-coverage",
+      "command": [
+        "echo",
+        "approval-required",
+        "cvconform:runtime-coverage"
+      ],
+      "objective": "Run target-specific parser, authorization, replay, failure-injection, or differential campaigns.",
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "requires_approval": true,
+      "target": "cvconform"
+    }
+  ],
+  "decisions": [
+    {
+      "action": "review_and_approve",
+      "affected_systems": [
+        "trustcard"
+      ],
+      "decision_id": "campaign:trustcard:runtime-coverage",
+      "evidence_refs": [],
+      "priority": 0.0,
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "status": "approval_required",
+      "title": "Authorize validation campaign for trustcard"
+    },
+    {
+      "action": "review_and_approve",
+      "affected_systems": [
+        "maos"
+      ],
+      "decision_id": "campaign:maos:runtime-coverage",
+      "evidence_refs": [],
+      "priority": 0.0,
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "status": "approval_required",
+      "title": "Authorize validation campaign for maos"
+    },
+    {
+      "action": "review_and_approve",
+      "affected_systems": [
+        "aafp"
+      ],
+      "decision_id": "campaign:aafp:runtime-coverage",
+      "evidence_refs": [],
+      "priority": 0.0,
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "status": "approval_required",
+      "title": "Authorize validation campaign for aafp"
+    },
+    {
+      "action": "review_and_approve",
+      "affected_systems": [
+        "infernet"
+      ],
+      "decision_id": "campaign:infernet:runtime-coverage",
+      "evidence_refs": [],
+      "priority": 0.0,
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "status": "approval_required",
+      "title": "Authorize validation campaign for infernet"
+    },
+    {
+      "action": "review_and_approve",
+      "affected_systems": [
+        "cvconform"
+      ],
+      "decision_id": "campaign:cvconform:runtime-coverage",
+      "evidence_refs": [],
+      "priority": 0.0,
+      "rationale": "Priority 133.33: Runtime adversarial coverage is incomplete",
+      "status": "approval_required",
+      "title": "Authorize validation campaign for cvconform"
+    }
+  ]
+}

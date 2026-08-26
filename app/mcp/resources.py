@@ -249,6 +249,18 @@ def _read_time_resource(runtime: Runtime) -> str:
     return json.dumps(packet, default=str, indent=2)
 
 
+def read_network_resource(runtime: Runtime) -> str:
+    """maos://network/current — current network health snapshot."""
+    return _instrument_resource(
+        runtime, "maos://network/current", _read_network_resource,
+    )
+
+
+def _read_network_resource(runtime: Runtime) -> str:
+    status = runtime.network.get_status()
+    return json.dumps(status.to_dict(), default=str, indent=2)
+
+
 # --- helpers ---------------------------------------------------------------
 
 

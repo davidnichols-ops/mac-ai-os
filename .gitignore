@@ -3,10 +3,19 @@ __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
+.venv.*/
 .ruff_cache/
 .pytest_cache/
 dist/
 build/
+
+# User configuration (machine-specific; use configs/example.yaml as a template)
+configs/user.yaml
+.grok/
+.cursor/
+.claude/
+.devin/
+.agents/
 
 # uv
 uv.lock
@@ -15,19 +24,73 @@ uv.lock
 data/embeddings/*
 data/indexes/*
 data/cache/*
+data/*.json
+data/*.jsonl
+data/*.db
+data/*.db-*
 !data/**/.gitkeep
 logs/*.log
+logs/*.err
 models/*
 
 # Knowledge base — keep directory structure, ignore indexed content
 knowledge/*/*
 !knowledge/*/.gitkeep
+
+# Datasets — keep directory structure, ignore imported content
+datasets/adaptive_operator_v1/raw/*
+datasets/adaptive_operator_v1/processed/*
+datasets/adaptive_operator_v1/validation/*
+datasets/adaptive_operator_v1/statistics/*
+!datasets/adaptive_operator_v1/**/.gitkeep
+datasets/incoming/*/sft/*
+datasets/incoming/*/evaluation/*
+datasets/incoming/*/architecture/*
+datasets/incoming/*/tools/*
+datasets/incoming/*/compute_policy/*
+datasets/incoming/*/recovery/*
+datasets/validated/*/processed/*
+datasets/validated/*/validation/*
+datasets/validated/*/validation_errors.json
+!datasets/**/.gitkeep
 data/maos.db
 data/maos.db-shm
 data/maos.db-wal
+data/device_rag.db
+data/device_rag.db-shm
+data/device_rag.db-wal
+data/slack.db
+data/slack.db-shm
+data/slack.db-wal
+data/agent_sessions.json
+
+# Agent trajectory recordings (runtime artifacts)
+data/trajectories/*
+
+# Generated guard evidence (refresh via uv run app guards verify ...)
+test.json
+lint.json
+*evidence.json
+evidence/*
+
+# Training runs — large model outputs, not source code
+training/runs/*
+training/output/*
+training/trajectories/*
+training/v4_pipeline/eval_results/*
+training/v4_pipeline/remote_logs/*
+training/v4_pipeline/charts/*
+!training/**/.gitkeep
+
+# Eval results — generated output
+eval/results/*
+eval/**/results/*/trajectories/*
+eval/**/trajectories/*
+!eval/**/.gitkeep
 
 # Agent context history (session artifacts)
 agent context history/
 
 # OS
 .DS_Store
+.env

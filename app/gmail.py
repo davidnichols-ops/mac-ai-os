@@ -7,8 +7,9 @@ it sends an email instead of silently moving on.
 
 Architecture:
     Gmail OAuth credentials live in ~/.gmail-mcp/ (shared with the
-    gmail-github-to-maos.js sync script). account-b is
-    david.nichols.ops@gmail.com — the sending AND receiving address.
+    gmail-github-to-maos.js sync script). The default recipient is read
+    from the ``MAOS_EMAIL_RECIPIENT`` environment variable so the module
+    remains account-agnostic.
 
     Tokens expire. This module refreshes them on demand using the
     stored refresh_token + client credentials. No interactive auth flow.
@@ -21,14 +22,15 @@ Security:
     - Credentials are read from ~/.gmail-mcp/, never written to logs.
     - Refreshed tokens are saved back to the credentials file so the
       sync script benefits too.
-    - The sending address is hardcoded to account-b (david's). No
-      outbound email to arbitrary recipients — only to david himself.
+    - The recipient defaults to the account owner; override with the
+      ``to`` argument or the ``MAOS_EMAIL_RECIPIENT`` environment variable.
 """
 
 from __future__ import annotations
 
 import base64
 import json
+import os
 import urllib.parse
 import urllib.request
 from email.message import EmailMessage
@@ -40,10 +42,9 @@ from app.log import get_logger
 log = get_logger(__name__)
 
 GMAIL_DIR = Path.home() / ".gmail-mcp"
-# account-b = david.nichols.ops@gmail.com (verified via profile API)
 SENDER_KEYS = GMAIL_DIR / "account-b-keys.json"
 SENDER_CREDS = GMAIL_DIR / "account-b-credentials.json"
-RECIPIENT = "david.nichols.ops@gmail.com"
+RECIPIENT = os.environ.get("MAOS_EMAIL_RECIPIENT", "")
 
 GMAIL_API_SEND = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
@@ -105,13 +106,15 @@ def _refresh_access_token() -> str:
 def _build_rfc2822(
     subject: str,
     body: str,
-    to: str = RECIPIENT,
-    sender: str = RECIPIENT,
+    to: str = "",
+    sender: str = "",
 ) -> bytes:
     """Build an RFC 2822 message as bytes."""
     msg = EmailMessage()
-    msg["To"] = to
-    msg["From"] = sender
+    if to:
+        msg["To"] = to
+    if sender:
+        msg["From"] = sender
     msg["Subject"] = subject
     msg.set_content(body)
     return msg.as_bytes()
@@ -121,24 +124,32 @@ def send_email(
     subject: str,
     body: str,
     *,
-    to: str = RECIPIENT,
+    to: str = "",
 ) -> dict[str, Any]:
     """Send an email via Gmail.
 
     Args:
         subject: Email subject line.
         body: Plain text body.
-        to: Recipient (defaults to david.nichols.ops@gmail.com).
+        to: Recipient. Defaults to ``MAOS_EMAIL_RECIPIENT`` if set,
+            otherwise raises an error.
 
     Returns:
         Dict with success, message_id, and any error.
 
     Raises:
-        EmailError: If sending fails after token refresh.
+        EmailError: If no recipient is configured or sending fails.
     """
+    recipient = to or RECIPIENT
+    if not recipient:
+        raise EmailError(
+            "No email recipient configured. Set MAOS_EMAIL_RECIPIENT "
+            "or pass the 'to' argument."
+        )
+
     access_token = _refresh_access_token()
 
-    raw_message = _build_rfc2822(subject, body, to=to)
+    raw_message = _build_rfc2822(subject, body, to=recipient)
     encoded = base64.urlsafe_b64encode(raw_message).decode()
 
     payload = json.dumps({"raw": encoded}).encode()
@@ -174,6 +185,7 @@ def escalate(
     *,
     context: dict[str, Any] | None = None,
     lesson_slug: str | None = None,
+    to: str = "",
 ) -> dict[str, Any]:
     """Send an escalation email — 'this needs human attention'.
 
@@ -192,6 +204,7 @@ def escalate(
         body: The detailed explanation.
         context: Optional structured context to append.
         lesson_slug: Optional lesson slug if this is related to a recorded lesson.
+        to: Optional recipient. Defaults to ``MAOS_EMAIL_RECIPIENT``.
 
     Returns:
         Dict with success, message_id, and subject.
@@ -219,4 +232,4 @@ def escalate(
     if not subject.startswith(prefix):
         subject = f"{prefix} {subject}"
 
-    return send_email(subject, full_body)
+    return send_email(subject, full_body, to=to)

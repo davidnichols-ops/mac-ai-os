@@ -22,7 +22,7 @@ def test_keyword_routing():
     assert agent == "system"
 
     agent, conf = _keyword_route("What is the meaning of life?", agents)
-    assert agent == "research"  # fallback
+    assert agent == "general"  # fallback
     assert conf < 0.5
 
 

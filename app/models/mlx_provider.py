@@ -6,11 +6,18 @@ non-Apple platforms (and in CI without the extra).
 
 from __future__ import annotations
 
+import json
+import re
+from typing import Any
+
 from app.log import get_logger
 from app.models.base import EmbeddingModel, Model
-from app.models.types import EmbeddingResponse, Message, ModelResponse
+from app.models.types import EmbeddingResponse, Message, ModelResponse, ToolCall
 
 log = get_logger(__name__)
+
+TC_OPEN = chr(60) + "tool_call" + chr(62)
+TC_CLOSE = chr(60) + "/tool_call" + chr(62)
 
 
 def _import_mlx_lm():
@@ -32,7 +39,7 @@ class MLXModel(Model):
         self.name = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self._mlx = _import_mlx_lm()
+        self._mlx = None  # deferred to _load() — saves ~3s on commands that never call the model
         self._model = None
         self._tokenizer = None
         log.info("mlx.model.requested", model=model)
@@ -40,6 +47,8 @@ class MLXModel(Model):
     def _load(self):
         if self._model is not None:
             return
+        if self._mlx is None:
+            self._mlx = _import_mlx_lm()
         log.info("mlx.model.loading", model=self.name)
         self._model, self._tokenizer = self._mlx.load(self.name)
         log.info("mlx.model.loaded", model=self.name)
@@ -52,13 +61,33 @@ class MLXModel(Model):
         messages.append(Message("user", prompt))
         return self.chat(messages, **kwargs)
 
-    def chat(self, messages: list[Message], **kwargs) -> ModelResponse:
+    def chat(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        **kwargs,
+    ) -> ModelResponse:
         self._load()
         temp = kwargs.get("temperature", self.temperature)
         max_tokens = kwargs.get("max_tokens", self.max_tokens)
         if hasattr(self._tokenizer, "apply_chat_template"):
+            # Convert messages to dicts, ensuring tool_calls arguments are
+            # dicts (not JSON strings) — Qwen3.5's template requires this.
+            msg_dicts = []
+            for m in messages:
+                d = m.to_dict()
+                if d.get("tool_calls"):
+                    for tc in d["tool_calls"]:
+                        args = tc.get("function", {}).get("arguments")
+                        if isinstance(args, str):
+                            try:
+                                tc["function"]["arguments"] = json.loads(args)
+                            except (json.JSONDecodeError, ValueError):
+                                pass
+                msg_dicts.append(d)
             prompt = self._tokenizer.apply_chat_template(
-                [m.to_dict() for m in messages], tokenize=False, add_generation_prompt=True
+                msg_dicts, tokenize=False, add_generation_prompt=True
             )
         else:
             prompt = "\n".join(f"{m.role}: {m.content}" for m in messages)
@@ -73,9 +102,54 @@ class MLXModel(Model):
             # Older mlx-lm versions accept `temp` directly.
             gen_kwargs["temp"] = temp
 
+        # Ensure the tokenizer's eos_token is in eos_token_ids.
+        # Some models (e.g. Phi-3.5) have eos_token=<|end|> (id 32007) but
+        # eos_token_ids={32000} — a different token. mlx-lm checks
+        # eos_token_ids to stop generation, so without this fix the model
+        # generates past its answer and fills context with repeated junk.
+        eos_id = getattr(self._tokenizer, "eos_token_id", None)
+        eos_ids = getattr(self._tokenizer, "eos_token_ids", set())
+        if eos_id is not None and eos_id not in eos_ids:
+            if hasattr(self._tokenizer, "add_eos_token"):
+                self._tokenizer.add_eos_token(self._tokenizer.eos_token)
+            else:
+                # Fallback: directly patch the set if possible
+                try:
+                    self._tokenizer.eos_token_ids = eos_ids | {eos_id}
+                except Exception:
+                    pass
+
         response = self._mlx.generate(self._model, self._tokenizer, prompt=prompt, **gen_kwargs)
-        text = response.text if hasattr(response, "text") else str(response)
-        return ModelResponse(text=text, model=self.name, provider=self.provider, raw=response)
+        # mlx_lm 0.31+ generate() returns str directly; older versions return
+        # an object with .text. Handle both cleanly.
+        if isinstance(response, str):
+            text = response
+        elif hasattr(response, "text"):
+            text = response.text
+        else:
+            text = str(response)
+        tool_calls = self._parse_tool_calls(text) if tools else []
+        finish = "tool_calls" if tool_calls else "stop"
+        return ModelResponse(
+            text=text, model=self.name, provider=self.provider, raw=response,
+            tool_calls=tool_calls, finish_reason=finish,
+        )
+
+    @staticmethod
+    def _parse_tool_calls(text: str) -> list[ToolCall]:
+        """Parse <tool_call> JSON blocks from model output."""
+        tool_calls = []
+        pat = TC_OPEN + r"\s*(\{.*?\})\s*(?:" + TC_CLOSE + r"|\n\n|$)"
+        for i, match in enumerate(re.findall(pat, text, re.DOTALL)):
+            try:
+                data = json.loads(match)
+                name = data.get("name", "")
+                args = data.get("arguments", data.get("parameters", {}))
+                if name:
+                    tool_calls.append(ToolCall(id=f"call_{i}", name=name, arguments=args))
+            except (json.JSONDecodeError, ValueError):
+                continue
+        return tool_calls
 
     def health(self) -> bool:
         try:
@@ -93,7 +167,7 @@ class MLXEmbeddingModel(EmbeddingModel):
 
     def __init__(self, model: str):
         self.name = model
-        self._mlx = _import_mlx_lm()
+        self._mlx = None  # deferred to _load()
         self._model = None
         self._tokenizer = None
         log.info("mlx.embedding.requested", model=model)
@@ -101,6 +175,8 @@ class MLXEmbeddingModel(EmbeddingModel):
     def _load(self):
         if self._model is not None:
             return
+        if self._mlx is None:
+            self._mlx = _import_mlx_lm()
         log.info("mlx.embedding.loading", model=self.name)
         self._model, self._tokenizer = self._mlx.load(self.name)
         log.info("mlx.embedding.loaded", model=self.name)

@@ -1,5 +1,10 @@
 # AGENTS.md — Mac AI OS
 
+Before following repository-specific guidance, read the device-level operating
+contract at `~/AGENTS_WORKFLOW.md`. It defines the shared refresh,
+evidence, Trajectory, MCP, task-handoff, and safety workflow for every AI on
+this device.
+
 Conventions, commands, and architecture notes for agents working on this repo.
 
 ## Quick start
@@ -18,12 +23,20 @@ uv run app                               # launch the CLI (== uv run maos)
 | Lint | `uv run ruff check app tests` |
 | Verify runtime | `uv run app verify` |
 | List models | `uv run app models` |
+| **Unified refresh** | `uv run app refresh [--full] [--scope all\|sessions\|context\|workspaces\|storage\|trajectory\|evidence\|confidence\|slack]` |
+| **Agent readiness** | `uv run app agent doctor --provider all --json` |
+| **Agent startup brief** | `uv run app agent brief --provider <provider> --task "..."` |
+| **Start agent session** | `uv run app agent start --provider <provider> --role <role> --task "..."` |
+| **End agent session** | `uv run app agent end <agent-id> --summary "..." --result "..."` |
+| **Refresh single workspace** | `uv run app refresh --workspace ~/Projects/foo` |
+| **Dry-run refresh** | `uv run app refresh --dry-run` |
 | Index a folder (incremental) | `uv run app index <path>` |
 | Force re-index | `uv run app index <path> --force` |
 | Watch a directory | `uv run app watch <path>` |
 | One-shot prompt | `uv run app ask "..."` |
 | RAG question | `uv run app rag "..."` |
 | Interactive chat | `uv run app chat` |
+| **Agent loop (with tools)** | `uv run app do "..."` |
 | Index git history | `uv run app git index <repo>` |
 | Recent commits | `uv run app git log [repo]` |
 | Changes since N days | `uv run app git changes [repo] --days 1` |
@@ -86,6 +99,7 @@ uv run app                               # launch the CLI (== uv run maos)
 | Start MCP server (HTTP) | `uv run app mcp serve --transport http [--port 7778]` |
 | MCP status | `uv run app mcp status` |
 | MCP test | `uv run app mcp test` |
+| **Umbrella view** | `uv run app umbrella` / `uv run app portfolio` |
 | **Onboarding briefing** | `uv run app onboard` |
 | Onboarding (JSON) | `uv run app onboard --json` |
 | List lessons | `uv run app onboard lessons` |
@@ -106,6 +120,13 @@ uv run app                               # launch the CLI (== uv run maos)
 | Bootstrap (first run) | `uv run app bootstrap [--scan-path ~/Projects]` |
 | Evaluate context quality | `uv run app context evaluate` |
 | Context eval history | `uv run app context history` |
+| **Storage scan** | `uv run app storage scan [--mode full\|fast\|system\|caches] [--json]` |
+| **System data decomposition** | `uv run app storage system-data [--json]` |
+| **Generate fix script** | `uv run app storage fix-script <path> [--no-caches] [--no-system] [--no-tm]` |
+| **Run maintenance** | `uv run app storage maintain` |
+| **Delete TM snapshot** | `uv run app storage delete-snapshot <date>` |
+| **Hidden data scan** | `uv run app storage hidden [--json]` |
+| **Volume stats** | `uv run app storage volume [--json]` |
 | Run the app directly | `uv run app` (entry: `app/__main__.py`) |
 
 ## Configuration
@@ -115,6 +136,20 @@ uv run app                               # launch the CLI (== uv run maos)
 - `configs/example.yaml` — reference for switching providers.
 - Empty model fields are auto-filled from `app.config.hardware.detect()`.
 - Layering: code defaults < `default.yaml` < `user.yaml` < env vars.
+
+## External agent handoff
+
+- Read `~/AGENTS_WORKFLOW.md`, this file, and the nearest nested
+  `AGENTS.md` before acting.
+- Run `agent doctor`, request a provider-specific `agent brief`, register with
+  `agent start`, refresh context, execute and verify, then close with `agent end`.
+- Supported provider names are `devin`, `grokhack`, `claude-code`, `codex`,
+  `local`, and `openrouter`.
+- Credential values stay in protected, ignored `.env` files or provider-managed
+  authentication. Agents may inspect names and readiness, but must never print,
+  copy, commit, or include token values in prompts, logs, or handoffs.
+- The implementation contract is in `app/agents/AGENTS.md`; the operator guide
+  is `docs/agent-handoff.md`.
 
 ## Architecture
 
@@ -376,11 +411,12 @@ interface becomes the Context API and MCP server.
   surfaced in every future briefing. This is the cold-start antidote —
   it prevents new sessions from repeating past mistakes.
 - `app/gmail.py` — Email sending via Gmail OAuth. Uses credentials
-  from `~/.gmail-mcp/` (account-b = david.nichols.ops@gmail.com).
-  Refreshes tokens automatically. Two functions: `send_email` (generic)
-  and `escalate` (the anti-vibe-overload channel — sends a [MAOS]
-  prefixed email when something needs human attention). No external
-  deps, just stdlib urllib + base64 + email.
+  from `~/.gmail-mcp/`. Refreshes tokens automatically. The recipient
+  defaults to `MAOS_EMAIL_RECIPIENT` or the `to` argument. Two
+  functions: `send_email` (generic) and `escalate` (the
+  anti-vibe-overload channel — sends a [MAOS] prefixed email when
+  something needs human attention). No external deps, just stdlib
+  urllib + base64 + email.
 - `app/guards.py` — PR governance system (evidence-producing, not
   evidence-consuming). The core principle: a boolean should represent the
   RESULT of a verification process, not REPLACE it. An agent can always
@@ -565,3 +601,46 @@ PDF text extraction, and image OCR. The AAFP binary must be on PATH (or at
 - GPU and Neural Engine utilization are not available without root (`powermetrics` needs `sudo`).
 - zsh history may not have extended timestamps (`: timestamp:duration;command`) — the parser
   handles both extended and plain formats (uses file mtime for plain format).
+
+## Adaptive Operator Runtime Substrate (`app/core/`)
+
+The agent execution core — the body that any sufficiently capable model can inhabit.
+
+- `app/core/agent_loop.py` — think-act-observe-verify cycle. The model generates
+  responses, parses tool calls, executes them, feeds results back, and iterates
+  until the task is complete. Step budget, error budget, infinite loop detection,
+  timeout, and nudge mechanism.
+- `app/core/tool_executor.py` — wraps ToolRouter with SafetyGate and trajectory
+  recording. Every tool call is risk-evaluated, possibly approval-gated, and
+  recorded for training data.
+- `app/core/safety.py` — SafetyGate with 4 risk levels (LOW/MEDIUM/HIGH/CRITICAL).
+  Blocked commands, high-risk command patterns, tool-level risk classification.
+  User approval callback for HIGH and CRITICAL operations.
+- `app/core/trajectory.py` — training-quality telemetry. Every step recorded
+  with inference metrics, tool calls, results, errors. Persisted as JSON to
+  `data/trajectories/`. Schema version 2.0.0.
+- `app/core/state.py` — mutable execution state (messages, step count, seen
+  actions, error count, completion status).
+- `app/core/system_prompt.py` — dynamic system prompt assembly from tool
+  schemas, workspace, context, and lessons.
+
+### Tool Calling
+
+The v2 model doesn't support native function calling. Tool definitions are
+injected into the system prompt as formatted text. The model emits tool calls
+in a structured format (5 supported formats: <tool_call> JSON, XML-style, pipe-delimited,
+JSON code blocks, bare JSON). The provider parses these into ToolCall objects.
+
+### Built-in Tools
+
+6 tools: `shell`, `file_read`, `file_write`, `file_edit`, `file_list`, `git`.
+Each has a proper JSON schema with parameter names, types, and descriptions.
+All tools declare permissions and are gated by the SafetyGate.
+
+### Usage
+
+```bash
+uv run app do "list files in current directory"
+uv run app do "read the file pyproject.toml" --max-steps 10
+uv run app do "show git status" --json
+```

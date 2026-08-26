@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from app.log import get_logger
@@ -54,18 +55,24 @@ class FolderIndexer(Indexer):
         return chunks
 
     def _walk(self, root: Path):
-        for path in root.rglob("*"):
-            if not path.is_file():
-                continue
-            if path.name in _IGNORE_NAMES:
-                continue
-            if any(part in _IGNORE_DIRS for part in path.parts):
-                continue
-            if path.suffix.lower() not in _TEXT_EXTS and path.suffix.lower() not in _CODE_EXTS:
-                continue
-            try:
-                if path.stat().st_size > _MAX_FILE_BYTES:
+        # Prune ignored directories before descending. Path.rglob() walks
+        # them first and filters afterward, which makes large repositories
+        # appear hung even though most of their contents are never indexed.
+        root = root.resolve()
+        for current, dirnames, filenames in os.walk(root, topdown=True, followlinks=False):
+            dirnames[:] = sorted(
+                name for name in dirnames
+                if name not in _IGNORE_DIRS and not name.startswith(".")
+            )
+            for name in sorted(filenames):
+                if name in _IGNORE_NAMES or name.startswith("."):
                     continue
-            except OSError:
-                continue
-            yield path
+                path = Path(current) / name
+                if path.suffix.lower() not in _TEXT_EXTS and path.suffix.lower() not in _CODE_EXTS:
+                    continue
+                try:
+                    if path.stat().st_size > _MAX_FILE_BYTES:
+                        continue
+                except OSError:
+                    continue
+                yield path

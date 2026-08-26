@@ -36,6 +36,7 @@ class Context:
     graph_entities: list[dict[str, Any]] = field(default_factory=list)
     rag_results: list[dict[str, Any]] = field(default_factory=list)
     sessions: list[dict[str, Any]] = field(default_factory=list)
+    network: dict[str, Any] | None = None
 
     def to_prompt(self) -> str:
         """Render the context as a text block for LLM prompts."""
@@ -84,6 +85,17 @@ class Context:
             parts.append(f"\nRelevant documents ({len(self.rag_results)}):")
             for r in self.rag_results[:3]:
                 parts.append(f"  [{r.get('score', 0):.2f}] {r.get('source', '?')}")
+
+        if self.network:
+            n = self.network
+            status = "healthy" if n.get("healthy") else "degraded"
+            parts.append(f"\nNetwork: {status}")
+            if n.get("latency_ms") is not None:
+                parts.append(f"  Latency: {n['latency_ms']:.0f}ms")
+            if n.get("interface"):
+                parts.append(f"  Interface: {n['interface']} ({n.get('network_type', 'unknown')})")
+            if n.get("issues"):
+                parts.append(f"  Issues: {', '.join(n['issues'])}")
 
         return "\n".join(parts) if parts else "(no context available)"
 
@@ -158,6 +170,13 @@ def build_context(
             ]
         except Exception as e:
             log.warning("context.rag_failed", error=str(e))
+
+    # Network intelligence — current health snapshot.
+    try:
+        from app.network import NetworkProvider
+        ctx.network = NetworkProvider(db).get_status().to_dict()
+    except Exception as e:
+        log.warning("context.network_failed", error=str(e))
 
     log.debug("context.built",
               events=len(ctx.recent_events),

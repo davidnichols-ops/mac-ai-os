@@ -259,18 +259,94 @@ LIST_LESSONS_TOOL = MCPToolSpec(
     parameters={},
 )
 
+RECORD_DECISION_TOOL = MCPToolSpec(
+    name="maos_record_decision",
+    description=(
+        "Record a structured agent decision to the hash-chained audit log. "
+        "Each decision is linked to the previous one via a SHA-256 digest "
+        "chain, making the log tamper-evident. Use this to make agent "
+        "reasoning auditable and reproducible."
+    ),
+    parameters={
+        "agent": {
+            "type": "string",
+            "description": "Identifier of the agent making the decision (e.g. 'devin', 'claude-3').",
+        },
+        "action": {
+            "type": "string",
+            "description": "The action being decided on (e.g. 'commit', 'deploy', 'merge').",
+        },
+        "rationale": {
+            "type": "string",
+            "description": "Why the decision was made. This is the auditable reasoning trail.",
+        },
+        "kind": {
+            "type": "string",
+            "description": "Decision category: 'decision', 'observation', 'escalation', or 'veto'.",
+            "default": "decision",
+        },
+        "tags": {
+            "type": "string",
+            "description": "Comma-separated free-form tags for grouping decisions.",
+            "default": "",
+        },
+        "confidence": {
+            "type": "number",
+            "description": "Confidence level 0-1 (default 0).",
+            "default": 0,
+        },
+    },
+)
+
+QUERY_DECISIONS_TOOL = MCPToolSpec(
+    name="maos_query_decisions",
+    description=(
+        "Query the decision audit log. Read-only and filtered. Returns "
+        "matching decisions with digests and chain pointers. Does not "
+        "include rationale (data minimization)."
+    ),
+    parameters={
+        "agent": {
+            "type": "string",
+            "description": "Filter to decisions by this agent only.",
+            "default": "",
+        },
+        "kind": {
+            "type": "string",
+            "description": "Filter to decisions of this kind only.",
+            "default": "",
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of decisions to return (default 100, max 1000).",
+            "default": 100,
+        },
+    },
+)
+
+VERIFY_DECISIONS_TOOL = MCPToolSpec(
+    name="maos_verify_decisions",
+    description=(
+        "Verify the integrity of the decision hash chain. Checks that "
+        "every decision's digest matches its recomputed value and that "
+        "chain links are intact. Returns valid=True if tamper-free."
+    ),
+    parameters={},
+)
+
 SEND_EMAIL_TOOL = MCPToolSpec(
     name="maos_send_email",
     description=(
-        "Send an email via Gmail (from david.nichols.ops@gmail.com). "
-        "Tokens are refreshed automatically. Default recipient is david."
+        "Send an email via Gmail. "
+        "Tokens are refreshed automatically. "
+        "Default recipient is read from MAOS_EMAIL_RECIPIENT or the 'to' argument."
     ),
     parameters={
         "subject": {"type": "string", "description": "Email subject line"},
         "body": {"type": "string", "description": "Plain text body"},
         "to": {
             "type": "string",
-            "description": "Recipient (defaults to david.nichols.ops@gmail.com)",
+            "description": "Recipient email address",
             "default": "",
         },
     },
@@ -282,8 +358,8 @@ ESCALATE_TOOL = MCPToolSpec(
         "Send an escalation email — 'this needs human attention'. This is "
         "the anti-vibe-overload channel. When something isn't working, when "
         "a verification fails, when context is getting diluted with false "
-        "confidence, escalate instead of glossing over it. Sends to "
-        "david.nichols.ops@gmail.com with [MAOS] prefix."
+        "confidence, escalate instead of glossing over it. Sends to the "
+        "configured MAOS email recipient with a [MAOS] prefix."
     ),
     parameters={
         "subject": {
@@ -305,6 +381,124 @@ ESCALATE_TOOL = MCPToolSpec(
             "default": "",
         },
     },
+)
+
+# --- Google Drive tools -----------------------------------------------------
+
+DRIVE_LIST_TOOL = MCPToolSpec(
+    name="maos_drive_list",
+    description=(
+        "List files in a Google Drive folder. "
+        "Returns file id, name, mimeType, size, modifiedTime for each file. "
+        "Use folder_id='root' or omit for the root folder."
+    ),
+    parameters={
+        "folder_id": {
+            "type": "string",
+            "description": "Folder ID to list (default: root)",
+            "default": "",
+        },
+        "page_size": {
+            "type": "integer",
+            "description": "Max files to return (default 50, max 200)",
+            "default": 50,
+        },
+        "query": {
+            "type": "string",
+            "description": "Optional Drive query string (e.g. \"name contains 'report'\")",
+            "default": "",
+        },
+    },
+)
+
+DRIVE_SEARCH_TOOL = MCPToolSpec(
+    name="maos_drive_search",
+    description=(
+        "Search Google Drive by name or content query. "
+        "Returns matching files with id, name, mimeType, size."
+    ),
+    parameters={
+        "query": {
+            "type": "string",
+            "description": "Search query (e.g. \"name contains 'report'\" or full-text search terms)",
+        },
+        "page_size": {
+            "type": "integer",
+            "description": "Max results (default 20)",
+            "default": 20,
+        },
+    },
+)
+
+DRIVE_UPLOAD_TOOL = MCPToolSpec(
+    name="maos_drive_upload",
+    description=(
+        "Upload a file to Google Drive (5TB Workspace account). "
+        "Creates or overwrites a file in the specified folder. "
+        "Returns the file id and metadata."
+    ),
+    parameters={
+        "name": {
+            "type": "string",
+            "description": "Remote file name on Drive",
+        },
+        "content_b64": {
+            "type": "string",
+            "description": "File content as base64-encoded string",
+        },
+        "mime_type": {
+            "type": "string",
+            "description": "MIME type (default: application/octet-stream)",
+            "default": "application/octet-stream",
+        },
+        "parent_folder_id": {
+            "type": "string",
+            "description": "Folder ID to upload into (default: root)",
+            "default": "",
+        },
+    },
+)
+
+DRIVE_DOWNLOAD_TOOL = MCPToolSpec(
+    name="maos_drive_download",
+    description=(
+        "Download a file from Google Drive by its file ID. "
+        "Returns the file content as base64-encoded string."
+    ),
+    parameters={
+        "file_id": {
+            "type": "string",
+            "description": "Google Drive file ID",
+        },
+    },
+)
+
+DRIVE_MKDIR_TOOL = MCPToolSpec(
+    name="maos_drive_mkdir",
+    description=(
+        "Create a folder on Google Drive (or get existing if it already exists). "
+        "Returns the folder id and metadata."
+    ),
+    parameters={
+        "name": {
+            "type": "string",
+            "description": "Folder name to create",
+        },
+        "parent_folder_id": {
+            "type": "string",
+            "description": "Parent folder ID (default: root)",
+            "default": "",
+        },
+    },
+)
+
+DRIVE_QUOTA_TOOL = MCPToolSpec(
+    name="maos_drive_quota",
+    description=(
+        "Get Google Drive storage quota info for the configured account. "
+        "Returns usage, limit, and user email."
+    ),
+    parameters={},
 )
 
 SCAN_VIBES_TOOL = MCPToolSpec(
@@ -566,6 +760,810 @@ PR_READINESS_TOOL = MCPToolSpec(
     },
 )
 
+# --- Storage management tool specifications ---------------------------------
+
+STORAGE_SCAN_TOOL = MCPToolSpec(
+    name="maos_storage_scan",
+    description=(
+        "Run a comprehensive storage analysis on the Mac. Decomposes the "
+        "mysterious macOS 'System Data' category into identifiable, "
+        "reclaimable components. Combines native macOS introspection "
+        "(tmutil, diskutil, /private/var/vm, unified log archive, Spotlight, "
+        "APFS snapshots), X-MaC disk + clean engines, NeoDisk scan cache "
+        "detection, and user-managed cache scan."
+    ),
+    parameters={
+        "mode": {
+            "type": "string",
+            "description": "Scan mode: full (default), fast, system, or caches.",
+            "default": "full",
+        },
+        "format": {
+            "type": "string",
+            "description": "Output format: text or json.",
+            "default": "text",
+        },
+    },
+)
+
+STORAGE_SYSTEM_DATA_TOOL = MCPToolSpec(
+    name="maos_storage_system_data",
+    description=(
+        "Decompose macOS 'System Data' into identifiable components. The "
+        "focused tool for solving the '120 GB of system data' mystery. "
+        "Checks sleepimage, swapfiles, unified log archive, system logs, "
+        "Spotlight index, asset cache, Time Machine snapshots, APFS "
+        "snapshots, per-user temp files, and system databases."
+    ),
+    parameters={
+        "format": {
+            "type": "string",
+            "description": "Output format: text or json.",
+            "default": "text",
+        },
+    },
+)
+
+STORAGE_FIX_SCRIPT_TOOL = MCPToolSpec(
+    name="maos_storage_fix_script",
+    description=(
+        "Generate a reviewable remediation shell script for storage cleanup. "
+        "ALL destructive commands are COMMENTED OUT. The user reviews, "
+        "uncomments what they want, and runs it. NEVER executes destructive "
+        "commands — only produces the script."
+    ),
+    parameters={
+        "output_path": {
+            "type": "string",
+            "description": "Where to write the fix script.",
+            "default": "./storage-fixes.sh",
+        },
+        "include_caches": {
+            "type": "boolean",
+            "description": "Include user cache cleanup commands.",
+            "default": True,
+        },
+        "include_system": {
+            "type": "boolean",
+            "description": "Include system data cleanup commands.",
+            "default": True,
+        },
+        "include_tm": {
+            "type": "boolean",
+            "description": "Include Time Machine snapshot deletion commands.",
+            "default": True,
+        },
+    },
+)
+
+STORAGE_MAINTAIN_TOOL = MCPToolSpec(
+    name="maos_storage_maintain",
+    description=(
+        "Run safe macOS maintenance tasks via X-MaC: flush DNS, reindex "
+        "Spotlight, rebuild LaunchServices, run periodic scripts, purge RAM, "
+        "clear Quick Look. Safe tasks run automatically; sudo tasks emitted "
+        "as findings."
+    ),
+    parameters={},
+)
+
+STORAGE_DELETE_TM_SNAPSHOT_TOOL = MCPToolSpec(
+    name="maos_storage_delete_tm_snapshot",
+    description=(
+        "Delete a Time Machine local snapshot by date. The #1 way to "
+        "reclaim 'System Data' space. Local snapshots pin purgeable space "
+        "that only clears on the next backup. Use maos_storage_scan first "
+        "to list available snapshots."
+    ),
+    parameters={
+        "date": {
+            "type": "string",
+            "description": "Snapshot date string, e.g. '2026-07-24-152803'.",
+        },
+    },
+)
+
+STORAGE_HIDDEN_TOOL = MCPToolSpec(
+    name="maos_storage_hidden",
+    description=(
+        "Scan for hidden data consumers that macOS categorizes as 'System "
+        "Data'. Goes beyond standard system data decomposition and user "
+        "caches. Finds hidden consumers in non-obvious locations: Devin CLI "
+        "session database (3GB+), AI/ML tool data, developer tool data, app "
+        "support directories, cloud storage sync, SDKs, app containers, and "
+        "system-level data."
+    ),
+    parameters={
+        "format": {
+            "type": "string",
+            "description": "Output format: text or json.",
+            "default": "text",
+        },
+    },
+)
+
+
+# --- Coding Agent Tools (Devin CLI parity) ----------------------------------
+# These mirror Devin CLI's built-in tools so MAOS can act as a full coding
+# agent when accessed via MCP by external clients (Grok web, etc.).
+
+
+WRITE_FILE_TOOL = MCPToolSpec(
+    name="maos_write_file",
+    description=(
+        "Write content to a file, creating it if needed. Creates parent "
+        "directories if they don't exist. Overwrites existing files. "
+        "Equivalent to Devin CLI's write tool."
+    ),
+    parameters={
+        "path": {
+            "type": "string",
+            "description": "Absolute or relative path to the file to write.",
+        },
+        "content": {
+            "type": "string",
+            "description": "The content to write to the file.",
+        },
+    },
+)
+
+EDIT_FILE_TOOL = MCPToolSpec(
+    name="maos_edit_file",
+    description=(
+        "Edit a file by replacing old_string with new_string. Performs "
+        "exact string replacement. The old_string must be unique in the "
+        "file unless replace_all=True. Equivalent to Devin CLI's edit tool."
+    ),
+    parameters={
+        "path": {
+            "type": "string",
+            "description": "Absolute or relative path to the file to edit.",
+        },
+        "old_string": {
+            "type": "string",
+            "description": "The exact text to replace.",
+        },
+        "new_string": {
+            "type": "string",
+            "description": "The text to replace it with.",
+        },
+        "replace_all": {
+            "type": "boolean",
+            "description": "If True, replace all occurrences. Default False.",
+            "default": False,
+        },
+    },
+)
+
+GREP_TOOL = MCPToolSpec(
+    name="maos_grep",
+    description=(
+        "Search file contents using ripgrep. Returns matching lines with "
+        "file paths and line numbers. Equivalent to Devin CLI's grep tool."
+    ),
+    parameters={
+        "pattern": {
+            "type": "string",
+            "description": "Regular expression to search for.",
+        },
+        "path": {
+            "type": "string",
+            "description": "Directory or file to search in (default current directory).",
+            "default": ".",
+        },
+        "glob_pattern": {
+            "type": "string",
+            "description": "File pattern filter (e.g. '*.py').",
+            "default": "",
+        },
+        "case_insensitive": {
+            "type": "boolean",
+            "description": "Case-insensitive matching (default False).",
+            "default": False,
+        },
+        "max_results": {
+            "type": "integer",
+            "description": "Maximum results to return (default 100).",
+            "default": 100,
+        },
+        "context_lines": {
+            "type": "integer",
+            "description": "Lines of context before/after each match (default 0).",
+            "default": 0,
+        },
+    },
+)
+
+GLOB_TOOL = MCPToolSpec(
+    name="maos_glob",
+    description=(
+        "Find files by glob pattern. Supports brace expansion (e.g. "
+        "'**/*.{ts,tsx}'). Equivalent to Devin CLI's glob tool."
+    ),
+    parameters={
+        "pattern": {
+            "type": "string",
+            "description": "Glob pattern (e.g. '**/*.py', '*.json').",
+        },
+        "path": {
+            "type": "string",
+            "description": "Directory to search in (default current directory).",
+            "default": ".",
+        },
+    },
+)
+
+FIND_FILE_TOOL = MCPToolSpec(
+    name="maos_find_file",
+    description=(
+        "Find files by name pattern using recursive glob matching. "
+        "Equivalent to Devin CLI's find_file_by_name tool."
+    ),
+    parameters={
+        "pattern": {
+            "type": "string",
+            "description": "File name pattern (e.g. '*.py', 'test_*').",
+        },
+        "path": {
+            "type": "string",
+            "description": "Directory to search in (default current directory).",
+            "default": ".",
+        },
+    },
+)
+
+RUN_COMMAND_TOOL = MCPToolSpec(
+    name="maos_run_command",
+    description=(
+        "Execute a shell command and return stdout, stderr, and exit code. "
+        "Blocked commands include rm -rf /, mkfs, fork bombs, chmod -R 777 /. "
+        "Restricted commands (sudo, kill -9, shutdown, reboot, launchctl "
+        "unload) are rejected. Equivalent to Devin CLI's exec tool."
+    ),
+    parameters={
+        "command": {
+            "type": "string",
+            "description": "The shell command to execute.",
+        },
+        "cwd": {
+            "type": "string",
+            "description": "Working directory (default current directory).",
+            "default": "",
+        },
+        "timeout": {
+            "type": "integer",
+            "description": "Timeout in seconds (default 120).",
+            "default": 120,
+        },
+        "env": {
+            "type": "object",
+            "description": "Additional environment variables as key-value pairs.",
+            "default": {},
+        },
+    },
+)
+
+WEB_SEARCH_TOOL = MCPToolSpec(
+    name="maos_web_search",
+    description=(
+        "Search the web for information. Returns relevant web page titles, "
+        "URLs, and summaries. Equivalent to Devin CLI's web_search tool."
+    ),
+    parameters={
+        "query": {
+            "type": "string",
+            "description": "Search query string.",
+        },
+        "num_results": {
+            "type": "integer",
+            "description": "Maximum results to return (default 5).",
+            "default": 5,
+        },
+    },
+)
+
+FETCH_URL_TOOL = MCPToolSpec(
+    name="maos_fetch_url",
+    description=(
+        "Fetch a web page and return its content as readable text. "
+        "Follows redirects. Equivalent to Devin CLI's webfetch tool."
+    ),
+    parameters={
+        "url": {
+            "type": "string",
+            "description": "The URL to fetch.",
+        },
+    },
+)
+
+NOTEBOOK_READ_TOOL = MCPToolSpec(
+    name="maos_notebook_read",
+    description=(
+        "Read a Jupyter notebook (.ipynb) and extract all cells with "
+        "outputs. Returns cell content, type, and execution outputs in "
+        "a structured format. Equivalent to Devin CLI's notebook_read tool."
+    ),
+    parameters={
+        "path": {
+            "type": "string",
+            "description": "Path to the .ipynb file.",
+        },
+    },
+)
+
+NOTEBOOK_EDIT_TOOL = MCPToolSpec(
+    name="maos_notebook_edit",
+    description=(
+        "Edit a cell in a Jupyter notebook. Supports replace, insert, and "
+        "delete modes. Equivalent to Devin CLI's notebook_edit tool."
+    ),
+    parameters={
+        "path": {
+            "type": "string",
+            "description": "Path to the .ipynb file.",
+        },
+        "cell_number": {
+            "type": "integer",
+            "description": "0-based index of the cell to edit.",
+        },
+        "new_source": {
+            "type": "string",
+            "description": "New source content for the cell.",
+        },
+        "cell_type": {
+            "type": "string",
+            "description": "Cell type: 'code', 'markdown', or 'raw' (for insert).",
+            "default": "code",
+        },
+        "edit_mode": {
+            "type": "string",
+            "description": "Edit mode: 'replace' (default), 'insert', or 'delete'.",
+            "default": "replace",
+        },
+    },
+)
+
+GIT_STATUS_TOOL = MCPToolSpec(
+    name="maos_git_status",
+    description=(
+        "Get git status for a repository. Returns branch, staged changes, "
+        "unstaged changes, and untracked files."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (default current directory).",
+            "default": "",
+        },
+    },
+)
+
+GIT_DIFF_TOOL = MCPToolSpec(
+    name="maos_git_diff",
+    description=(
+        "Get git diff for a repository. Can show staged or unstaged "
+        "changes, or compare between refs."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (default current directory).",
+            "default": "",
+        },
+        "staged": {
+            "type": "boolean",
+            "description": "If True, show staged changes (default False).",
+            "default": False,
+        },
+        "base": {
+            "type": "string",
+            "description": "Base ref for comparison (e.g. 'main', 'HEAD~1').",
+            "default": "",
+        },
+        "target": {
+            "type": "string",
+            "description": "Target ref for comparison. If base is set, shows base...target.",
+            "default": "",
+        },
+    },
+)
+
+GIT_COMMIT_TOOL = MCPToolSpec(
+    name="maos_git_commit",
+    description=(
+        "Stage files and create a git commit. Optionally stages all "
+        "changes (git add -A) before committing."
+    ),
+    parameters={
+        "message": {
+            "type": "string",
+            "description": "Commit message.",
+        },
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (default current directory).",
+            "default": "",
+        },
+        "add_all": {
+            "type": "boolean",
+            "description": "If True, stage all changes (git add -A) before committing.",
+            "default": False,
+        },
+    },
+)
+
+GIT_LOG_TOOL = MCPToolSpec(
+    name="maos_git_log",
+    description=(
+        "Get git log for a repository. Returns recent commits in "
+        "oneline or detailed format."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (default current directory).",
+            "default": "",
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum number of commits to return (default 20).",
+            "default": 20,
+        },
+        "oneline": {
+            "type": "boolean",
+            "description": "If True, use --oneline format (default True).",
+            "default": True,
+        },
+    },
+)
+
+GIT_BRANCH_TOOL = MCPToolSpec(
+    name="maos_git_branch",
+    description=(
+        "Manage git branches. Actions: list (default), create, switch, "
+        "delete."
+    ),
+    parameters={
+        "repo_dir": {
+            "type": "string",
+            "description": "Path to the git repository (default current directory).",
+            "default": "",
+        },
+        "action": {
+            "type": "string",
+            "description": "Branch action: 'list', 'create', 'switch', or 'delete'.",
+            "default": "list",
+        },
+        "branch_name": {
+            "type": "string",
+            "description": "Branch name for create/switch/delete actions.",
+            "default": "",
+        },
+    },
+)
+
+RUN_SUBAGENT_TOOL = MCPToolSpec(
+    name="maos_run_subagent",
+    description=(
+        "Spawn a subagent to handle a task autonomously. The spec flag is "
+        "MANDATORY — it determines which AI system to route through. "
+        "Supported specs: devin (GLM-5.2, deepest MCP), grokhack (Grok, "
+        "security research), claude-code (OpenRouter, model-agnostic), "
+        "local (Phi-3.5-mini, private), openrouter (any model)."
+    ),
+    parameters={
+        "task": {
+            "type": "string",
+            "description": "The task or prompt to give the subagent.",
+        },
+        "spec": {
+            "type": "string",
+            "description": (
+                "MANDATORY. Which system to route to: 'devin' (Devin+GLM-5.2), "
+                "'grokhack' (Grok+security personas), 'claude-code' (Claude Code "
+                "via OpenRouter, model-agnostic), 'local' (MAOS local models, "
+                "private), 'openrouter' (any OpenRouter model)."
+            ),
+        },
+        "title": {
+            "type": "string",
+            "description": "Short title for the subagent (optional).",
+            "default": "",
+        },
+        "profile": {
+            "type": "string",
+            "description": "Subagent profile: 'general' (default) or 'explore' (read-only).",
+            "default": "general",
+        },
+        "is_background": {
+            "type": "boolean",
+            "description": "If True, run in background (default False).",
+            "default": False,
+        },
+    },
+)
+
+TODO_WRITE_TOOL = MCPToolSpec(
+    name="maos_todo_write",
+    description=(
+        "Create or update a structured todo list for the current session. "
+        "Each todo has a content description and status (pending, "
+        "in_progress, completed). Calling this replaces the entire todo "
+        "list. Equivalent to Devin CLI's todo_write tool."
+    ),
+    parameters={
+        "todos": {
+            "type": "array",
+            "description": "List of todo items, each with 'content' and 'status' keys.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "content": {"type": "string"},
+                    "status": {"type": "string", "enum": ["pending", "in_progress", "completed"]},
+                },
+            },
+            "default": [],
+        },
+    },
+)
+
+ASK_USER_TOOL = MCPToolSpec(
+    name="maos_ask_user",
+    description=(
+        "Present questions to the user and collect their answers. For "
+        "HTTP/non-interactive sessions, returns a prompt that the calling "
+        "client should present to the user. Equivalent to Devin CLI's "
+        "ask_user_question tool."
+    ),
+    parameters={
+        "questions": {
+            "type": "array",
+            "description": "List of question objects with 'question', 'header', and optional 'options'.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "question": {"type": "string"},
+                    "header": {"type": "string"},
+                    "options": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {"type": "string"},
+                                "description": {"type": "string"},
+                            },
+                        },
+                    },
+                    "multi_select": {"type": "boolean"},
+                },
+            },
+            "default": [],
+        },
+    },
+)
+
+# --- Slack tools -------------------------------------------------------------
+# These let any MCP-connected agent (local or cloud) read and send Slack
+# messages, list channels, search history, and trigger incremental syncs.
+# Tokens are loaded from the MAOS SlackConfig (env vars), never hardcoded.
+
+
+SLACK_SEND_TOOL = MCPToolSpec(
+    name="maos_slack_send",
+    description=(
+        "Send a message to a Slack channel or DM. Uses the bot token "
+        "(chat.postMessage). The channel can be a channel ID (e.g. "
+        "C0BMSQGTCJV), a channel name (e.g. #maos-ops), or a user ID for "
+        "a DM. Optionally reply in a thread by providing thread_ts."
+    ),
+    parameters={
+        "channel": {
+            "type": "string",
+            "description": "Channel ID, channel name (e.g. #general), or user ID for DM.",
+        },
+        "message": {
+            "type": "string",
+            "description": "The message text to send (Slack mrkdwn supported).",
+        },
+        "thread_ts": {
+            "type": "string",
+            "description": "Optional timestamp of the parent message to reply in a thread.",
+            "default": "",
+        },
+    },
+)
+
+SLACK_READ_TOOL = MCPToolSpec(
+    name="maos_slack_read",
+    description=(
+        "Read recent messages from a Slack channel. Uses the bot token "
+        "(conversations.history). Returns messages as JSON with text, "
+        "user, ts, and thread info. Use maos_slack_channels to find "
+        "channel IDs."
+    ),
+    parameters={
+        "channel": {
+            "type": "string",
+            "description": "Channel ID or name to read from.",
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Maximum messages to return (default 50, max 200).",
+            "default": 50,
+        },
+        "oldest": {
+            "type": "string",
+            "description": "Optional Unix timestamp — only return messages after this time.",
+            "default": "",
+        },
+    },
+)
+
+SLACK_CHANNELS_TOOL = MCPToolSpec(
+    name="maos_slack_channels",
+    description=(
+        "List all visible Slack channels. Uses the bot token "
+        "(conversations.list). Returns channel names, IDs, and type "
+        "(public, private, im, mpim). Use this to find channel IDs for "
+        "maos_slack_send and maos_slack_read."
+    ),
+    parameters={
+        "types": {
+            "type": "string",
+            "description": (
+                "Comma-separated channel types to list: public_channel, "
+                "private_channel, im, mpim (default: "
+                "public_channel,private_channel)."
+            ),
+            "default": "public_channel,private_channel",
+        },
+    },
+)
+
+SLACK_SEARCH_TOOL = MCPToolSpec(
+    name="maos_slack_search",
+    description=(
+        "Search Slack messages across the workspace. Uses the user token "
+        "(search.messages) — requires SLACK_USER_TOKEN. Returns matching "
+        "messages with channel, author, timestamp, and permalink."
+    ),
+    parameters={
+        "query": {
+            "type": "string",
+            "description": "Search query (Slack search syntax supported).",
+        },
+        "count": {
+            "type": "integer",
+            "description": "Maximum results to return (default 20, max 100).",
+            "default": 20,
+        },
+    },
+)
+
+SLACK_SYNC_TOOL = MCPToolSpec(
+    name="maos_slack_sync",
+    description=(
+        "Trigger an incremental Slack history sync into MAOS. Pulls "
+        "recent messages from visible channels into the local SQLite "
+        "store and refreshes the RAG index so messages become searchable "
+        "via maos_search_memory. Uses the user token. Returns sync "
+        "counts (channels, messages, users)."
+    ),
+    parameters={
+        "days": {
+            "type": "integer",
+            "description": "How many days of history to sync (default 30).",
+            "default": 30,
+        },
+    },
+)
+
+# --- Project sync tools ------------------------------------------------------
+# These let cloud agents manage 2-way project sync state (local ~/Projects/
+# <-> GDrive with blockchain evidence) via the project-sync CLI.
+
+
+PROJECT_SYNC_STATUS_TOOL = MCPToolSpec(
+    name="maos_project_sync_status",
+    description=(
+        "Show sync state for all projects. Calls the project-sync CLI "
+        "to display which projects are in sync, which have local changes "
+        "to push, and which have pending forks from cloud AI agents."
+    ),
+    parameters={},
+)
+
+PROJECT_SYNC_PUSH_TOOL = MCPToolSpec(
+    name="maos_project_sync_push",
+    description=(
+        "Push a project to GDrive and record blockchain evidence. "
+        "Uploads the current local state of the project to Google Drive "
+        "and creates a hash-chained evidence entry. Use this after making "
+        "local changes that should be propagated to the cloud."
+    ),
+    parameters={
+        "project": {
+            "type": "string",
+            "description": "Project name in ~/Projects/.",
+        },
+        "agent": {
+            "type": "string",
+            "description": "Agent name performing the push (default 'cloud').",
+            "default": "cloud",
+        },
+    },
+)
+
+PROJECT_SYNC_PULL_TOOL = MCPToolSpec(
+    name="maos_project_sync_pull",
+    description=(
+        "Pull a project from GDrive. Downloads the latest cloud state "
+        "of the project from Google Drive and updates the local copy. "
+        "Use this to sync local with the latest cloud version."
+    ),
+    parameters={
+        "project": {
+            "type": "string",
+            "description": "Project name in ~/Projects/.",
+        },
+        "agent": {
+            "type": "string",
+            "description": "Agent name performing the pull (default 'cloud').",
+            "default": "cloud",
+        },
+    },
+)
+
+PROJECT_SYNC_FORKS_TOOL = MCPToolSpec(
+    name="maos_project_sync_forks",
+    description=(
+        "List pending forks — cloud AI changes not yet pulled locally. "
+        "A fork is registered when a cloud agent modifies a project. "
+        "Use this to check if any cloud agents have made changes that "
+        "need to be resolved."
+    ),
+    parameters={},
+)
+
+PROJECT_SYNC_FORK_TOOL = MCPToolSpec(
+    name="maos_project_sync_fork",
+    description=(
+        "Register a cloud AI fork. Call this when a cloud agent has "
+        "modified a project, recording the project hash after the "
+        "changes. This creates a pending fork that must later be "
+        "resolved by pulling from GDrive."
+    ),
+    parameters={
+        "project": {
+            "type": "string",
+            "description": "Project name.",
+        },
+        "agent": {
+            "type": "string",
+            "description": "Agent name (e.g. 'devin', 'grokhack').",
+        },
+        "hash": {
+            "type": "string",
+            "description": "Project hash after cloud AI changes.",
+        },
+    },
+)
+
+PROJECT_SYNC_RESOLVE_TOOL = MCPToolSpec(
+    name="maos_project_sync_resolve",
+    description=(
+        "Resolve a fork by pulling from GDrive. After a cloud AI fork "
+        "has been registered, this pulls the latest state from Google "
+        "Drive to reconcile the local copy and clears the pending fork."
+    ),
+    parameters={
+        "project": {
+            "type": "string",
+            "description": "Project name to resolve.",
+        },
+    },
+)
+
 ALL_TOOLS: list[MCPToolSpec] = [
     GET_CONTEXT_TOOL,
     SEARCH_MEMORY_TOOL,
@@ -576,8 +1574,17 @@ ALL_TOOLS: list[MCPToolSpec] = [
     ONBOARD_TOOL,
     RECORD_LESSON_TOOL,
     LIST_LESSONS_TOOL,
+    RECORD_DECISION_TOOL,
+    QUERY_DECISIONS_TOOL,
+    VERIFY_DECISIONS_TOOL,
     SEND_EMAIL_TOOL,
     ESCALATE_TOOL,
+    DRIVE_LIST_TOOL,
+    DRIVE_SEARCH_TOOL,
+    DRIVE_UPLOAD_TOOL,
+    DRIVE_DOWNLOAD_TOOL,
+    DRIVE_MKDIR_TOOL,
+    DRIVE_QUOTA_TOOL,
     SCAN_VIBES_TOOL,
     CHECK_GUARDS_TOOL,
     VERIFY_COMMAND_TOOL,
@@ -586,4 +1593,42 @@ ALL_TOOLS: list[MCPToolSpec] = [
     DIAGNOSTICS_TOOL,
     TIME_TOOL,
     READ_FILE_TOOL,
+    STORAGE_SCAN_TOOL,
+    STORAGE_SYSTEM_DATA_TOOL,
+    STORAGE_FIX_SCRIPT_TOOL,
+    STORAGE_MAINTAIN_TOOL,
+    STORAGE_DELETE_TM_SNAPSHOT_TOOL,
+    STORAGE_HIDDEN_TOOL,
+    # Coding Agent Tools (Devin CLI parity)
+    WRITE_FILE_TOOL,
+    EDIT_FILE_TOOL,
+    GREP_TOOL,
+    GLOB_TOOL,
+    FIND_FILE_TOOL,
+    RUN_COMMAND_TOOL,
+    WEB_SEARCH_TOOL,
+    FETCH_URL_TOOL,
+    NOTEBOOK_READ_TOOL,
+    NOTEBOOK_EDIT_TOOL,
+    GIT_STATUS_TOOL,
+    GIT_DIFF_TOOL,
+    GIT_COMMIT_TOOL,
+    GIT_LOG_TOOL,
+    GIT_BRANCH_TOOL,
+    RUN_SUBAGENT_TOOL,
+    TODO_WRITE_TOOL,
+    ASK_USER_TOOL,
+    # Slack tools
+    SLACK_SEND_TOOL,
+    SLACK_READ_TOOL,
+    SLACK_CHANNELS_TOOL,
+    SLACK_SEARCH_TOOL,
+    SLACK_SYNC_TOOL,
+    # Project sync tools
+    PROJECT_SYNC_STATUS_TOOL,
+    PROJECT_SYNC_PUSH_TOOL,
+    PROJECT_SYNC_PULL_TOOL,
+    PROJECT_SYNC_FORKS_TOOL,
+    PROJECT_SYNC_FORK_TOOL,
+    PROJECT_SYNC_RESOLVE_TOOL,
 ]
