@@ -7,6 +7,7 @@ verifies, and explains, all while keeping your data on-device.
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![CI](https://github.com/davidnichols-ops/mac-ai-os/actions/workflows/ci.yml/badge.svg)](https://github.com/davidnichols-ops/mac-ai-os/actions/workflows/ci.yml)
 
 ## What is MAOS?
 
