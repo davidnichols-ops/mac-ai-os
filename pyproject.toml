@@ -46,10 +46,6 @@ slack = [
     "slack_bolt>=1.18.0",
     "slack_sdk>=3.20.0",
 ]
-docs = [
-    "mkdocs>=1.6",
-    "mkdocs-readthedocs-theme>=1.2",
-]
 dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
