@@ -73,6 +73,9 @@ lint.json
 *evidence.json
 evidence/*
 
+# MkDocs build output
+site/
+
 # Training runs — large model outputs, not source code
 training/runs/*
 training/output/*
