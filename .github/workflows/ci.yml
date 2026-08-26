@@ -16,7 +16,7 @@ jobs:
         with:
           version: "latest"
       - name: Ruff check
-        run: uv run ruff check app tests
+        run: uv run --extra dev ruff check app tests
 
   test:
     runs-on: macos-latest
@@ -27,6 +27,6 @@ jobs:
         with:
           version: "latest"
       - name: Sync dependencies
-        run: uv sync
+        run: uv sync --extra dev
       - name: Run tests
-        run: uv run pytest
+        run: uv run --extra dev pytest
