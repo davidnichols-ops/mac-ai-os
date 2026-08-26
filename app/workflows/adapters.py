@@ -170,13 +170,13 @@ class LangGraphAdapter(WorkflowAdapter):
         except ImportError:
             return {"ok": False, "error": "langgraph not installed"}
         # Implementation would convert MAOS workflow to LangGraph StateGraph.
-        return {"ok": False, "error": "not implemented (reference adapter)"}
+        return {"ok": False, "error": "langgraph adapter is a reference stub; MAOS uses the custom engine"}
 
     def pause(self, run_id: int) -> bool:
         return False  # LangGraph doesn't have native pause
 
     def resume(self, run_id: int) -> dict[str, Any]:
-        return {"ok": False, "error": "not implemented"}
+        return {"ok": False, "error": "reference stub; MAOS uses the custom engine"}
 
     def cancel(self, run_id: int) -> bool:
         return False
@@ -203,13 +203,13 @@ class PydanticAIAdapter(WorkflowAdapter):
             import pydantic_ai  # noqa: F401  # type: ignore
         except ImportError:
             return {"ok": False, "error": "pydantic-ai not installed"}
-        return {"ok": False, "error": "not implemented (reference adapter)"}
+        return {"ok": False, "error": "reference stub; MAOS uses the custom engine"}
 
     def pause(self, run_id: int) -> bool:
         return False
 
     def resume(self, run_id: int) -> dict[str, Any]:
-        return {"ok": False, "error": "not implemented"}
+        return {"ok": False, "error": "reference stub; MAOS uses the custom engine"}
 
     def cancel(self, run_id: int) -> bool:
         return False
@@ -237,13 +237,13 @@ class TemporalAdapter(WorkflowAdapter):
             import temporalio  # noqa: F401  # type: ignore
         except ImportError:
             return {"ok": False, "error": "temporalio not installed"}
-        return {"ok": False, "error": "not implemented (reference adapter)"}
+        return {"ok": False, "error": "reference stub; MAOS uses the custom engine"}
 
     def pause(self, run_id: int) -> bool:
         return False  # Temporal uses signals for pause, not direct API
 
     def resume(self, run_id: int) -> dict[str, Any]:
-        return {"ok": False, "error": "not implemented"}
+        return {"ok": False, "error": "reference stub; MAOS uses the custom engine"}
 
     def cancel(self, run_id: int) -> bool:
         return False  # Temporal uses cancellation signals

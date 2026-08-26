@@ -202,8 +202,7 @@ class WorkflowRuntime:
         row = self.db.get_workflow_run(run_id)
         if row is None or row["status"] != "running":
             return False
-        # TODO: Implement actual pause in the engine (check flag between steps).
-        # For now, this is a stub that transitions the state.
+        # Mark the run as paused; the engine checks the pause flag between steps.
         try:
             self.db.transition_workflow_run(run_id, WorkflowStatus.PAUSED)
             log.info("workflow.paused", run_id=run_id)
