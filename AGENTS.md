@@ -1,9 +1,10 @@
 # AGENTS.md — Mac AI OS
 
 Before following repository-specific guidance, read the device-level operating
-contract at `~/AGENTS_WORKFLOW.md`. It defines the shared refresh,
-evidence, Trajectory, MCP, task-handoff, and safety workflow for every AI on
-this device.
+contract at `~/AGENTS_WORKFLOW.md` if one exists on your machine. It defines
+the shared refresh, evidence, Trajectory, MCP, task-handoff, and safety
+workflow for every AI on the device. If you don't have one, this file plus the
+documentation in `docs/` provides the canonical project contract.
 
 Conventions, commands, and architecture notes for agents working on this repo.
 
@@ -104,7 +105,7 @@ uv run app                               # launch the CLI (== uv run maos)
 | Onboarding (JSON) | `uv run app onboard --json` |
 | List lessons | `uv run app onboard lessons` |
 | Record a lesson | `uv run app onboard record <slug> "<text>"` |
-| Send email to david | `uv run app onboard email "<subject>" "<body>"` |
+| Send email to configured recipient | `uv run app onboard email "<subject>" "<body>"` |
 | Escalate (needs attention) | `uv run app onboard escalate "<subject>" "<body>"` |
 | **Scan for vibes** | `uv run app guards scan "<text>"` |
 | Run all guards | `uv run app guards check "<text>" --pr --bug-fix` |

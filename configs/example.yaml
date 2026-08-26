@@ -1,5 +1,6 @@
 # Example user override. Copy to configs/user.yaml and edit.
 # Any field left empty is auto-selected from detected hardware.
+# API keys and secrets belong in a .env file, not here.
 
 planner:
   provider: mlx

@@ -1,11 +1,26 @@
 [project]
 name = "mac-ai-os"
-version = "0.1.0"
-description = "Local-first AI operating system for macOS — an intelligence layer over the computer."
+version = "0.2.0"
+description = "A local-first AI operating system for macOS — an intelligence layer over the computer."
 readme = "README.md"
 requires-python = ">=3.12,<3.15"
-authors = [{ name = "Mac AI OS" }]
+authors = [{ name = "Mac AI OS contributors" }]
 license = { text = "MIT" }
+keywords = ["ai", "agent", "macos", "mcp", "local-first", "operating-system"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Repository = "https://github.com/davidnichols-ops/mac-ai-os"
 
 dependencies = [
     "typer>=0.12.3",
