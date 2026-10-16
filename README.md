@@ -1,3 +1,5 @@
+> **Unmaintained as of 2026-10-16.** This public tree is a stale snapshot, not a buildable operating system, and it is not being maintained. Current work is [trustcard](https://github.com/davidnichols-ops/trustcard) and [apple-quality-recognition-engine](https://github.com/davidnichols-ops/apple-quality-recognition-engine).
+
 # Mac AI OS (MAOS)
 
 A local-first AI operating system for macOS — an intelligence layer over the
